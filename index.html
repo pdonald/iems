@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="joint/joint.css" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="joint/joint.js"></script>
+  <script src="joint/joint.shapes.devs.js"></script>
+  <script src="http://fb.me/react-0.12.2.js"></script>
+  <script src="http://fb.me/react-with-addons-0.12.2.js"></script>
+  <script src="http://fb.me/JSXTransformer-0.12.2.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Machine Translation Experiments</h1>
+  </header>
+  <div id="example"></div>
+  <script type="text/jsx;harmony=true">
+  var components = {
+    wget: {
+      name: 'wget',
+      params: { url: 'string' },
+      input: { },
+      output: { out: 'file<any>' },
+      toBash: (params, input, output) => {
+        return `wget ${params.url} -o ${output.out}`;
+      }
+    },
+    tokenizer: {
+      name: 'moses-tokenizer',
+      params: { lang: 'string' },
+      input: { in: 'file<text>' },
+      output: { out: 'file<tok>' },
+      toBash: (params, input, output) => {
+        return `./perl -l ${params.lang} < ${input.in} > ${output.out}`;
+      }
+    },
+    kenlm: {
+      name: 'kenlm',
+      params: { order: 'integer' },
+      input: { in: 'file<tok>' },
+      output: { out: 'file<arpa>' },
+      toBash: (params, input, output) => {
+        return `./lmplz -o ${params.order} < ${input.in} > ${output.out}`;
+      }
+    }
+  };
+
+  var ComponentList = React.createClass({
+    render: function() {
+      return (
+        <div className="components">
+        <h2>Components</h2>
+        <ul>
+          {Object.keys(components).map((key) => (
+            <li key={key} onClick={() => this.props.onAdd(components[key])}>
+              {components[key].name}
+            </li>
+          ))}
+        </ul>
+        </div>
+      );
+    }
+  });
+
+  var Workspace = React.createClass({
+    getInitialState: function() {
+      return { added: [] };
+    },
+
+    componentDidMount: function() {
+      var graph = new joint.dia.Graph;
+
+      this.graph = graph;
+
+      var paper = new joint.dia.Paper({
+        el: this.refs.graph.getDOMNode(),
+        width: '100%',
+        height: '100%',
+        model: graph,
+        gridSize: 1,
+        validateConnection: function(cellViewS, magnetS, cellViewT, magnetT, end, linkView) {
+          // Prevent linking from input ports.
+          if (magnetS && magnetS.getAttribute('type') === 'input') return false;
+          // Prevent linking from output ports to input ports within one element.
+          if (cellViewS === cellViewT) return false;
+          // Prevent linking to input ports.
+          return magnetT && magnetT.getAttribute('type') === 'input';
+        },
+        // Enable marking available cells & magnets
+        markAvailable: true
+      });
+
+      paper.on('cell:pointerclick', (e) => {
+        this.props.onSelect(e.model.attributes.componentIndex);
+      })
+    },
+
+    componentWillReceiveProps: function(nextProps) {
+      nextProps.components
+      .map((c, index) => {
+        if (this.state.added.indexOf(index) !== -1) return;
+
+        var rect = new joint.shapes.devs.Model({
+          position: { x: 50, y: 50 },
+          size: { width: 90, height: 90 },
+          inPorts: Object.keys(c.template.input),
+          outPorts: Object.keys(c.template.output),
+          componentIndex: index,
+          attrs: {
+            '.label': { text: c.template.name, 'ref-x': .4, 'ref-y': .2 },
+            rect: { fill: '#2ECC71' },
+            '.inPorts circle': { fill: '#16A085', type: 'input' },
+            '.outPorts circle': { fill: '#E74C3C' }
+          }
+        });
+
+        this.graph.addCells([rect]);
+        this.state.added.push(index);
+        this.setState({ added: this.state.added });
+      });
+    },
+
+    /*shouldComponentUpdate: function() {
+      return false;
+    }, */
+
+    render: function() {
+      return (
+        <div className="table">
+          <div className="table-row">
+            <div className="workspace">
+              <h2>Experiment</h2>
+              <div className="full" ref="graph"/>
+              {/*<ul>
+                {this.props.components.map((c, index) => (
+                  <li key={index}>
+                    <a href="#" onClick={() => this.props.onSelect(c)}>{c.template.name}</a>
+                    {' '}
+                    (
+                      inputs = {Object.keys(c.template.input).map((key) => key + ': ' + c.template.input[key] + ' ')}
+                      outputs = {Object.keys(c.template.output).map((key) => key + ': ' + c.template.output[key] + ' ')}
+                    )
+                  </li>
+                ))}
+              </ul>*/}
+            </div>
+          </div>
+          <div className="table-row">
+            <Preview components={this.props.components}/>
+          </div>
+        </div>
+      );
+    }
+  });
+
+  var Properties = React.createClass({
+    render: function() {
+      if (this.props.selectedIndex === null) {
+        return <div className="properties"><h2>Properties</h2></div>
+      }
+
+      var component = this.props.components[this.props.selectedIndex];
+
+      return (
+        <div className="properties">
+          <h2>Properties of {component.template.name}</h2>
+          <ul>
+          {Object.keys(component.template.params).map((key) => (
+            <li key={key}>{key}: <input defaultValue={component.params[key]} onChange={(e) => this.props.onChange(key, e.target.value)}/></li>
+          ))}
+          </ul>
+        </div>
+      );
+    }
+  });
+
+  var Preview = React.createClass({
+    render: function() {
+      return (
+        <pre className="preview">
+        {this.props.components.map((c) => {
+          return c.template.toBash(c.params, c.input, c.output) + '\n';
+        })}
+        </pre>
+      );
+    }
+  });
+
+  var App = React.createClass({
+    getInitialState: function() {
+      return { components: [], selectedIndex: null };
+    },
+
+    addComponent: function(component) {
+      var c = {
+        template: component,
+        params: {}, input: {}, output: {}
+      };
+
+      this.setState(React.addons.update(this.state, {
+        components: { $push: [c] },
+        selectedIndex: { $set: this.state.components.length }
+      }));
+    },
+
+    selectComponent: function(index) {
+      this.setState({ selectedIndex: index });
+    },
+
+    onPropertiesChange: function(key, value) {
+      var changes = { components: {} };
+      changes.components[this.state.selectedIndex] = { params: {} };
+      changes.components[this.state.selectedIndex].params[key] = { $set: value };
+      this.setState(React.addons.update(this.state, changes));
+    },
+
+    render: function() {
+      return (
+        <div className="container">
+          <ComponentList onAdd={this.addComponent}/>
+          <Workspace components={this.state.components} onSelect={this.selectComponent}/>
+          <Properties components={this.state.components} selectedIndex={this.state.selectedIndex} onChange={this.onPropertiesChange}/>
+
+        </div>
+      );
+    }
+  });
+
+  React.render(
+    <App/>,
+    document.getElementById('example')
+  );
+  </script>
+
+</body>
+</html>
