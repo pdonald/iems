@@ -15,23 +15,102 @@
   </header>
   <div id="example"></div>
   <script type="text/jsx;harmony=true">
+  joint.shapes.devs.Model2 = joint.shapes.basic.Generic.extend(_.extend({}, joint.shapes.basic.PortsModelInterface, {
+
+    markup: '<g class="rotatable"><g class="scalable"><rect class="body"/></g><text class="label"/><g class="inPorts"/><g class="outPorts"/></g>',
+    portMarkup: '<g class="port port<%= id %>"><circle class="port-body"/><text class="port-label"/></g>',
+
+    defaults: joint.util.deepSupplement({
+
+        type: 'devs.Model',
+        size: { width: 1, height: 1 },
+
+        inPorts: [],
+        outPorts: [],
+
+        attrs: {
+            '.': { magnet: false },
+            '.body': {
+                width: 150, height: 250,
+                stroke: '#000000'
+            },
+            '.port-body': {
+                r: 10,
+                magnet: true,
+                stroke: '#000000'
+            },
+            text: {
+                'pointer-events': 'none'
+            },
+            '.label': { text: 'Model', 'ref-x': .5, 'ref-y': 10, ref: '.body', 'text-anchor': 'middle', fill: '#000000' },
+            '.inPorts .port-label': { dy:-30, x: 4, 'text-anchor': 'end', fill: '#000000' },
+            '.outPorts .port-label':{ dy: 15, x: 4, fill: '#000000' }
+        }
+
+    }, joint.shapes.basic.Generic.prototype.defaults),
+
+    getPortAttrs: function(portName, index, total, selector, type) {
+
+        var attrs = {};
+
+        var portClass = 'port' + index;
+        var portSelector = selector + '>.' + portClass;
+        var portLabelSelector = portSelector + '>.port-label';
+        var portBodySelector = portSelector + '>.port-body';
+
+        attrs[portLabelSelector] = { text: portName };
+        attrs[portBodySelector] = { port: { id: portName || _.uniqueId(type) , type: type } };
+        attrs[portSelector] = { ref: '.body', 'ref-y': (index + 0.5) * (1 / total) };
+
+        // CHANGED: swap x and y ports coordinates ('ref-y' => 'ref-x')
+       attrs[portSelector] = { ref: '.body', 'ref-x': (index + 0.5) * (1 / total) };
+       // ('ref-dx' => 'ref-dy')
+       if (selector === '.outPorts') { attrs[portSelector]['ref-dy'] = 0; }
+
+        return attrs;
+    }
+}));
+
   var components = {
+    bible: {
+      name: 'bible',
+      params: { lang: 'string' },
+      input: { },
+      output: { out: 'file<sent>' },
+      toBash: (params, input, output) => {
+        return [`cp /data/bible.${params.lang} ${output.out}`];
+      }
+    },
     wget: {
       name: 'wget',
       params: { url: 'string' },
       input: { },
-      output: { out: 'file<any>' },
+      output: { out: 'file<any>', stats: 'file<text>' },
       toBash: (params, input, output) => {
-        return `wget ${params.url} -o ${output.out}`;
+        return [`wget ${params.url} -o ${output.out}`];
       }
     },
     tokenizer: {
-      name: 'moses-tokenizer',
+      name: 'tokenizer',
       params: { lang: 'string' },
       input: { in: 'file<text>' },
       output: { out: 'file<tok>' },
       toBash: (params, input, output) => {
-        return `./perl -l ${params.lang} < ${input.in} > ${output.out}`;
+        return [`perl /tools/tokenizer.perl -l ${params.lang} < ${input.in} > ${output.out}`];
+      }
+    },
+    fastalign: {
+      name: 'fastalign',
+      params: { reverse: 'bool' },
+      input: { src: 'file<tok>', trg: 'file<tok>' },
+      output: { out: 'file<align>' },
+      toBash: (params, input, output) => {
+        var temp = `${output.out}.temp`
+        var cmd = [];
+        cmd.push(`python /tools/join.py -f ${input.src} -f ${input.trg} -d ' ||| ' > ${temp}`);
+        cmd.push(`/tools/fast_align ${params.reverse ? '-r' : ''} -i ${temp} > ${output.out}`);
+        cmd.push(`rm ${temp}`);
+        return cmd;
       }
     },
     kenlm: {
@@ -40,8 +119,23 @@
       input: { in: 'file<tok>' },
       output: { out: 'file<arpa>' },
       toBash: (params, input, output) => {
-        return `./lmplz -o ${params.order} < ${input.in} > ${output.out}`;
+        return [`/tools/lmplz -o ${params.order} < ${input.in} > ${output.out}`];
       }
+    }
+  };
+
+  var groups = {
+    align: {
+      name: 'fastalign',
+      input: {},
+      output: {},
+      components: [{
+        name: 'fastalign',
+        params: {}
+      }],
+      links: [{
+
+      }]
     }
   };
 
@@ -64,13 +158,25 @@
 
   var Workspace = React.createClass({
     getInitialState: function() {
-      return { added: [] };
+      return { added: [], links: [], cells: {} };
     },
 
     componentDidMount: function() {
       var graph = new joint.dia.Graph;
 
       this.graph = graph;
+
+      graph.on('add', (cell) => {
+        this.state.cells[cell.id] = cell;
+        if (cell.attributes.type == 'link') {
+          this.state.links.push(cell);
+        }
+        this.setState({ cells: this.state.cells, links: this.state.links });
+      })
+
+      graph.on('change', () => {
+        this.forceUpdate();
+      });
 
       var paper = new joint.dia.Paper({
         el: this.refs.graph.getDOMNode(),
@@ -93,14 +199,15 @@
       paper.on('cell:pointerclick', (e) => {
         this.props.onSelect(e.model.attributes.componentIndex);
       })
+
+      add(graph, [components.bible, components.tokenizer, components.kenlm]);
     },
 
     componentWillReceiveProps: function(nextProps) {
-      nextProps.components
-      .map((c, index) => {
+      nextProps.components.map((c, index) => {
         if (this.state.added.indexOf(index) !== -1) return;
 
-        var rect = new joint.shapes.devs.Model({
+        var rect = new joint.shapes.devs.Model2({
           position: { x: 50, y: 50 },
           size: { width: 90, height: 90 },
           inPorts: Object.keys(c.template.input),
@@ -125,33 +232,45 @@
     }, */
 
     render: function() {
+      //console.log(this.state)
       return (
         <div className="table">
           <div className="table-row">
             <div className="workspace">
               <h2>Experiment</h2>
               <div className="full" ref="graph"/>
-              {/*<ul>
-                {this.props.components.map((c, index) => (
-                  <li key={index}>
-                    <a href="#" onClick={() => this.props.onSelect(c)}>{c.template.name}</a>
-                    {' '}
-                    (
-                      inputs = {Object.keys(c.template.input).map((key) => key + ': ' + c.template.input[key] + ' ')}
-                      outputs = {Object.keys(c.template.output).map((key) => key + ': ' + c.template.output[key] + ' ')}
-                    )
-                  </li>
-                ))}
-              </ul>*/}
             </div>
           </div>
           <div className="table-row">
-            <Preview components={this.props.components}/>
+            <Preview components={this.props.components} links={this.state.links} cells={this.state.cells}/>
           </div>
         </div>
       );
     }
   });
+
+  function add(graph, components) {
+    var cells = components.map(c => {
+      return new joint.shapes.devs.Atomic({
+          position: { x: 260, y: 150 },
+          size: { width: 100, height: 100 },
+          inPorts: Object.keys(c.input),
+          outPorts: Object.keys(c.output)
+      });
+    });
+
+    var grouping = new joint.shapes.devs.Coupled({
+      position: { x: 260, y: 150 },
+      size: { width: 300, height: 300 },
+      inPorts: Object.keys(components[0].input),
+      outPorts: Object.keys(components[components.length-1].output)
+    });
+
+    graph.addCells([grouping]);
+    graph.addCells(cells);
+
+    cells.forEach(c => grouping.embed(c));
+  }
 
   var Properties = React.createClass({
     render: function() {
@@ -177,11 +296,48 @@
   var Preview = React.createClass({
     render: function() {
       return (
-        <pre className="preview">
-        {this.props.components.map((c) => {
-          return c.template.toBash(c.params, c.input, c.output) + '\n';
+        <div className="preview">
+        <pre>
+        {this.props.components.map((c, index) => {
+          var cellid = null;
+          for (var id in this.props.cells) {
+            if ('componentIndex' in this.props.cells[id].attributes) {
+              if (this.props.cells[id].attributes.componentIndex == index) {
+                cellid = id;
+                break;
+              }
+            }
+          }
+
+          //console.log(c.template.name + index + ' => ' + cellid);
+
+          var input = {};
+          this.props.links.forEach((link) => {
+            //console.log(link)
+            //console.log('!! ' + link.attributes.target.id + ' + ' + link.attributes.source.id)
+            if (link.attributes.target.id == cellid) {
+              var key = link.attributes.target.port;
+              var cell = this.props.cells[link.attributes.source.id];
+              var comp = this.props.components[cell.attributes.componentIndex];
+              var key2 = link.attributes.source.port;
+              //console.log(c.template.name + index + ' ('+key+') => ' + comp.template.name + '('+key2+')');
+              input[key] = comp.template.name + cell.attributes.componentIndex + '.' + key2;
+            }
+          });
+
+          var output = {};
+          for (var key in c.template.output) {
+            output[key] = c.template.name + index + '.' + key;
+          }
+
+          var make = '';
+          for (var x in output) make += output[x] + ' ';
+          make = make.trim() + ': '
+          for (var x in input) make += input[x] + ' ';
+          return make + '\n' + '\t' + c.template.toBash(c.params, input, output).join('\n\t') + '\n\n';
         })}
         </pre>
+        </div>
       );
     }
   });
