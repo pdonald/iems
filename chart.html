@@ -110,13 +110,10 @@
 
   var Connector = React.createClass({
     render: function() {
-      var width = 150;
-      var outs = (+this.props.sourcePort+1) * (width / (this.props.source.props.ports.out.length+1));
-      var ins = (+this.props.targetPort+1) * (width / (this.props.source.props.ports.in.length+1));
       return (
         <g className="connector">
-          <line x1={+this.props.source.props.x+outs} y1={+this.props.source.props.y+150+10}
-                x2={+this.props.target.props.x+ins} y2={+this.props.target.props.y-10} />
+          <line x1={this.props.source.x} y1={this.props.source.y}
+                x2={this.props.target.x} y2={this.props.target.y} />
         </g>
       );
     }
@@ -201,48 +198,34 @@
     }
   });
 
-  var Process = React.createClass({
-    render: function() {
-      var width = 150;
-      var height = 150;
-
-      React.Children.forEach(this.props.children, child => {
-        if (child.props.x) width = Math.max(width, +child.props.x + 150);
-        if (child.props.y) height = Math.max(height, +child.props.y + 150);
-      });
-
-      if (this.props.children) {
-        width += 20;
-        height += 50;
-      }
-
-      var ins = width / (this.props.ports.in.length+1);
-      var outs = width / (this.props.ports.out.length+1);
-
-      // todo: borders
-
-      return (
-        <Draggable className="process" x={this.props.x} y={this.props.y} onMove={this.props.onMove}>
-          <g>
-            <rect x="0" y="0" width={width} height={height}/>
-            <text x="10" y="20">{this.props.name}</text>
-            <g>{this.props.ports.in.map((port, index) => <Port key={port} label={port} type="in" x={(index+1)*ins} y={0}/>)}</g>
-            <g>{this.props.ports.out.map((port, index) => <Port key={port} label={port} type="out" x={(index+1)*outs} y={height}/>)}</g>
-          </g>
-          <g>
-            {this.props.children}
-          </g>
-        </Draggable>
-      );
-    }
-  });
-
   var Group = React.createClass({
     render: function() {
       return (
         <Process name={this.props.name} ports={this.props.ports}>
           {this.props.children}
         </Process>
+      );
+    }
+  });
+
+  var Process = React.createClass({
+    render: function() {
+      var offset = {
+        x: this.props.width / (this.props.ports.in.length+1),
+        y: this.props.width / (this.props.ports.out.length+1)
+      };
+      return (
+        <Draggable className="process" x={this.props.x} y={this.props.y} onMove={this.props.onMove}>
+          <g>
+            <rect x="0" y="0" width={this.props.width} height={this.props.height}/>
+            <text x="10" y="30">{this.props.name}</text>
+            <g>{this.props.ports.in.map((port, index) => <Port key={port} label={port} type="in" x={(index+1)*offset.x} y={0}/>)}</g>
+            <g>{this.props.ports.out.map((port, index) => <Port key={port} label={port} type="out" x={(index+1)*offset.y} y={this.props.height}/>)}</g>
+          </g>
+          <g>
+            {this.props.children}
+          </g>
+        </Draggable>
       );
     }
   });
@@ -256,13 +239,16 @@
             processes: [
               { name: 'fastalign', x: 20, y: 50, ports: { in: ['src', 'trg'], out: ['out'] } },
               { name: 'fastalign rev', x: 200, y: 50, ports: { in: ['src', 'trg'], out: ['out'] } },
-              { name: 'sym', x: 120, y: 280, ports: { in: ['src-trg', 'trg-src'], out: ['out1', 'out2'] } },
+              { name: 'sym', x: 120, y: 200, ports: { in: ['src-trg', 'trg-src'], out: ['out'] } },
             ],
             links: [
-              { from: { process: null, port: 0 }, to: { process: 1, port: 0 } },
-              { from: { process: null, port: 1 }, to: { process: 1, port: 1 } },
+              { from: { process: null, port: 0 }, to: { process: 0, port: 0 } },
+              { from: { process: null, port: 1 }, to: { process: 0, port: 1 } },
+              { from: { process: null, port: 0 }, to: { process: 1, port: 1 } },
+              { from: { process: null, port: 1 }, to: { process: 1, port: 0 } },
               { from: { process: 0, port: 0 }, to: { process: 2, port: 0 } },
               { from: { process: 1, port: 0 }, to: { process: 2, port: 1 } },
+              { from: { process: 2, port: 0 }, to: { process: null, port: 0 } },
             ]
           }
         ]
@@ -270,26 +256,60 @@
     },
 
     render: function() {
-      var me = this;
+      var pos = {x:50, y:50}
+
       var groups = this.state.groups.map(group => {
-        var processes = group.processes.map(p => <Process name={p.name} x={p.x} y={p.y} ports={p.ports} onMove={pos => {
-          //console.log(pos);
-          p.x = pos.x;
-          p.y = pos.y;
-          this.setState({processes: this.state.processes})
-        }}/>)
+        var width = 150;
+        var height = 150;
+
+        var pwidth = 150;
+        var pheight = 50;
+
+        var processes = group.processes.map(p => {
+          width = Math.max(width, p.x + pwidth);
+          height = Math.max(height, p.y + pheight);
+
+          var callback = pos => {
+            p.x = pos.x;
+            p.y = pos.y;
+            this.setState({processes: this.state.processes})
+          };
+
+          return <Process width={pwidth} height={pheight} name={p.name} x={p.x} y={p.y} ports={p.ports} onMove={callback}/>;
+        });
+
+        if (processes.length) {
+          width += 20;
+          height += 50;
+        }
 
         var links = group.links.map(l => {
+          var source = {}, target = {};
+          if (l.from.process !== null) {
+            var p = group.processes[l.from.process];
+            source.x = p.x + (l.from.port+1)*(pwidth/(p.ports.out.length+1));
+            source.y = p.y + pheight+10;
+          } else {
+            source.x = (l.from.port+1)*(width/(group.ports.in.length+1));
+            source.y = 10;
+          }
+          if (l.to.process !== null) {
+            var p = group.processes[l.to.process];
+            target.x = p.x + (l.to.port+1)*(pwidth/(p.ports.in.length+1));
+            target.y = p.y - 10;
+          } else {
+            target.x = (l.to.port+1)*(width/(group.ports.out.length+1));
+            target.y = height-10;
+          }
+
           return (
-            <Connector source={l.from.process !== null ? processes[l.from.process] : me}
-                       target={l.to.process !== null ? processes[l.to.process] : me}
-                       sourcePort={l.from.port}
-                       targetPort={l.to.port}/>
+            <Connector source={source}
+                       target={target}/>
           )
         })
 
         return (
-          <Process name={group.name} ports={group.ports} x={50} y={50}>
+          <Process width={width} height={height} name={group.name} ports={group.ports} x={pos.x} y={pos.y}>
             {processes}
             {links}
           </Process>
