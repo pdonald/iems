@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="http://fb.me/react-0.13.0-rc1.js"></script>
+  <script src="http://fb.me/react-with-addons-0.13.0-rc1.js"></script>
+  <script src="http://fb.me/JSXTransformer-0.13.0-rc1.js"></script>
+</head>
+<body>
+  <div id="example"></div>
+  <style>
+  body {
+    font-family: Verdana;
+    font-size: 12px;
+  }
+  .process rect {
+    cursor: move;
+    fill: #2ECC71;
+    stroke: #000;
+  }
+  .process text {
+    color: black;
+  }
+  .process .port-in circle {
+    fill: #16A085;
+    stroke: #000;
+  }
+  .process .port-out circle {
+    fill: #E74C3C;
+    stroke: #000;
+  }
+  .connector line, .port-line {
+    stroke: #000;
+    stroke-width: 1px;
+  }
+  .port-on {
+    fill: yellow;
+  }
+  </style>
+  <script type="text/jsx;harmony=true">
+  var Draggable = React.createClass({
+    getDefaultProps: function () {
+      return { x: 0, y: 0 };
+    },
+
+    getInitialState: function () {
+      return {
+        pos: { x: this.props.x, y: this.props.y },
+        dragging: false,
+        rel: null // position relative to the cursor
+      };
+    },
+
+    componentDidUpdate: function (props, state) {
+      if (this.state.dragging && !state.dragging) {
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+      } else if (!this.state.dragging && state.dragging) {
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    },
+
+    onMouseDown: function (e) {
+      if (e.button !== 0) return; // only left mouse button
+      this.setState({
+        dragging: true,
+        rel: {
+          x: e.pageX - this.props.x,
+          y: e.pageY - this.props.y
+        }
+      });
+      e.stopPropagation();
+      e.preventDefault();
+    },
+
+    onMouseUp: function (e) {
+      this.setState({ dragging: false });
+      e.stopPropagation();
+      e.preventDefault();
+    },
+
+    onMouseMove: function (e) {
+      if (!this.state.dragging) return;
+      var pos = {
+        x: e.pageX - this.state.rel.x,
+        y: e.pageY - this.state.rel.y
+      };
+      this.setState({ pos: pos });
+      if (this.props.onMove) {
+        this.props.onMove(pos);
+      }
+      e.stopPropagation();
+      e.preventDefault();
+    },
+
+    render: function () {
+      return (
+        <g {...this.props}
+            transform={`translate(${this.state.pos.x},${this.state.pos.y})`}
+            onMouseDown={this.onMouseDown} />
+      );
+    }
+  });
+
+  var Graph = React.createClass({
+    render: function() {
+      return <svg {...this.props}>{this.props.children}</svg>;
+    }
+  });
+
+  var Connector = React.createClass({
+    render: function() {
+      var width = 150;
+      var outs = (+this.props.sourcePort+1) * (width / (this.props.source.props.ports.out.length+1));
+      var ins = (+this.props.targetPort+1) * (width / (this.props.source.props.ports.in.length+1));
+      return (
+        <g className="connector">
+          <line x1={+this.props.source.props.x+outs} y1={+this.props.source.props.y+150+10}
+                x2={+this.props.target.props.x+ins} y2={+this.props.target.props.y-10} />
+        </g>
+      );
+    }
+  });
+
+  var Port = React.createClass({
+    getInitialState: function () {
+      return {
+        pos: { x: this.props.x, y: this.props.y },
+        dragging: false,
+        rel: null
+      };
+    },
+
+    componentDidUpdate: function (props, state) {
+      if (this.state.dragging && !state.dragging) {
+        document.addEventListener('mousemove', this.onMouseMove);
+        document.addEventListener('mouseup', this.onMouseUp);
+      } else if (!this.state.dragging && state.dragging) {
+        document.removeEventListener('mousemove', this.onMouseMove);
+        document.removeEventListener('mouseup', this.onMouseUp);
+      }
+    },
+
+    onMouseDown: function (e) {
+      if (e.button !== 0) return; // only left mouse button
+      this.setState({
+        dragging: true,
+        rel: {
+          x: e.pageX - +this.props.x,
+          y: e.pageY - +this.props.y
+        }
+      });
+      e.stopPropagation();
+      e.preventDefault();
+    },
+
+    onMouseUp: function (e) {
+      this.setState({ dragging: false });
+      e.stopPropagation();
+      e.preventDefault();
+    },
+
+    onMouseMove: function (e) {
+      if (!this.state.dragging) return;
+      var pos = {
+        x: e.pageX - this.state.rel.x,
+        y: e.pageY - this.state.rel.y
+      };
+      this.setState({ pos: pos });
+      e.stopPropagation();
+      e.preventDefault();
+    },
+
+    onMouseOver: function(e) {
+      this.setState({ on: true });
+    },
+
+    onMouseOut: function(e) {
+      this.setState({ on: false });
+    },
+
+    render: function() {
+      var line = null;
+      if (this.state.dragging) {
+        line = <line x1={this.props.x} y1={this.props.y}
+                     x2={this.state.pos.x} y2={this.state.pos.y} className="port-line"/>;
+      }
+
+      var fill = this.state.on ? "yellow" : "red";
+
+      return (
+        <g className={`port port-${this.props.type}`}>
+          <text x={+this.props.x-(this.props.label.length*2)} y={+this.props.y+(this.props.type == 'in' ? -20 : 30)}>{this.props.label}</text>
+          <circle cx={this.props.x} cy={this.props.y} r="10" fill={fill}
+                  onMouseDown={this.onMouseDown}
+                  onMouseOver={this.onMouseOver}
+                  onMouseOut={this.onMouseOut} />
+          {line}
+        </g>
+      );
+    }
+  });
+
+  var Process = React.createClass({
+    render: function() {
+      var width = 150;
+      var height = 150;
+
+      React.Children.forEach(this.props.children, child => {
+        if (child.props.x) width = Math.max(width, +child.props.x + 150);
+        if (child.props.y) height = Math.max(height, +child.props.y + 150);
+      });
+
+      if (this.props.children) {
+        width += 20;
+        height += 50;
+      }
+
+      var ins = width / (this.props.ports.in.length+1);
+      var outs = width / (this.props.ports.out.length+1);
+
+      // todo: borders
+
+      return (
+        <Draggable className="process" x={this.props.x} y={this.props.y} onMove={this.props.onMove}>
+          <g>
+            <rect x="0" y="0" width={width} height={height}/>
+            <text x="10" y="20">{this.props.name}</text>
+            <g>{this.props.ports.in.map((port, index) => <Port key={port} label={port} type="in" x={(index+1)*ins} y={0}/>)}</g>
+            <g>{this.props.ports.out.map((port, index) => <Port key={port} label={port} type="out" x={(index+1)*outs} y={height}/>)}</g>
+          </g>
+          <g>
+            {this.props.children}
+          </g>
+        </Draggable>
+      );
+    }
+  });
+
+  var Group = React.createClass({
+    render: function() {
+      return (
+        <Process name={this.props.name} ports={this.props.ports}>
+          {this.props.children}
+        </Process>
+      );
+    }
+  });
+
+  var App = React.createClass({
+    getInitialState: function() {
+      return {
+        groups: [
+          {
+            ports: { in: ['src', 'trg'], out: ['alignments'] },
+            processes: [
+              { name: 'fastalign', x: 20, y: 50, ports: { in: ['src', 'trg'], out: ['out'] } },
+              { name: 'fastalign rev', x: 200, y: 50, ports: { in: ['src', 'trg'], out: ['out'] } },
+              { name: 'sym', x: 120, y: 280, ports: { in: ['src-trg', 'trg-src'], out: ['out1', 'out2'] } },
+            ],
+            links: [
+              { from: { process: null, port: 0 }, to: { process: 1, port: 0 } },
+              { from: { process: null, port: 1 }, to: { process: 1, port: 1 } },
+              { from: { process: 0, port: 0 }, to: { process: 2, port: 0 } },
+              { from: { process: 1, port: 0 }, to: { process: 2, port: 1 } },
+            ]
+          }
+        ]
+      }
+    },
+
+    render: function() {
+      var me = this;
+      var groups = this.state.groups.map(group => {
+        var processes = group.processes.map(p => <Process name={p.name} x={p.x} y={p.y} ports={p.ports} onMove={pos => {
+          //console.log(pos);
+          p.x = pos.x;
+          p.y = pos.y;
+          this.setState({processes: this.state.processes})
+        }}/>)
+
+        var links = group.links.map(l => {
+          return (
+            <Connector source={l.from.process !== null ? processes[l.from.process] : me}
+                       target={l.to.process !== null ? processes[l.to.process] : me}
+                       sourcePort={l.from.port}
+                       targetPort={l.to.port}/>
+          )
+        })
+
+        return (
+          <Process name={group.name} ports={group.ports} x={50} y={50}>
+            {processes}
+            {links}
+          </Process>
+        )
+      });
+
+      return (
+        <Graph width="1000" height="1000">
+          {groups}
+        </Graph>
+      );
+    }
+  });
+
+  React.render(
+    <App/>,
+    document.getElementById('example')
+  );
+  </script>
+</body>
+</html>

@@ -14,64 +14,60 @@
     <h1>Machine Translation Experiments</h1>
   </header>
   <div id="example"></div>
-  <script type="text/jsx;harmony=true">
-  joint.shapes.devs.Model2 = joint.shapes.basic.Generic.extend(_.extend({}, joint.shapes.basic.PortsModelInterface, {
-
+  <script type="text/javascript">
+  var custom = {
     markup: '<g class="rotatable"><g class="scalable"><rect class="body"/></g><text class="label"/><g class="inPorts"/><g class="outPorts"/></g>',
     portMarkup: '<g class="port port<%= id %>"><circle class="port-body"/><text class="port-label"/></g>',
-
     defaults: joint.util.deepSupplement({
-
         type: 'devs.Model',
         size: { width: 1, height: 1 },
-
         inPorts: [],
         outPorts: [],
-
         attrs: {
-            '.': { magnet: false },
-            '.body': {
-                width: 150, height: 250,
-                stroke: '#000000'
-            },
-            '.port-body': {
-                r: 10,
-                magnet: true,
-                stroke: '#000000'
-            },
-            text: {
-                'pointer-events': 'none'
-            },
-            '.label': { text: 'Model', 'ref-x': .5, 'ref-y': 10, ref: '.body', 'text-anchor': 'middle', fill: '#000000' },
-            '.inPorts .port-label': { dy:-30, x: 4, 'text-anchor': 'end', fill: '#000000' },
-            '.outPorts .port-label':{ dy: 15, x: 4, fill: '#000000' }
+          '.': { magnet: false },
+          '.body': {
+            width: 150, height: 250,
+            stroke: '#000000'
+          },
+          '.port-body': {
+            r: 10,
+            magnet: true,
+            stroke: '#000000'
+          },
+          text: {
+            'pointer-events': 'none'
+          },
+          '.label': { text: 'Model', 'ref-x': .5, 'ref-y': 10, ref: '.body', 'text-anchor': 'middle', fill: '#000000' },
+          '.inPorts .port-label': { dy:-30, x: 4, 'text-anchor': 'end', fill: '#000000' },
+          '.outPorts .port-label':{ dy: 15, x: 4, fill: '#000000' }
         }
-
-    }, joint.shapes.basic.Generic.prototype.defaults),
+      }, joint.shapes.basic.Generic.prototype.defaults),
 
     getPortAttrs: function(portName, index, total, selector, type) {
+      var attrs = {};
 
-        var attrs = {};
+      var portClass = 'port' + index;
+      var portSelector = selector + '>.' + portClass;
+      var portLabelSelector = portSelector + '>.port-label';
+      var portBodySelector = portSelector + '>.port-body';
 
-        var portClass = 'port' + index;
-        var portSelector = selector + '>.' + portClass;
-        var portLabelSelector = portSelector + '>.port-label';
-        var portBodySelector = portSelector + '>.port-body';
+      attrs[portLabelSelector] = { text: portName };
+      attrs[portBodySelector] = { port: { id: portName || _.uniqueId(type) , type: type } };
+      attrs[portSelector] = { ref: '.body', 'ref-y': (index + 0.5) * (1 / total) };
 
-        attrs[portLabelSelector] = { text: portName };
-        attrs[portBodySelector] = { port: { id: portName || _.uniqueId(type) , type: type } };
-        attrs[portSelector] = { ref: '.body', 'ref-y': (index + 0.5) * (1 / total) };
+      attrs[portSelector] = { ref: '.body', 'ref-x': (index + 0.5) * (1 / total) };
+      if (selector === '.outPorts') { attrs[portSelector]['ref-dy'] = 0; }
 
-        // CHANGED: swap x and y ports coordinates ('ref-y' => 'ref-x')
-       attrs[portSelector] = { ref: '.body', 'ref-x': (index + 0.5) * (1 / total) };
-       // ('ref-dx' => 'ref-dy')
-       if (selector === '.outPorts') { attrs[portSelector]['ref-dy'] = 0; }
-
-        return attrs;
+      return attrs;
     }
-}));
+  };
 
-  var components = {
+  joint.shapes.devs.Process = joint.shapes.basic.Generic.extend(_.extend({}, joint.shapes.basic.PortsModelInterface, custom));
+  </script>
+
+  <script type="text/jsx;harmony=true">
+
+  var processes = {
     bible: {
       name: 'bible',
       params: { lang: 'string' },
@@ -121,21 +117,32 @@
       toBash: (params, input, output) => {
         return [`/tools/lmplz -o ${params.order} < ${input.in} > ${output.out}`];
       }
+    },
+    sym: {
+      name: 'sym',
+      params: { method: 'string' },
+      input: { srctrg: 'file<align>', trgsrc: 'file<align>' },
+      output: { out: 'file<align>' },
+      toBash: (params, input, output) => {
+        return [`/tools/sym -alg ${params.method} -i ${input.srctrg} -i ${input.trgsrc} > ${output.out}`];
+      }
     }
   };
 
   var groups = {
     align: {
       name: 'fastalign',
-      input: {},
-      output: {},
-      components: [{
-        name: 'fastalign',
-        params: {}
-      }],
-      links: [{
-
-      }]
+      input: { src: 'file<tok>', trg: 'file<tok>' },
+      output: { out: 'file<align>' },
+      processes: {
+        'fastalign': { name: 'fastalign', params: {} },
+        'fastalign-rev': { name: 'fastalign', params: {} },
+        'sym': { name: 'sym', params: {} }
+      },
+      links: [
+        { from: 'fastalign', fromPort: 'out', to: 'sym', toPort: 'srctrg' },
+        { from: 'fastalign-rev', fromPort: 'out', to: 'sym', toPort: 'trgsrc' },
+      ]
     }
   };
 
@@ -382,8 +389,127 @@
     }
   });
 
+  var Graph = React.createClass({
+    getInitialState: function() {
+      return { cells: {}, selected: null };
+    },
+
+    componentDidMount: function() {
+      this.graph = new joint.dia.Graph();
+
+      this.paper = new joint.dia.Paper({
+        el: this.refs.graph.getDOMNode(),
+        width: '100%',
+        height: '100%',
+        model: this.graph,
+        gridSize: 1,
+        markAvailable: true,
+        validateConnection: function(cellViewS, magnetS, cellViewT, magnetT, end, linkView) {
+          // Prevent linking from input ports.
+          if (magnetS && magnetS.getAttribute('type') === 'input') return false;
+          // Prevent linking from output ports to input ports within one element.
+          if (cellViewS === cellViewT) return false;
+          // Prevent linking to input ports.
+          return magnetT && magnetT.getAttribute('type') === 'input';
+        }
+      });
+
+      this.graph.on('add', cell => {
+        this.state.cells[cell.id] = cell;
+        this.setState({ cells: this.state.cells });
+      });
+
+      this.paper.on('cell:pointerclick', e => {
+        this.setState({ selected: e.model.id });
+      });
+    },
+
+    addProcess: function(process) {
+
+      // find bottom most element
+      var y = 0;
+      this.graph.getElements().forEach(e => {
+        var ey = e.attributes.position.y + e.attributes.size.height;
+        if (y < ey)  {
+          y = ey;
+        }
+      });
+
+      var rect = new joint.shapes.devs.Process({
+        position: { x: 50, y: y > 0 ? y + 100 : 50 },
+        size: { width: 90, height: 90 },
+        inPorts: Object.keys(process.input),
+        outPorts: Object.keys(process.output),
+        attrs: {
+          '.label': { text: process.name },
+          'rect': { fill: '#2ECC71' },
+          '.inPorts circle': { fill: '#16A085', type: 'input' },
+          '.outPorts circle': { fill: '#E74C3C' }
+        }
+      });
+
+      this.graph.addCells([rect]);
+    },
+
+    addGroup: function(group) {
+      var cells = Object.keys(group.processes).map((p, index) => {
+        var process = group.processes[p];
+        return new joint.shapes.devs.Process({
+            position: { x: 260, y: 150*index },
+            size: { width: 100, height: 100 },
+            attrs: {
+              'rect': { fill: '#2ECC71' },
+              '.label': { text: process.name },
+              '.inPorts circle': { fill: '#16A085', type: 'input' },
+              '.outPorts circle': { fill: '#E74C3C' }
+            },
+            inPorts: Object.keys(processes[process.name].input),
+            outPorts: Object.keys(processes[process.name].output)
+        });
+      });
+
+      var links = group.links.map(link => {
+
+      });
+
+      var grouping = new joint.shapes.devs.Coupled({
+        position: { x: 260, y: 50 },
+        size: { width: 300, height: (Object.keys(group.processes).length+1) * 150 },
+        inPorts: Object.keys(group.input),
+        outPorts: Object.keys(group.output)
+      });
+
+      this.graph.addCells([grouping]);
+      this.graph.addCells(cells);
+      this.graph.addCells(links);
+
+      cells.forEach(c => grouping.embed(c));
+    },
+
+    save: function() {
+      console.log(this.graph.toJSON())
+    },
+
+    shouldComponentUpdate: function() {
+      return false;
+    },
+
+    render: function() {
+      return (
+        <div className="full">
+          <button onClick={() => this.addProcess(processes.tokenizer)}>Add tokenizer</button>
+          <button onClick={() => this.addProcess(processes.fastalign)}>Add fast align</button>
+          <button onClick={() => this.addGroup(groups.align)}>Add group</button>
+          <button onClick={() => this.save()}>Save</button>
+          <div className="full" ref="graph"/>
+        </div>
+      );
+    }
+  });
+
   React.render(
-    <App/>,
+    //<App/>,
+    <Graph/>,
     document.getElementById('example')
   );
   </script>
