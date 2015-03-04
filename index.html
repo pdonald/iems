@@ -1,518 +1,107 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <link rel="stylesheet" href="joint/joint.css" />
-  <link rel="stylesheet" href="styles.css" />
-  <script src="joint/joint.js"></script>
-  <script src="joint/joint.shapes.devs.js"></script>
-  <script src="http://fb.me/react-0.12.2.js"></script>
-  <script src="http://fb.me/react-with-addons-0.12.2.js"></script>
-  <script src="http://fb.me/JSXTransformer-0.12.2.js"></script>
+  <script src="http://fb.me/react-0.13.0-rc1.js"></script>
+  <script src="http://fb.me/react-with-addons-0.13.0-rc1.js"></script>
+  <script src="http://fb.me/JSXTransformer-0.13.0-rc1.js"></script>
 </head>
 <body>
   <header>
     <h1>Machine Translation Experiments</h1>
   </header>
+
   <div id="example"></div>
-  <script type="text/javascript">
-  var custom = {
-    markup: '<g class="rotatable"><g class="scalable"><rect class="body"/></g><text class="label"/><g class="inPorts"/><g class="outPorts"/></g>',
-    portMarkup: '<g class="port port<%= id %>"><circle class="port-body"/><text class="port-label"/></g>',
-    defaults: joint.util.deepSupplement({
-        type: 'devs.Model',
-        size: { width: 1, height: 1 },
-        inPorts: [],
-        outPorts: [],
-        attrs: {
-          '.': { magnet: false },
-          '.body': {
-            width: 150, height: 250,
-            stroke: '#000000'
-          },
-          '.port-body': {
-            r: 10,
-            magnet: true,
-            stroke: '#000000'
-          },
-          text: {
-            'pointer-events': 'none'
-          },
-          '.label': { text: 'Model', 'ref-x': .5, 'ref-y': 10, ref: '.body', 'text-anchor': 'middle', fill: '#000000' },
-          '.inPorts .port-label': { dy:-30, x: 4, 'text-anchor': 'end', fill: '#000000' },
-          '.outPorts .port-label':{ dy: 15, x: 4, fill: '#000000' }
-        }
-      }, joint.shapes.basic.Generic.prototype.defaults),
 
-    getPortAttrs: function(portName, index, total, selector, type) {
-      var attrs = {};
-
-      var portClass = 'port' + index;
-      var portSelector = selector + '>.' + portClass;
-      var portLabelSelector = portSelector + '>.port-label';
-      var portBodySelector = portSelector + '>.port-body';
-
-      attrs[portLabelSelector] = { text: portName };
-      attrs[portBodySelector] = { port: { id: portName || _.uniqueId(type) , type: type } };
-      attrs[portSelector] = { ref: '.body', 'ref-y': (index + 0.5) * (1 / total) };
-
-      attrs[portSelector] = { ref: '.body', 'ref-x': (index + 0.5) * (1 / total) };
-      if (selector === '.outPorts') { attrs[portSelector]['ref-dy'] = 0; }
-
-      return attrs;
-    }
-  };
-
-  joint.shapes.devs.Process = joint.shapes.basic.Generic.extend(_.extend({}, joint.shapes.basic.PortsModelInterface, custom));
-  </script>
-
+  <link rel="stylesheet" href="styles.css" />
+  <script src="js/model.js" type="text/jsx;harmony=true"></script>
+  <script src="js/graph.jsx" type="text/jsx;harmony=true"></script>
+  <script src="js/workspace.jsx" type="text/jsx;harmony=true"></script>
   <script type="text/jsx;harmony=true">
-
-  var processes = {
-    bible: {
-      name: 'bible',
-      params: { lang: 'string' },
-      input: { },
-      output: { out: 'file<sent>' },
-      toBash: (params, input, output) => {
-        return [`cp /data/bible.${params.lang} ${output.out}`];
-      }
-    },
-    wget: {
-      name: 'wget',
-      params: { url: 'string' },
-      input: { },
-      output: { out: 'file<any>', stats: 'file<text>' },
-      toBash: (params, input, output) => {
-        return [`wget ${params.url} -o ${output.out}`];
-      }
-    },
-    tokenizer: {
-      name: 'tokenizer',
-      params: { lang: 'string' },
-      input: { in: 'file<text>' },
-      output: { out: 'file<tok>' },
-      toBash: (params, input, output) => {
-        return [`perl /tools/tokenizer.perl -l ${params.lang} < ${input.in} > ${output.out}`];
-      }
-    },
-    fastalign: {
-      name: 'fastalign',
-      params: { reverse: 'bool' },
-      input: { src: 'file<tok>', trg: 'file<tok>' },
-      output: { out: 'file<align>' },
-      toBash: (params, input, output) => {
-        var temp = `${output.out}.temp`
-        var cmd = [];
-        cmd.push(`python /tools/join.py -f ${input.src} -f ${input.trg} -d ' ||| ' > ${temp}`);
-        cmd.push(`/tools/fast_align ${params.reverse ? '-r' : ''} -i ${temp} > ${output.out}`);
-        cmd.push(`rm ${temp}`);
-        return cmd;
-      }
-    },
-    kenlm: {
-      name: 'kenlm',
-      params: { order: 'integer' },
-      input: { in: 'file<tok>' },
-      output: { out: 'file<arpa>' },
-      toBash: (params, input, output) => {
-        return [`/tools/lmplz -o ${params.order} < ${input.in} > ${output.out}`];
-      }
-    },
-    sym: {
-      name: 'sym',
-      params: { method: 'string' },
-      input: { srctrg: 'file<align>', trgsrc: 'file<align>' },
-      output: { out: 'file<align>' },
-      toBash: (params, input, output) => {
-        return [`/tools/sym -alg ${params.method} -i ${input.srctrg} -i ${input.trgsrc} > ${output.out}`];
-      }
-    }
-  };
-
-  var groups = {
-    align: {
-      name: 'fastalign',
-      input: { src: 'file<tok>', trg: 'file<tok>' },
-      output: { out: 'file<align>' },
-      processes: {
-        'fastalign': { name: 'fastalign', params: {} },
-        'fastalign-rev': { name: 'fastalign', params: {} },
-        'sym': { name: 'sym', params: {} }
-      },
-      links: [
-        { from: 'fastalign', fromPort: 'out', to: 'sym', toPort: 'srctrg' },
-        { from: 'fastalign-rev', fromPort: 'out', to: 'sym', toPort: 'trgsrc' },
-      ]
-    }
-  };
-
-  var ComponentList = React.createClass({
-    render: function() {
-      return (
-        <div className="components">
-        <h2>Components</h2>
-        <ul>
-          {Object.keys(components).map((key) => (
-            <li key={key} onClick={() => this.props.onAdd(components[key])}>
-              {components[key].name}
-            </li>
-          ))}
-        </ul>
-        </div>
-      );
-    }
-  });
-
-  var Workspace = React.createClass({
+  var App = React.createClass({
     getInitialState: function() {
-      return { added: [], links: [], cells: {} };
-    },
-
-    componentDidMount: function() {
-      var graph = new joint.dia.Graph;
-
-      this.graph = graph;
-
-      graph.on('add', (cell) => {
-        this.state.cells[cell.id] = cell;
-        if (cell.attributes.type == 'link') {
-          this.state.links.push(cell);
-        }
-        this.setState({ cells: this.state.cells, links: this.state.links });
-      })
-
-      graph.on('change', () => {
-        this.forceUpdate();
-      });
-
-      var paper = new joint.dia.Paper({
-        el: this.refs.graph.getDOMNode(),
-        width: '100%',
-        height: '100%',
-        model: graph,
-        gridSize: 1,
-        validateConnection: function(cellViewS, magnetS, cellViewT, magnetT, end, linkView) {
-          // Prevent linking from input ports.
-          if (magnetS && magnetS.getAttribute('type') === 'input') return false;
-          // Prevent linking from output ports to input ports within one element.
-          if (cellViewS === cellViewT) return false;
-          // Prevent linking to input ports.
-          return magnetT && magnetT.getAttribute('type') === 'input';
-        },
-        // Enable marking available cells & magnets
-        markAvailable: true
-      });
-
-      paper.on('cell:pointerclick', (e) => {
-        this.props.onSelect(e.model.attributes.componentIndex);
-      })
-
-      add(graph, [components.bible, components.tokenizer, components.kenlm]);
-    },
-
-    componentWillReceiveProps: function(nextProps) {
-      nextProps.components.map((c, index) => {
-        if (this.state.added.indexOf(index) !== -1) return;
-
-        var rect = new joint.shapes.devs.Model2({
-          position: { x: 50, y: 50 },
-          size: { width: 90, height: 90 },
-          inPorts: Object.keys(c.template.input),
-          outPorts: Object.keys(c.template.output),
-          componentIndex: index,
-          attrs: {
-            '.label': { text: c.template.name, 'ref-x': .4, 'ref-y': .2 },
-            rect: { fill: '#2ECC71' },
-            '.inPorts circle': { fill: '#16A085', type: 'input' },
-            '.outPorts circle': { fill: '#E74C3C' }
+      return {
+        x: 10, y: 10,
+        groups: [
+          {
+            id: 6,
+            x: 350, y: 350,
+            ports: { in: ['src', 'trg'], out: ['alignments'] },
+            processes: [
+              { id: 7, name: 'fastalign', x: 20, y: 50, width: 150, height: 50, ports: { in: ['src', 'trg'], out: ['out'] } },
+              { id: 8, name: 'fastalign rev', x: 200, y: 50, width: 150, height: 50, ports: { in: ['src', 'trg'], out: ['out'] } },
+              { id: 9, name: 'sym', x: 120, y: 200, width: 150, height: 50, ports: { in: ['src-trg', 'trg-src'], out: ['out'] } },
+            ],
+            links: [
+              { from: { process: null, port: 0 }, to: { process: 0, port: 0 } },
+              { from: { process: null, port: 1 }, to: { process: 0, port: 1 } },
+              { from: { process: null, port: 0 }, to: { process: 1, port: 1 } },
+              { from: { process: null, port: 1 }, to: { process: 1, port: 0 } },
+              { from: { process: 0, port: 0 }, to: { process: 2, port: 0 } },
+              { from: { process: 1, port: 0 }, to: { process: 2, port: 1 } },
+              { from: { process: 2, port: 0 }, to: { process: null, port: 0 } },
+            ]
           }
-        });
-
-        this.graph.addCells([rect]);
-        this.state.added.push(index);
-        this.setState({ added: this.state.added });
-      });
+        ],
+        processes: [
+          { id: 1, name: 'wget', params: { url: 'http://opus/bible.lv.ltxt' }, x: 20, y: 50, width: 150, height: 50, ports: { in: [], out: ['out'] } },
+          { id: 2, name: 'tokenizer', params: { lang: 'lv' }, x: 20, y: 200, width: 150, height: 50, ports: { in: ['in'], out: ['out'] } },
+          { id: 3, name: 'kenlm', params: { order: 5 }, x: 20, y: 350, width: 150, height: 50, ports: { in: ['in'], out: ['out'] } },
+          { id: 4, name: 'wget', params: { url: 'http://opus/bible.en.txt' }, x: 180, y: 50, width: 150, height: 50, ports: { in: [], out: ['out'] } },
+          { id: 5, name: 'tokenizer', params: { lang: 'en' }, x: 180, y: 200, width: 150, height: 50, ports: { in: ['in'], out: ['out'] } },
+        ],
+        links: [
+          { from: { process: 0, port: 0 }, to: { process: 1, port: 0 } },
+          { from: { process: 1, port: 0 }, to: { process: 2, port: 0 } },
+          { from: { process: 3, port: 0 }, to: { process: 4, port: 0 } },
+          { from: { process: 1, port: 0 }, to: { group: 0, port: 0 } },
+          { from: { process: 4, port: 0 }, to: { group: 0, port: 1 } },
+        ]
+      }
     },
-
-    /*shouldComponentUpdate: function() {
-      return false;
-    }, */
 
     render: function() {
-      //console.log(this.state)
       return (
         <div className="table">
           <div className="table-row">
-            <div className="workspace">
-              <h2>Experiment</h2>
-              <div className="full" ref="graph"/>
+            <div className="table-col sidebar toolbox">
+              <Toolbox onAdd={this.addComponent}/>
+            </div>
+            <div className="table-col middle grid">
+              <div className="table">
+                  <div className="table-row">
+                    <div className="table-col middle-pad">
+                      <h2>Experiment</h2>
+                    </div>
+                  </div>
+                  <div className="table-row table-row-expanded">
+                    <div className="table-col middle-pad">
+                      <Graph>
+                        <Group blank={true} group={this.state}/>
+                      </Graph>
+                    </div>
+                  </div>
+                <div className="table-row">
+                  <div className="table-col preview">
+                    <pre>{genMakefile(this.state)}</pre>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="table-row">
-            <Preview components={this.props.components} links={this.state.links} cells={this.state.cells}/>
-          </div>
         </div>
       );
     }
   });
 
-  function add(graph, components) {
-    var cells = components.map(c => {
-      return new joint.shapes.devs.Atomic({
-          position: { x: 260, y: 150 },
-          size: { width: 100, height: 100 },
-          inPorts: Object.keys(c.input),
-          outPorts: Object.keys(c.output)
-      });
-    });
-
-    var grouping = new joint.shapes.devs.Coupled({
-      position: { x: 260, y: 150 },
-      size: { width: 300, height: 300 },
-      inPorts: Object.keys(components[0].input),
-      outPorts: Object.keys(components[components.length-1].output)
-    });
-
-    graph.addCells([grouping]);
-    graph.addCells(cells);
-
-    cells.forEach(c => grouping.embed(c));
-  }
-
-  var Properties = React.createClass({
-    render: function() {
-      if (this.props.selectedIndex === null) {
-        return <div className="properties"><h2>Properties</h2></div>
-      }
-
-      var component = this.props.components[this.props.selectedIndex];
-
-      return (
-        <div className="properties">
-          <h2>Properties of {component.template.name}</h2>
-          <ul>
-          {Object.keys(component.template.params).map((key) => (
-            <li key={key}>{key}: <input defaultValue={component.params[key]} onChange={(e) => this.props.onChange(key, e.target.value)}/></li>
-          ))}
-          </ul>
-        </div>
-      );
-    }
-  });
-
-  var Preview = React.createClass({
-    render: function() {
-      return (
-        <div className="preview">
-        <pre>
-        {this.props.components.map((c, index) => {
-          var cellid = null;
-          for (var id in this.props.cells) {
-            if ('componentIndex' in this.props.cells[id].attributes) {
-              if (this.props.cells[id].attributes.componentIndex == index) {
-                cellid = id;
-                break;
-              }
-            }
-          }
-
-          //console.log(c.template.name + index + ' => ' + cellid);
-
-          var input = {};
-          this.props.links.forEach((link) => {
-            //console.log(link)
-            //console.log('!! ' + link.attributes.target.id + ' + ' + link.attributes.source.id)
-            if (link.attributes.target.id == cellid) {
-              var key = link.attributes.target.port;
-              var cell = this.props.cells[link.attributes.source.id];
-              var comp = this.props.components[cell.attributes.componentIndex];
-              var key2 = link.attributes.source.port;
-              //console.log(c.template.name + index + ' ('+key+') => ' + comp.template.name + '('+key2+')');
-              input[key] = comp.template.name + cell.attributes.componentIndex + '.' + key2;
-            }
-          });
-
-          var output = {};
-          for (var key in c.template.output) {
-            output[key] = c.template.name + index + '.' + key;
-          }
-
-          var make = '';
-          for (var x in output) make += output[x] + ' ';
-          make = make.trim() + ': '
-          for (var x in input) make += input[x] + ' ';
-          return make + '\n' + '\t' + c.template.toBash(c.params, input, output).join('\n\t') + '\n\n';
-        })}
-        </pre>
-        </div>
-      );
-    }
-  });
-
-  var App = React.createClass({
-    getInitialState: function() {
-      return { components: [], selectedIndex: null };
-    },
-
-    addComponent: function(component) {
-      var c = {
-        template: component,
-        params: {}, input: {}, output: {}
-      };
-
-      this.setState(React.addons.update(this.state, {
-        components: { $push: [c] },
-        selectedIndex: { $set: this.state.components.length }
-      }));
-    },
-
-    selectComponent: function(index) {
-      this.setState({ selectedIndex: index });
-    },
-
-    onPropertiesChange: function(key, value) {
-      var changes = { components: {} };
-      changes.components[this.state.selectedIndex] = { params: {} };
-      changes.components[this.state.selectedIndex].params[key] = { $set: value };
-      this.setState(React.addons.update(this.state, changes));
-    },
-
-    render: function() {
-      return (
-        <div className="container">
-          <ComponentList onAdd={this.addComponent}/>
-          <Workspace components={this.state.components} onSelect={this.selectComponent}/>
-          <Properties components={this.state.components} selectedIndex={this.state.selectedIndex} onChange={this.onPropertiesChange}/>
-
-        </div>
-      );
-    }
-  });
-
-  var Graph = React.createClass({
-    getInitialState: function() {
-      return { cells: {}, selected: null };
-    },
-
-    componentDidMount: function() {
-      this.graph = new joint.dia.Graph();
-
-      this.paper = new joint.dia.Paper({
-        el: this.refs.graph.getDOMNode(),
-        width: '100%',
-        height: '100%',
-        model: this.graph,
-        gridSize: 1,
-        markAvailable: true,
-        validateConnection: function(cellViewS, magnetS, cellViewT, magnetT, end, linkView) {
-          // Prevent linking from input ports.
-          if (magnetS && magnetS.getAttribute('type') === 'input') return false;
-          // Prevent linking from output ports to input ports within one element.
-          if (cellViewS === cellViewT) return false;
-          // Prevent linking to input ports.
-          return magnetT && magnetT.getAttribute('type') === 'input';
-        }
-      });
-
-      this.graph.on('add', cell => {
-        this.state.cells[cell.id] = cell;
-        this.setState({ cells: this.state.cells });
-      });
-
-      this.paper.on('cell:pointerclick', e => {
-        this.setState({ selected: e.model.id });
-      });
-    },
-
-    addProcess: function(process) {
-
-      // find bottom most element
-      var y = 0;
-      this.graph.getElements().forEach(e => {
-        var ey = e.attributes.position.y + e.attributes.size.height;
-        if (y < ey)  {
-          y = ey;
-        }
-      });
-
-      var rect = new joint.shapes.devs.Process({
-        position: { x: 50, y: y > 0 ? y + 100 : 50 },
-        size: { width: 90, height: 90 },
-        inPorts: Object.keys(process.input),
-        outPorts: Object.keys(process.output),
-        attrs: {
-          '.label': { text: process.name },
-          'rect': { fill: '#2ECC71' },
-          '.inPorts circle': { fill: '#16A085', type: 'input' },
-          '.outPorts circle': { fill: '#E74C3C' }
-        }
-      });
-
-      this.graph.addCells([rect]);
-    },
-
-    addGroup: function(group) {
-      var cells = Object.keys(group.processes).map((p, index) => {
-        var process = group.processes[p];
-        return new joint.shapes.devs.Process({
-            position: { x: 260, y: 150*index },
-            size: { width: 100, height: 100 },
-            attrs: {
-              'rect': { fill: '#2ECC71' },
-              '.label': { text: process.name },
-              '.inPorts circle': { fill: '#16A085', type: 'input' },
-              '.outPorts circle': { fill: '#E74C3C' }
-            },
-            inPorts: Object.keys(processes[process.name].input),
-            outPorts: Object.keys(processes[process.name].output)
-        });
-      });
-
-      var links = group.links.map(link => {
-
-      });
-
-      var grouping = new joint.shapes.devs.Coupled({
-        position: { x: 260, y: 50 },
-        size: { width: 300, height: (Object.keys(group.processes).length+1) * 150 },
-        inPorts: Object.keys(group.input),
-        outPorts: Object.keys(group.output)
-      });
-
-      this.graph.addCells([grouping]);
-      this.graph.addCells(cells);
-      this.graph.addCells(links);
-
-      cells.forEach(c => grouping.embed(c));
-    },
-
-    save: function() {
-      console.log(this.graph.toJSON())
-    },
-
-    shouldComponentUpdate: function() {
-      return false;
-    },
-
-    render: function() {
-      return (
-        <div className="full">
-          <button onClick={() => this.addProcess(processes.tokenizer)}>Add tokenizer</button>
-          <button onClick={() => this.addProcess(processes.fastalign)}>Add fast align</button>
-          <button onClick={() => this.addGroup(groups.align)}>Add group</button>
-          <button onClick={() => this.save()}>Save</button>
-          <div className="full" ref="graph"/>
-        </div>
-      );
-    }
-  });
+  /*
+  <div className="table-col sidebar properties">
+    <p>Properties...</p>
+  </div>*/
 
   React.render(
-    //<App/>,
-    <Graph/>,
+    <App/>,
     document.getElementById('example')
   );
   </script>
-
 </body>
 </html>
