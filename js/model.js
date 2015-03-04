@@ -57,6 +57,15 @@ var processes = {
     toBash: (params, input, output) => {
       return [`/tools/sym -alg ${params.method} -i ${input.srctrg} -i ${input.trgsrc} > ${output.out}`];
     }
+  },
+  phrases: {
+    name: 'phrases',
+    params: {},
+    input: { alignments: 'file<align>', src: 'file<tok>', trg: 'file<tok>' },
+    output: { out: 'file<phrases>' },
+    toBash: (params, input, output) => {
+      return [`/tools/extract_phrases -s ${input.src} -t ${input.src} -a ${input.alignments} > ${output.out}`];
+    }
   }
 };
 

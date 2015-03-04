@@ -160,7 +160,7 @@ var Port = React.createClass({
 });
 
 var Group = React.createClass({
-  getSize: function(group) {
+  /* getSize: function(group) {
     var width = 150;
     var height = 50;
 
@@ -185,43 +185,49 @@ var Group = React.createClass({
     }
 
     return { width: width, height: height };
+  }, */
+
+  getPortPos: function(obj, portName, dir, self) {
+    var x = self ? 0 : obj.x;
+    var y = self ? 0 : obj.y;
+    if (self) dir = dir == 'in' ? 'out' : 'in';
+
+    x += (obj.ports[dir].indexOf(portName)+1) * (obj.width / (obj.ports[dir].length + 1));
+    y += dir == 'out' ? obj.height : 0;
+    y += (dir == 'out' ? 10 : -10) * (self ? - 1 : 1);
+
+    return { x: x, y: y };
   },
 
   render: function() {
-    var onMove = this.props.onMove || function() {};
     var group = this.props.group;
-    var size = this.getSize(group);
+    var groups, processes, links;
 
-    var groups = group.groups ? group.groups.map(g => <Group group={g} onMove={onMove}/>) : null;
+    if (group.groups) {
+      groups = group.groups.map(g => <Group group={g}/>);
+    }
 
-    var processes = group.processes.map(p => {
-      return <Process width={p.width} height={p.height} x={p.x} y={p.y}
-                      name={p.name} ports={p.ports} onMove={pos => {p.x=pos.x;p.y=pos.y;onMove()}}/>;
-    });
+    if (group.processes) {
+      processes = group.processes.map(p => {
+        return <Process width={p.width} height={p.height} x={p.x} y={p.y}
+                        name={p.name} ports={p.ports} />;
+      });
+    }
 
-    var links = group.links ? group.links.map(l => {
-      var source = {}, target = {};
-        if (l.from.process !== null) {
-          var p = group.processes[l.from.process];
-          source.x = p.x + (l.from.port+1)*(p.width/(p.ports.out.length+1));
-          source.y = p.y + p.height+10;
-        } else {
-          source.x = (l.from.port+1)*(size.width/(group.ports.in.length+1));
-          source.y = 10;
-        }
-        if (l.to.process !== null) {
-          var p = group.processes[l.to.process];
-          target.x = p.x + (l.to.port+1)*(p.width/(p.ports.in.length+1));
-          target.y = p.y - 10;
-        } else {
-          target.x = (l.to.port+1)*(size.width/(group.ports.out.length+1));
-          target.y = size.height-10;
-        }
+    if (group.links) {
+      var ids = {};
+      ids[group.id] = group;
+      if (group.groups) group.groups.forEach(g => ids[g.id] = g)
+      if (group.processes) group.processes.forEach(p => ids[p.id] = p)
 
+      links = group.links.map(l => {
+        var source = this.getPortPos(ids[l.from.id], l.from.port, 'out', l.from.id == group.id);
+        var target = this.getPortPos(ids[l.to.id], l.to.port, 'in', l.to.id == group.id);
         return <Connector source={source} target={target}/>;
-    }) : null;
+      });
+    }
 
-    if (this.props.blank === true) {
+    if (this.props.blank) {
       return (
         <g>
           {groups}
@@ -231,8 +237,8 @@ var Group = React.createClass({
       );
     } else {
       return (
-        <Process width={size.width} height={size.height} name={group.name} ports={group.ports}
-                x={group.x} y={group.y} onMove={pos => {group.x=pos.x;group.y=pos.y;onMove();this.forceUpdate()}}>
+        <Process width={group.width} height={group.height} name={group.name} ports={group.ports}
+                 x={group.x} y={group.y}>
           {groups}
           {processes}
           {links}
@@ -243,8 +249,12 @@ var Group = React.createClass({
 });
 
 var Process = React.createClass({
+  getDefaultProps: function () {
+    return { ports: { in: [], out: [] } };
+  },
+
   render: function() {
-    var ports = this.props.ports ? this.props.ports : { in: [], out: [] };
+    var ports = this.props.ports;
     var offset = {
       x: this.props.width / (ports.in.length+1),
       y: this.props.width / (ports.out.length+1)

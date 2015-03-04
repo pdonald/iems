@@ -24,37 +24,41 @@
         groups: [
           {
             id: 6,
-            x: 350, y: 350,
+            x: 350, y: 350, width: 400, height: 300,
             ports: { in: ['src', 'trg'], out: ['alignments'] },
             processes: [
-              { id: 7, name: 'fastalign', x: 20, y: 50, width: 150, height: 50, ports: { in: ['src', 'trg'], out: ['out'] } },
-              { id: 8, name: 'fastalign rev', x: 200, y: 50, width: 150, height: 50, ports: { in: ['src', 'trg'], out: ['out'] } },
-              { id: 9, name: 'sym', x: 120, y: 200, width: 150, height: 50, ports: { in: ['src-trg', 'trg-src'], out: ['out'] } },
+              { id: 601, name: 'fastalign', x: 20, y: 50, width: 150, height: 50, ports: { in: ['src', 'trg'], out: ['out'] } },
+              { id: 602, name: 'fastalign rev', x: 200, y: 50, width: 150, height: 50, ports: { in: ['src', 'trg'], out: ['out'] } },
+              { id: 603, name: 'sym', x: 120, y: 200, width: 150, height: 50, ports: { in: ['src-trg', 'trg-src'], out: ['out'] } },
             ],
             links: [
-              { from: { process: null, port: 0 }, to: { process: 0, port: 0 } },
-              { from: { process: null, port: 1 }, to: { process: 0, port: 1 } },
-              { from: { process: null, port: 0 }, to: { process: 1, port: 1 } },
-              { from: { process: null, port: 1 }, to: { process: 1, port: 0 } },
-              { from: { process: 0, port: 0 }, to: { process: 2, port: 0 } },
-              { from: { process: 1, port: 0 }, to: { process: 2, port: 1 } },
-              { from: { process: 2, port: 0 }, to: { process: null, port: 0 } },
+              { from: { id: 6, port: 'src' }, to: { id: 601, port: 'src' } },
+              { from: { id: 6, port: 'trg' }, to: { id: 602, port: 'trg' } },
+              { from: { id: 6, port: 'src' }, to: { id: 602, port: 'src' } },
+              { from: { id: 6, port: 'trg' }, to: { id: 601, port: 'trg' } },
+              { from: { id: 601, port: 'out' }, to: { id: 603, port: 'src-trg' } },
+              { from: { id: 602, port: 'out' }, to: { id: 603, port: 'trg-src' } },
+              { from: { id: 603, port: 'out' }, to: { id: 6, port: 'alignments' } },
             ]
           }
         ],
         processes: [
           { id: 1, name: 'wget', params: { url: 'http://opus/bible.lv.ltxt' }, x: 20, y: 50, width: 150, height: 50, ports: { in: [], out: ['out'] } },
           { id: 2, name: 'tokenizer', params: { lang: 'lv' }, x: 20, y: 200, width: 150, height: 50, ports: { in: ['in'], out: ['out'] } },
-          { id: 3, name: 'kenlm', params: { order: 5 }, x: 20, y: 350, width: 150, height: 50, ports: { in: ['in'], out: ['out'] } },
+          { id: 3, name: 'kenlm', params: { order: 5 }, x: 400, y: 200, width: 150, height: 50, ports: { in: ['in'], out: ['out'] } },
           { id: 4, name: 'wget', params: { url: 'http://opus/bible.en.txt' }, x: 180, y: 50, width: 150, height: 50, ports: { in: [], out: ['out'] } },
           { id: 5, name: 'tokenizer', params: { lang: 'en' }, x: 180, y: 200, width: 150, height: 50, ports: { in: ['in'], out: ['out'] } },
+          { id: 7, name: 'phrases', params: { }, x: 180, y: 700, width: 150, height: 50, ports: { in: ['src', 'trg', 'alignments'], out: ['out'] } },
         ],
         links: [
-          { from: { process: 0, port: 0 }, to: { process: 1, port: 0 } },
-          { from: { process: 1, port: 0 }, to: { process: 2, port: 0 } },
-          { from: { process: 3, port: 0 }, to: { process: 4, port: 0 } },
-          { from: { process: 1, port: 0 }, to: { group: 0, port: 0 } },
-          { from: { process: 4, port: 0 }, to: { group: 0, port: 1 } },
+          { from: { id: 1, port: 'out' }, to: { id: 2, port: 'in' } },
+          { from: { id: 5, port: 'out' }, to: { id: 3, port: 'in' } },
+          { from: { id: 4, port: 'out' }, to: { id: 5, port: 'in' } },
+          { from: { id: 2, port: 'out' }, to: { id: 6, port: 'src' } },
+          { from: { id: 5, port: 'out' }, to: { id: 6, port: 'trg' } },
+          { from: { id: 2, port: 'out' }, to: { id: 7, port: 'src' } },
+          { from: { id: 5, port: 'out' }, to: { id: 7, port: 'trg' } },
+          { from: { id: 6, port: 'alignments' }, to: { id: 7, port: 'alignments' } },
         ]
       }
     },
