@@ -98,10 +98,17 @@ svg {
   fill: #E74C3C;
   stroke: #000;
 }
+.connector:hover line {
+  stroke: yellow;
+}
 .connector line, .port-line {
   stroke: #000;
   stroke-width: 1px;
+  cursor: pointer;
 }
-.port-on {
+.connector.selected line {
+  stroke: red;
+}
+.process .port-on circle {
   fill: yellow;
 }

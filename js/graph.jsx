@@ -1,12 +1,14 @@
 var Draggable = React.createClass({
+  mixins: [React.addons.PureRenderMixin],
+
   getDefaultProps: function () {
-    return { x: 0, y: 0 };
+    return { x: 0, y: 0, onMove: function() {} };
   },
 
   getInitialState: function () {
     return {
-      pos: { x: this.props.x, y: this.props.y },
       dragging: false,
+      pos: { x: this.props.x, y: this.props.y },
       rel: null // position relative to the cursor
     };
   },
@@ -47,9 +49,7 @@ var Draggable = React.createClass({
       y: e.pageY - this.state.rel.y
     };
     this.setState({ pos: pos });
-    if (this.props.onMove) {
-      this.props.onMove(pos);
-    }
+    this.props.onMove(pos);
     e.stopPropagation();
     e.preventDefault();
   },
@@ -58,21 +58,40 @@ var Draggable = React.createClass({
     return (
       <g {...this.props}
           transform={`translate(${this.state.pos.x},${this.state.pos.y})`}
-          onMouseDown={this.onMouseDown} />
+          onMouseDown={this.onMouseDown}
+          onMove={this.props.onMove} />
     );
   }
 });
 
 var Graph = React.createClass({
+  //mixins: [React.addons.PureRenderMixin],
+
   render: function() {
     return <svg {...this.props}>{this.props.children}</svg>;
   }
 });
 
 var Connector = React.createClass({
+  mixins: [React.addons.PureRenderMixin],
+
+  getInitialState: function() {
+    return { selected: false };
+  },
+
+  onClick: function() {
+    this.setState({ selected: !this.state.selected })
+  },
+
+  onKeyDown: function(e) {
+    console.log(e.keyCode)
+  },
+
   render: function() {
+    var classes = 'connector';
+    if (this.state.selected) classes += ' ' + 'selected';
     return (
-      <g className="connector">
+      <g className={classes} onClick={this.onClick} onKeyDown={this.onKeyDown}>
         <line x1={this.props.source.x} y1={this.props.source.y}
               x2={this.props.target.x} y2={this.props.target.y} />
       </g>
@@ -116,6 +135,7 @@ var Port = React.createClass({
     this.setState({ dragging: false });
     e.stopPropagation();
     e.preventDefault();
+    connectAction({ id: this.props.process, port: this.props.label })
   },
 
   onMouseMove: function (e) {
@@ -131,11 +151,15 @@ var Port = React.createClass({
 
   onMouseOver: function(e) {
     this.setState({ on: true });
+    portSelectedAction({ id: this.props.process, port: this.props.label })
   },
 
   onMouseOut: function(e) {
     this.setState({ on: false });
+    portDeselectedAction({ id: this.props.process, port: this.props.label })
   },
+
+  mixins: [React.addons.PureRenderMixin],
 
   render: function() {
     var line = null;
@@ -144,12 +168,10 @@ var Port = React.createClass({
                    x2={this.state.pos.x} y2={this.state.pos.y} className="port-line"/>;
     }
 
-    var fill = this.state.on ? "yellow" : "red";
-
     return (
-      <g className={`port port-${this.props.type}`}>
+      <g className={`port port-${this.props.type} ${this.state.on ? 'port-on' : ''}`}>
         <text x={+this.props.x-(this.props.label.length*2)} y={+this.props.y+(this.props.type == 'in' ? -20 : 30)}>{this.props.label}</text>
-        <circle cx={this.props.x} cy={this.props.y} r="10" fill={fill}
+        <circle cx={this.props.x} cy={this.props.y} r="10"
                 onMouseDown={this.onMouseDown}
                 onMouseOver={this.onMouseOver}
                 onMouseOut={this.onMouseOut} />
@@ -160,39 +182,22 @@ var Port = React.createClass({
 });
 
 var Group = React.createClass({
-  /* getSize: function(group) {
-    var width = 150;
-    var height = 50;
-
-    if (group.processes) {
-      group.processes.forEach(p => {
-        width = Math.max(width, p.x + p.width);
-        height = Math.max(height, p.y + p.height);
-      });
-
-      if (group.processes.length > 1) {
-        width += 20;
-        height += 50;
-      }
-    }
-
-    if (group.groups) {
-      group.groups.forEach(g => {
-        var size = this.getSize(g);
-        width = Math.max(width, size.width);
-        height = Math.max(height, size.height);
-      });
-    }
-
-    return { width: width, height: height };
-  }, */
+  //mixins: [React.addons.PureRenderMixin],
 
   getPortPos: function(obj, portName, dir, self) {
     var x = self ? 0 : obj.x;
     var y = self ? 0 : obj.y;
     if (self) dir = dir == 'in' ? 'out' : 'in';
 
-    x += (obj.ports[dir].indexOf(portName)+1) * (obj.width / (obj.ports[dir].length + 1));
+    var ports = obj.ports;
+    if (!ports) {
+      ports = {
+        in: Object.keys(processes[obj.name].input),
+        out: Object.keys(processes[obj.name].output)
+      }
+    }
+
+    x += (ports[dir].indexOf(portName)+1) * (obj.width / (ports[dir].length + 1));
     y += dir == 'out' ? obj.height : 0;
     y += (dir == 'out' ? 10 : -10) * (self ? - 1 : 1);
 
@@ -201,16 +206,17 @@ var Group = React.createClass({
 
   render: function() {
     var group = this.props.group;
-    var groups, processes, links;
+    var groups, processez, links;
 
     if (group.groups) {
-      groups = group.groups.map(g => <Group group={g}/>);
+      groups = group.groups.map(g => <Group key={g.id} group={g}/>);
     }
 
     if (group.processes) {
-      processes = group.processes.map(p => {
+      processez = group.processes.map(p => {
+        var ports = { in: Object.keys(processes[p.name].input), out: Object.keys(processes[p.name].output) }
         return <Process width={p.width} height={p.height} x={p.x} y={p.y}
-                        name={p.name} ports={p.ports} />;
+                        name={p.name} ports={ports} graph={p} id={p.id} key={p.id} />;
       });
     }
 
@@ -223,7 +229,7 @@ var Group = React.createClass({
       links = group.links.map(l => {
         var source = this.getPortPos(ids[l.from.id], l.from.port, 'out', l.from.id == group.id);
         var target = this.getPortPos(ids[l.to.id], l.to.port, 'in', l.to.id == group.id);
-        return <Connector source={source} target={target}/>;
+        return <Connector key={l.from.id+l.from.port+l.to.id+l.to.port} source={source} target={target}/>;
       });
     }
 
@@ -231,16 +237,16 @@ var Group = React.createClass({
       return (
         <g>
           {groups}
-          {processes}
+          {processez}
           {links}
         </g>
       );
     } else {
       return (
         <Process width={group.width} height={group.height} name={group.name} ports={group.ports}
-                 x={group.x} y={group.y}>
+                 x={group.x} y={group.y} graph={group} id={group.id}>
           {groups}
-          {processes}
+          {processez}
           {links}
         </Process>
       );
@@ -253,6 +259,12 @@ var Process = React.createClass({
     return { ports: { in: [], out: [] } };
   },
 
+  mixins: [React.addons.PureRenderMixin],
+
+  onMove: function(pos) {
+    moveAction(this.props.graph, pos);
+  },
+
   render: function() {
     var ports = this.props.ports;
     var offset = {
@@ -260,12 +272,12 @@ var Process = React.createClass({
       y: this.props.width / (ports.out.length+1)
     };
     return (
-      <Draggable className="process" x={this.props.x} y={this.props.y} onMove={this.props.onMove}>
+      <Draggable className="process" x={this.props.x} y={this.props.y} onMove={this.onMove}>
         <g>
           <rect x="0" y="0" width={this.props.width} height={this.props.height}/>
           <text x="10" y="30">{this.props.name}</text>
-          <g>{ports.in.map((port, index) => <Port key={port} label={port} type="in" x={(index+1)*offset.x} y={0}/>)}</g>
-          <g>{ports.out.map((port, index) => <Port key={port} label={port} type="out" x={(index+1)*offset.y} y={this.props.height}/>)}</g>
+          <g>{ports.in.map((port, index) => <Port process={this.props.id} key={port} label={port} type="in" x={(index+1)*offset.x} y={0}/>)}</g>
+          <g>{ports.out.map((port, index) => <Port process={this.props.id} key={port} label={port} type="out" x={(index+1)*offset.y} y={this.props.height}/>)}</g>
         </g>
         <g>
           {this.props.children}

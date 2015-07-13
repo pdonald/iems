@@ -1,6 +1,17 @@
 var Toolbox = React.createClass({
-  getDefaultProps: function () {
-    return { onAdd: () => {} };
+  getInitialState: function() {
+    return { dragging: null };
+  },
+
+  dragStart: function(e, key) {
+    this.setState({ dragging: key });
+  },
+
+  dragEnd: function(e) {
+    if (this.state.dragging) {
+      addAction(this.state.dragging, e.pageX, e.pageY)
+      this.setState({ dragging: null });
+    }
   },
 
   render: function() {
@@ -9,7 +20,10 @@ var Toolbox = React.createClass({
         <h2>Toolbox</h2>
         <ul>
           {Object.keys(processes).map((key) => (
-            <li key={key} onClick={() => this.props.onAdd(processes[key])}>
+            <li key={key}
+              draggable="true"
+              onDragStart={(e) => this.dragStart(e, key)}
+              onDragEnd={this.dragEnd}>
               {processes[key].name}
             </li>
           ))}

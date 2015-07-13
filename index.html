@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="http://fb.me/react-0.13.0-rc1.js"></script>
-  <script src="http://fb.me/react-with-addons-0.13.0-rc1.js"></script>
-  <script src="http://fb.me/JSXTransformer-0.13.0-rc1.js"></script>
+  <script src="react/react-0.13.0-rc2.js"></script>
+  <script src="react/react-with-addons-0.13.0-rc2.js"></script>
+  <script src="react/JSXTransformer-0.13.0-rc2.js"></script>
+  <script src="react/reflux.js"></script>
 </head>
 <body>
   <header>
@@ -17,9 +18,25 @@
   <script src="js/graph.jsx" type="text/jsx;harmony=true"></script>
   <script src="js/workspace.jsx" type="text/jsx;harmony=true"></script>
   <script type="text/jsx;harmony=true">
+  var moveAction = Reflux.createAction();
+  var addAction = Reflux.createAction();
+  var connectAction = Reflux.createAction();
+  var portSelectedAction = Reflux.createAction();
+  var portDeselectedAction = Reflux.createAction();
+
   var App = React.createClass({
     getInitialState: function() {
+      /*return {
+        last: 1000,
+        id: 0,
+        x: 10, y: 10,
+        groups: [],
+        links: [],
+        processes: []
+      } */
       return {
+        last: 1000,
+        id: 0,
         x: 10, y: 10,
         groups: [
           {
@@ -27,28 +44,28 @@
             x: 350, y: 350, width: 400, height: 300,
             ports: { in: ['src', 'trg'], out: ['alignments'] },
             processes: [
-              { id: 601, name: 'fastalign', x: 20, y: 50, width: 150, height: 50, ports: { in: ['src', 'trg'], out: ['out'] } },
-              { id: 602, name: 'fastalign rev', x: 200, y: 50, width: 150, height: 50, ports: { in: ['src', 'trg'], out: ['out'] } },
-              { id: 603, name: 'sym', x: 120, y: 200, width: 150, height: 50, ports: { in: ['src-trg', 'trg-src'], out: ['out'] } },
+              { id: 601, name: 'fastalign', x: 20, y: 50, width: 150, height: 50 },
+              { id: 602, name: 'fastalign', params: { reverse: true }, x: 200, y: 50, width: 150, height: 50 },
+              { id: 603, name: 'sym', x: 120, y: 200, width: 150, height: 50 },
             ],
             links: [
               { from: { id: 6, port: 'src' }, to: { id: 601, port: 'src' } },
               { from: { id: 6, port: 'trg' }, to: { id: 602, port: 'trg' } },
               { from: { id: 6, port: 'src' }, to: { id: 602, port: 'src' } },
               { from: { id: 6, port: 'trg' }, to: { id: 601, port: 'trg' } },
-              { from: { id: 601, port: 'out' }, to: { id: 603, port: 'src-trg' } },
-              { from: { id: 602, port: 'out' }, to: { id: 603, port: 'trg-src' } },
+              { from: { id: 601, port: 'out' }, to: { id: 603, port: 'srctrg' } },
+              { from: { id: 602, port: 'out' }, to: { id: 603, port: 'trgsrc' } },
               { from: { id: 603, port: 'out' }, to: { id: 6, port: 'alignments' } },
             ]
           }
         ],
         processes: [
-          { id: 1, name: 'wget', params: { url: 'http://opus/bible.lv.ltxt' }, x: 20, y: 50, width: 150, height: 50, ports: { in: [], out: ['out'] } },
-          { id: 2, name: 'tokenizer', params: { lang: 'lv' }, x: 20, y: 200, width: 150, height: 50, ports: { in: ['in'], out: ['out'] } },
-          { id: 3, name: 'kenlm', params: { order: 5 }, x: 400, y: 200, width: 150, height: 50, ports: { in: ['in'], out: ['out'] } },
-          { id: 4, name: 'wget', params: { url: 'http://opus/bible.en.txt' }, x: 180, y: 50, width: 150, height: 50, ports: { in: [], out: ['out'] } },
-          { id: 5, name: 'tokenizer', params: { lang: 'en' }, x: 180, y: 200, width: 150, height: 50, ports: { in: ['in'], out: ['out'] } },
-          { id: 7, name: 'phrases', params: { }, x: 180, y: 700, width: 150, height: 50, ports: { in: ['src', 'trg', 'alignments'], out: ['out'] } },
+          { id: 1, name: 'wget', params: { url: 'http://opus/bible.lv.ltxt' }, x: 20, y: 50, width: 150, height: 50 },
+          { id: 2, name: 'tokenizer', params: { lang: 'lv' }, x: 20, y: 200, width: 150, height: 50 },
+          { id: 3, name: 'kenlm', params: { order: 5 }, x: 400, y: 200, width: 150, height: 50 },
+          { id: 4, name: 'wget', params: { url: 'http://opus/bible.en.txt' }, x: 180, y: 50, width: 150, height: 50 },
+          { id: 5, name: 'tokenizer', params: { lang: 'en' }, x: 180, y: 200, width: 150, height: 50 },
+          { id: 7, name: 'phrases', params: { }, x: 180, y: 700, width: 150, height: 50 },
         ],
         links: [
           { from: { id: 1, port: 'out' }, to: { id: 2, port: 'in' } },
@@ -63,12 +80,50 @@
       }
     },
 
+    mixins: [Reflux.ListenerMixin],
+
+    componentDidMount: function() {
+       this.listenTo(moveAction, this.onMove);
+       this.listenTo(addAction, this.onAdd);
+       this.listenTo(connectAction, this.onConnect);
+       this.listenTo(portSelectedAction, p => this.selectedPort = p);
+       this.listenTo(portDeselectedAction, p => this.selectedPort = null);
+     },
+
+    onMove: function(graph, pos) {
+       graph.x = pos.x;
+       graph.y = pos.y;
+       this.setState(this.state)
+       //this.forceUpdate();
+       //console.log(graph.id, pos.x, pos.y)
+    },
+
+    onAdd: function(process, x, y) {
+      var offset = this.refs.graph.getDOMNode().getBoundingClientRect();
+      if (x >= offset.left && x <= offset.right && y >= offset.top && y <= offset.bottom) {
+        this.state.processes.push({
+          id: this.state.last, name: process,
+          x: x - offset.left - 150, y: y - offset.top - 75,
+          width: 150, height: 50
+        })
+        this.state.last++;
+        this.setState(this.state)
+      }
+    },
+
+    onConnect: function(from, to) {
+      if (from && this.selectedPort) {
+        this.state.links.push({ from: from, to: this.selectedPort });
+        this.setState(this.state)
+      }
+    },
+
     render: function() {
       return (
         <div className="table">
           <div className="table-row">
             <div className="table-col sidebar toolbox">
-              <Toolbox onAdd={this.addComponent}/>
+              <Toolbox/>
             </div>
             <div className="table-col middle grid">
               <div className="table">
@@ -79,7 +134,7 @@
                   </div>
                   <div className="table-row table-row-expanded">
                     <div className="table-col middle-pad">
-                      <Graph>
+                      <Graph ref="graph">
                         <Group blank={true} group={this.state}/>
                       </Graph>
                     </div>
