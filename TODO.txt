@@ -1,0 +1,27 @@
+PMS
+* layout
+* properties pane
+* add/move/delete/connect
+* json output
+* makefile output
+
+[preprocess]
+tokenize
+lowercase
+filter
+
+[align]
+fast align
+fast align rev
+sym
+
+sacompile
+extract dev
+extract devtest
+
+[lm]
+kenlm
+build_binary
+
+cdec.ini
+tune
