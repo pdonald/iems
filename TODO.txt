@@ -1,9 +1,20 @@
 PMS
-* layout
 * properties pane
 * add/move/delete/connect
+* * can add a component
+* * move into group
+* * move out of group
+* * can connect two components (also in a group)
 * json output
 * makefile output
+
+done
+* layout
+* * can move a component
+* * move within group only
+* * can select a component and delete it
+* * can select a connector and delete it
+* * can select a group and delete it
 
 [preprocess]
 tokenize

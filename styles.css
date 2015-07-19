@@ -1,45 +1,22 @@
+/* Resets */
+*, *:after, *:before {
+    margin: 0; /* Margin zero is used to prevent unnecessary white space. */
+    padding: 0; /* Padding zero is used to prevent unnecessary white space. */
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box; /* Border boxing is used, so the padding, margin and borders are within de width and height of de element. */
+}
+
 html, body {
-  height: 100%;
-  max-height: 100%;
+    height: 100%;
+    max-height: 100%;
 }
 
 body {
-  font-family: Verdana;
-  font-size: 12px;
-  margin: 0;
-  position:fixed; top:0px; left:0px;bottom:0px; right:0px;
+    padding: 0px;
 }
 
-header {
-  box-shadow: 0px 1px 5px 0px rgba(0,0,0,0.75);
-  position: relative;
-  z-index: 10;
-}
-
-header h1 {
-  margin: 0;
-  padding: 20px 20px;
-  background: rgb(29,31,33);
-  color: #fff;
-  font-size: 16px;
-}
-
-div.scrollable {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    overflow: auto;
-}
-
-#example { width: 100%; height: 100%; }
-
-.table { display: table; width: 100%; height: 100%; table-layout: fixed; }
-.table-row { display: table-row; width: 100%; }
-.table-row-expanded { height: 100%; }
-.table-col { display: table-cell; }
-
-.table, .table-row, .table-col {
+.table, .row, .cell {
     outline: none;
     border: none;
     outline-style: none;
@@ -47,39 +24,98 @@ div.scrollable {
     text-align: left;
 }
 
-.sidebar {
-  background: rgb(81,81,81);
-  padding: 20px;
-  box-shadow: 0px 0px 5px 3px rgba(0,0,0,0.75);
-  position: relative;
-  z-index: 1;
-  width: 20%;
+.table {
+    border-collapse: collapse;
+    display: table;
+    table-layout: fixed; /* This will ensure the cells within the table will keep there width. */
+    width: 100%;
+    height: 100%;
 }
 
+.row {
+    display: table-row;
+    width: 100%;
+}
+
+.cell {
+    display: table-cell;
+    white-space: nowrap; /* This property is used to show ellipses, when the content within de cell is overflown. */
+    overflow: hidden; /* This property is used to show ellipses, when the content within de cell is overflown. */
+    -ms-text-overflow: ellipsis; /* This property is used to show ellipses, when the content within de cell is overflown. */
+    -o-text-overflow: ellipsis; /* This property is used to show ellipses, when the content within de cell is overflown. */
+    text-overflow: ellipsis; /* This property is used to show ellipses, when the content within de cell is overflown. */
+}
+
+#example {
+  width: 100%;
+  height: 100%;
+}
+
+.container {
+  display: block;
+  height: 100%;
+  font-family: Verdana;
+  font-size: 12px;
+}
+
+.header-row {
+  height: 50px;
+}
+.header-cell {
+  background: #101010;
+  color: white;
+  vertical-align: middle;
+  padding: 10px;
+  padding-left: 20px;
+  height: 50px;
+}
+.header-cell h1 {
+  font-size: 14px;
+}
+.cell-scroll-outer {
+  position: relative;
+}
+.cell-scroll-inner {
+  overflow-y: scroll;
+  position: absolute;
+  top: 0;
+  right:0;
+  bottom: 0;
+  left: 0;
+}
+
+.sidebar {
+  background: rgb(81,81,81);
+}
+
+.toolbox, .properties {
+  padding: 20px;
+}
+
+.sidebar h2 {
+  font-size: 14px;
+  color: #fff;
+  margin-bottom: 15px;
+}
 .toolbox ul {
   margin: 0;
   padding: 0;
+  height: 100%;
+  width: 100%;
   list-style-type: none;
 }
 .toolbox li {
-  display: inline-block;
   border: 2px solid black;
   background: rgb(90,90,90);
   color: white;
   cursor: pointer;
-  text-align: center;
   padding: 15px 20px;
-  margin: 5px;
-}
-
-.properties ul {
-  margin: 0;
-  padding: 0;
-  list-style-type: none;
-}
-
-.middle-pad {
-  padding: 0 20px;
+  margin: 5px 0;
+  width: 150px;
+  height: 50px;
+  background: #2ECC71;
+  color: black;
+  border: 1px solid black;
 }
 
 .grid {
@@ -88,19 +124,14 @@ div.scrollable {
   repeating-linear-gradient(-90deg, #eee, #eee 1px, transparent 1px, transparent 40px);
 }
 
-svg {
-  width: 100%;
-  height: 100%;
-  overflow: scroll;
-}
-
 .preview {
   background: #fff;
-  padding: 0px 20px;
+  padding: 0px 0px;
 }
 
 .preview pre {
   height: 200px;
+  padding: 10px 10px;
   overflow: auto;
 }
 
@@ -122,6 +153,7 @@ svg {
 }
 .connector:hover line {
   stroke: yellow;
+  stroke-width: 3px;
 }
 .connector line, .port-line {
   stroke: #000;
@@ -135,6 +167,11 @@ svg {
   fill: yellow;
 }
 
+.process.selected rect {
+  stroke: red;
+  fill: yellow;
+}
 
-.temp1 { position:relative; height: 100%; }
-.temp2 { overflow-y: scroll; position: absolute; top: 0; right:0; bottom: 0; left: 0; }
+*:focus {
+  outline: none;
+}
