@@ -126,7 +126,7 @@ var App = React.createClass({
         <div className="table">
           <div className="row header-row">
             <div className="cell header-cell">
-              <h1>PMS - Peters Experiment Management System</h1>
+              <h1>Interactive Experiment Management System</h1>
             </div>
           </div>
           <div className="row" style={{'height': '80%'}}>
