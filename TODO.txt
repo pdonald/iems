@@ -36,3 +36,9 @@ build_binary
 
 cdec.ini
 tune
+
+MTM 2015
+* var mainīt Properties
+* salikt visus moses procesus
+* precompilēt visu, lai var atvērt html failu
+* podziņa copy makefile

@@ -1,12 +1,12 @@
 var Process = React.createClass({
+  mixins: [React.addons.PureRenderMixin],
+
   getDefaultProps: function () {
     return { ports: { in: [], out: [] } };
   },
 
-  mixins: [React.addons.PureRenderMixin],
-
   onMove: function(pos) {
-    moveAction(this.props.graph, pos);
+    moveAction(pos, this.props.graph, this.props.parent);
   },
 
   onClick: function() {

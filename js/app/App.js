@@ -68,10 +68,24 @@ var App = React.createClass({
      this.listenTo(portDeselectedAction, p => this.selectedPort = null);
    },
 
-  onMove: function(graph, pos) {
+  onMove: function(pos, graph, parent) {
      graph.x = pos.x;
      graph.y = pos.y;
-     this.setState({ graph: this.state.graph })
+     //console.log(parent)
+     /*if (!parent) {
+
+     } else {
+       if (parent.groups.indexOf(graph)) {
+       }
+       if (parent.processes.indexOf(graph) != -1) {
+         console.log('te')
+         var update = {};
+         update[parent.processes.indexOf(graph)] = { x: { $set: pos.x }, y: { $set: pos.y } };
+         parent.processes = React.addons.update(parent.processes, update);
+       }
+
+     } */
+     this.setState({ graph: this.state.graph });
      //this.forceUpdate();
      //console.log(graph.id, pos.x, pos.y)
   },

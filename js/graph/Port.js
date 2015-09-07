@@ -1,4 +1,6 @@
 var Port = React.createClass({
+  mixins: [React.addons.PureRenderMixin],
+
   getInitialState: function () {
     return {
       pos: { x: this.props.x, y: this.props.y },
@@ -57,8 +59,6 @@ var Port = React.createClass({
     this.setState({ on: false });
     portDeselectedAction({ id: this.props.process, port: this.props.label })
   },
-
-  mixins: [React.addons.PureRenderMixin],
 
   render: function() {
     var line = null;

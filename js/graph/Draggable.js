@@ -2,7 +2,12 @@ var Draggable = React.createClass({
   mixins: [React.addons.PureRenderMixin],
 
   getDefaultProps: function () {
-    return { pos: { x: 0, y: 0 }, min: null, max: null, onMove: function() {} };
+    return {
+      pos: { x: 0, y: 0 },
+      min: null, max: null,
+      onMove: function() {},
+      onClick: function() {}
+    };
   },
 
   getInitialState: function () {
@@ -43,9 +48,7 @@ var Draggable = React.createClass({
 
   onMouseUp: function (e) {
     if (!this.state.moved) {
-      if (this.props.onClick) {
-        this.props.onClick(e);
-      }
+      this.props.onClick(e);
     }
     this.setState({ dragging: false, moved: false });
     e.stopPropagation();
@@ -75,7 +78,7 @@ var Draggable = React.createClass({
   render: function () {
     return (
       <g {...this.props}
-          transform={`translate(${this.state.pos.x},${this.state.pos.y})`}
+          transform={`translate(${this.props.pos.x},${this.props.pos.y})`}
           onClick={this.onClick}
           onMouseDown={this.onMouseDown}
           onMove={this.props.onMove} />
