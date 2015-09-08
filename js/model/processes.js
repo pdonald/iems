@@ -121,6 +121,17 @@ var processes = {
       ];
     }
   },
+  phrasesbin: {
+    name: 'binarize-phrases',
+    input: { ptable: 'file<phrase-table>' },
+    output: { bin: 'file<phrase-table-bin>' },
+    toBash: (params, input, output) => {
+      return [
+        `/tools/processPhraseTableMin -nscores 4 -threads 1 -in ${input.ptable} -out ${output.bin}`,
+        `mv ${output.bin}.minphr ${output.bin}`
+      ];
+    }
+  },
   reordering: {
     name: 'reordering',
     params: { model: 'string', type: 'string', orientation: 'string', smoothing: 'float' },
@@ -141,7 +152,7 @@ var processes = {
     output: { reord: 'file<reordering-bin>' },
     toBash: (params, input, output) => {
       return [
-        `/tools/processLexicalTableMin -in ${input.reord} -out ${output.reord}`,
+        `/tools/processLexicalTableMin -threads 1 -in ${input.reord} -out ${output.reord}`,
         `mv ${output.reord}.minlexr ${output.reord}`
       ];
     }

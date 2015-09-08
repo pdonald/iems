@@ -45,6 +45,7 @@ var App = React.createClass({
           { id: 11, name: 'reorderingbin', params: {}, x: 350, y: 1000, width: 150, height: 50 },
           { id: 9, name: 'lexical', params: {}, x: 50, y: 700, width: 150, height: 50 },
           { id: 10, name: 'phrasescore', params: {}, x: 50, y: 900, width: 250, height: 50 },
+          { id: 12, name: 'phrasesbin', params: {}, x: 50, y: 1050, width: 150, height: 50 },
         ],
         links: [
           { from: { id: 1, port: 'src' }, to: { id: 2, port: 'in' } },
@@ -65,6 +66,7 @@ var App = React.createClass({
           { from: { id: 9, port: 'srctrg' }, to: { id: 10, port: 'srctrg' } },
           { from: { id: 9, port: 'trgsrc' }, to: { id: 10, port: 'trgsrc' } },
           { from: { id: 8, port: 'reord' }, to: { id: 11, port: 'reord' } },
+          { from: { id: 10, port: 'ptable' }, to: { id: 12, port: 'ptable' } },
         ]
       })
     }
