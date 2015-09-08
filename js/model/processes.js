@@ -156,5 +156,39 @@ var processes = {
         `mv ${output.reord}.minlexr ${output.reord}`
       ];
     }
+  },
+  moses: {
+    name: 'moses',
+    input: { phr: ['file<phrase-table>', 'file<phrase-table-bin'], lm: 'file<binlm>', lex: 'file<lex>' },
+    output: { trans: 'file<tok>' },
+    toBash: (params, input, output) => {
+      var ini = [];
+      ini.push('[input-factors]')
+      ini.push('0');
+      ini.push('[mapping]');
+      ini.push('0 T 0');
+      ini.push('[distortion-limit]');
+      ini.push('6');
+      ini.push('[feature]');
+      ini.push('UnknownWordPenalty');
+      ini.push('WordPenalty');
+      ini.push('PhrasePenalty');
+      ini.push('Distortion');
+      ini.push(`PhraseDictionaryCompact name=TranslationModel0 num-features=4 path=${input.phr} input-factor=0 output-factor=0`);
+      if (input.lex) ini.push('LexicalReordering name=LexicalReordering0 num-features=6 type=wbe-msd-bidirectional-fe-allff input-factor=0 output-factor=0 path=/opt/letsmt/systems/smt-45de6a0a-2678-4412-8351-6979c1e5a65a/work/model/reordering-table-bin.1.wbe-msd-bidirectional-fe');
+      if (input.lm) ini.push(`KENLM lazyken=0 name=LM0 factor=0 path=${input.lm} order=3`);
+      ini.push('[weight]');
+      ini.push('UnknownWordPenalty0= 1');
+      ini.push('WordPenalty0= -1');
+      ini.push('PhrasePenalty0= 0.2');
+      ini.push('TranslationModel0= 0.2 0.2 0.2 0.2');
+      if (input.lex) ini.push('LexicalReordering0= 0.3 0.3 0.3 0.3 0.3 0.3');
+      ini.push('Distortion0= 0.3');
+      if (input.lm) ini.push('LM0= 0.5');
+
+      return [
+        'cat << EOF \\\n' + ini.join(' \\\n') + ' \\\nEOF > moses.ini'
+      ];
+    }
   }
 };
