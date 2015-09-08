@@ -1,20 +1,26 @@
 var processes = {
-  bible: {
-    name: 'bible',
-    params: { lang: 'string' },
-    input: { },
-    output: { out: 'file<sent>' },
-    toBash: (params, input, output) => {
-      return [`cp /data/bible.${params.lang} ${output.out}`];
-    }
-  },
   wget: {
     name: 'wget',
     params: { url: 'string' },
     input: { },
-    output: { out: 'file<any>', stats: 'file<text>' },
+    output: { out: 'file<any>' },
     toBash: (params, input, output) => {
-      return [`wget ${params.url} -o ${output.out}`];
+      return [`wget ${params.url} -O ${output.out}`];
+    }
+  },
+  opus: {
+    name: 'opus',
+    params: { corpus: 'string', srcLang: 'language', trgLang: 'language' },
+    input: { },
+    output: { src: 'file<text>', trg: 'file<text>' },
+    toBash: (params, input, output) => {
+      return [
+        'TEMP=$(shell mktemp) && \\',
+        `wget http://opus.lingfil.uu.se/${params.corpus}/${params.srcLang}-${params.trgLang}.txt.zip -O $TEMP && \\`,
+        `unzip -p $TEMP ${params.corpus}.${params.srcLang}-${params.trgLang}.${params.srcLang} > ${output.src} && \\`,
+        `unzip -p $TEMP ${params.corpus}.${params.srcLang}-${params.trgLang}.${params.trgLang} > ${output.trg} && \\`,
+        'rm $TEMP'
+      ];
     }
   },
   tokenizer: {
@@ -23,7 +29,7 @@ var processes = {
     input: { in: 'file<text>' },
     output: { out: 'file<tok>' },
     toBash: (params, input, output) => {
-      return [`perl /tools/tokenizer.perl -l ${params.lang} < ${input.in} > ${output.out}`];
+      return [`perl /tools/scripts/tokenizer/tokenizer.perl -l ${params.lang} < ${input.in} > ${output.out}`];
     }
   },
   fastalign: {
@@ -32,12 +38,12 @@ var processes = {
     input: { src: 'file<tok>', trg: 'file<tok>' },
     output: { out: 'file<align>' },
     toBash: (params, input, output) => {
-      var temp = `${output.out}.temp`
-      var cmd = [];
-      cmd.push(`python /tools/join.py -f ${input.src} -f ${input.trg} -d ' ||| ' > ${temp}`);
-      cmd.push(`/tools/fast_align ${params.reverse ? '-r' : ''} -i ${temp} > ${output.out}`);
-      cmd.push(`rm ${temp}`);
-      return cmd;
+      return [
+        'TEMP=$(shell mktemp) && \\',
+        `python /tools/join.py ${input.src} ${input.trg} > $TEMP && \\`,
+        `/tools/fast_align ${params.reverse ? '-r' : ''} -i $TEMP > ${output.out} && \\`,
+        'rm $TEMP'
+      ]
     }
   },
   kenlm: {
@@ -55,7 +61,7 @@ var processes = {
     input: { srctrg: 'file<align>', trgsrc: 'file<align>' },
     output: { out: 'file<align>' },
     toBash: (params, input, output) => {
-      return [`/tools/sym -alg ${params.method} -i ${input.srctrg} -i ${input.trgsrc} > ${output.out}`];
+      return [`/tools/atools -c ${params.method} -i ${input.srctrg} -j ${input.trgsrc} > ${output.out}`];
     }
   },
   phrases: {
@@ -64,7 +70,8 @@ var processes = {
     input: { alignments: 'file<align>', src: 'file<tok>', trg: 'file<tok>' },
     output: { out: 'file<phrases>' },
     toBash: (params, input, output) => {
-      return [`/tools/extract_phrases -s ${input.src} -t ${input.src} -a ${input.alignments} > ${output.out}`];
+      // /tools/extract aligned.1.0.lv aligned.1.0.en aligned.1.grow-diag-final-and extract.1.0-0 7 orientation --model wbe-msd --GZOutput
+      return [`/tools/extract -s ${input.src} -t ${input.src} -a ${input.alignments} > ${output.out}`];
     },
     wordalign: {
 

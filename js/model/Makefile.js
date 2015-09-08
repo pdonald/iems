@@ -1,4 +1,4 @@
-function genMakefile(graph, data) {
+function genMakefile(graph, data, ischild) {
 
   function makeData(graph) {
     data.ids[graph.id] = graph
@@ -27,6 +27,7 @@ function genMakefile(graph, data) {
     makeData(graph)
   }
 
+  var all = [];
   var text = '';
 
   if (graph.processes) {
@@ -43,18 +44,27 @@ function genMakefile(graph, data) {
         if (x) input[l.to.port] = x.graph.name + x.graph.id + '.' + x.port
       });
 
+      Object.keys(output).forEach(key => all.push(output[key]));
+
       text += Object.keys(output).map(key => output[key]).join(' ')
       text += ': '
       text += Object.keys(input).map(key => input[key]).join(' ')
       text += '\n'
-      text += '  ' + tpl.toBash(p.params || {}, input, output).join('\n  ') + '\n\n'
+      text += '\t' + tpl.toBash(p.params || {}, input, output).join('\n\t') + '\n\n'
     });
   }
 
   if (graph.groups) {
     graph.groups.forEach(g => {
-      text += genMakefile(g, data) + '\n'
+      text += genMakefile(g, data, true) + '\n'
     })
+  }
+
+  if (!ischild) {
+    text =
+      'all: ' + all.join(' ') + '\n\n' +
+      'clean:\n\trm -f ' + all.join(' ') + '\n\n' +
+      text;
   }
 
   //if (!graph.id) console.log(text)

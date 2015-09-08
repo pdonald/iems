@@ -21,7 +21,7 @@ var App = React.createClass({
             processes: [
               { id: 601, name: 'fastalign', x: 20, y: 50, width: 150, height: 50 },
               { id: 602, name: 'fastalign', params: { reverse: true }, x: 200, y: 50, width: 150, height: 50 },
-              { id: 603, name: 'sym', x: 120, y: 200, width: 150, height: 50 },
+              { id: 603, name: 'sym', params: { method: 'grow-diag-final-and' }, x: 120, y: 200, width: 150, height: 50 },
             ],
             links: [
               { from: { id: 6, port: 'src' }, to: { id: 601, port: 'src' } },
@@ -35,17 +35,16 @@ var App = React.createClass({
           }
         ],
         processes: [
-          { id: 1, name: 'wget', params: { url: 'http://opus/bible.lv.ltxt' }, x: 20, y: 50, width: 150, height: 50 },
-          { id: 2, name: 'tokenizer', params: { lang: 'lv' }, x: 20, y: 200, width: 150, height: 50 },
+          { id: 1, name: 'opus', params: { corpus: 'EUconst', srcLang: 'en', trgLang: 'lv' }, x: 20, y: 50, width: 150, height: 50 },
+          { id: 2, name: 'tokenizer', params: { lang: 'en' }, x: 20, y: 200, width: 150, height: 50 },
           { id: 3, name: 'kenlm', params: { order: 5 }, x: 400, y: 200, width: 150, height: 50 },
-          { id: 4, name: 'wget', params: { url: 'http://opus/bible.en.txt' }, x: 180, y: 50, width: 150, height: 50 },
-          { id: 5, name: 'tokenizer', params: { lang: 'en' }, x: 180, y: 200, width: 150, height: 50 },
+          { id: 5, name: 'tokenizer', params: { lang: 'lv' }, x: 180, y: 200, width: 150, height: 50 },
           { id: 7, name: 'phrases', params: { }, x: 180, y: 700, width: 150, height: 50 },
         ],
         links: [
-          { from: { id: 1, port: 'out' }, to: { id: 2, port: 'in' } },
+          { from: { id: 1, port: 'src' }, to: { id: 2, port: 'in' } },
           { from: { id: 5, port: 'out' }, to: { id: 3, port: 'in' } },
-          { from: { id: 4, port: 'out' }, to: { id: 5, port: 'in' } },
+          { from: { id: 1, port: 'trg' }, to: { id: 5, port: 'in' } },
           { from: { id: 2, port: 'out' }, to: { id: 6, port: 'src' } },
           { from: { id: 5, port: 'out' }, to: { id: 6, port: 'trg' } },
           { from: { id: 2, port: 'out' }, to: { id: 7, port: 'src' } },
@@ -66,7 +65,13 @@ var App = React.createClass({
      this.listenTo(connectAction, this.onConnect);
      this.listenTo(portSelectedAction, p => this.selectedPort = p);
      this.listenTo(portDeselectedAction, p => this.selectedPort = null);
+     this.listenTo(paramChangedAction, this.onParamChanged);
    },
+
+  onParamChanged: function(process, key, value) {
+    process[key] = value;
+    this.setState({ graph: this.state.graph });
+  },
 
   onMove: function(pos, graph, parent) {
      graph.x = pos.x;

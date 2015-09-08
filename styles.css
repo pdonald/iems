@@ -133,6 +133,10 @@ body {
   height: 200px;
   padding: 10px 10px;
   overflow: auto;
+  -moz-tab-size:    2;
+  -o-tab-size:      2;
+  tab-size:         2;
+  white-space: pre;
 }
 
 .process rect {
