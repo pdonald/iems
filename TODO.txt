@@ -38,7 +38,7 @@ cdec.ini
 tune
 
 MTM 2015
-* var mainīt Properties
-* salikt visus moses procesus
-* precompilēt visu, lai var atvērt html failu
-* podziņa copy makefile
+[x] var mainīt Properties
+[ ] salikt visus moses procesus
+[ ] precompilēt visu, lai var atvērt html failu
+[x] podziņa copy makefile
