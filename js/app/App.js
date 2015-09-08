@@ -17,7 +17,7 @@ var App = React.createClass({
           {
             id: 6,
             x: 350, y: 350, width: 400, height: 300,
-            ports: { in: ['src', 'trg'], out: ['alignments'] },
+            ports: { in: ['src', 'trg'], out: ['algn'] },
             processes: [
               { id: 601, name: 'fastalign', x: 20, y: 50, width: 150, height: 50 },
               { id: 602, name: 'fastalign', params: { reverse: true }, x: 200, y: 50, width: 150, height: 50 },
@@ -30,7 +30,7 @@ var App = React.createClass({
               { from: { id: 6, port: 'trg' }, to: { id: 601, port: 'trg' } },
               { from: { id: 601, port: 'out' }, to: { id: 603, port: 'srctrg' } },
               { from: { id: 602, port: 'out' }, to: { id: 603, port: 'trgsrc' } },
-              { from: { id: 603, port: 'out' }, to: { id: 6, port: 'alignments' } },
+              { from: { id: 603, port: 'out' }, to: { id: 6, port: 'algn' } },
             ]
           }
         ],
@@ -40,7 +40,10 @@ var App = React.createClass({
           { id: 3, name: 'kenlm', params: { order: 5 }, x: 800, y: 300, width: 150, height: 50 },
           { id: 4, name: 'binlm', params: { type: 'trie' }, x: 800, y: 450, width: 150, height: 50 },
           { id: 5, name: 'tokenizer', params: { lang: 'lv' }, x: 180, y: 200, width: 150, height: 50 },
-          { id: 7, name: 'phrases', params: { model: 'wbe-msd', maxLength: 7 }, x: 180, y: 700, width: 150, height: 50 },
+          { id: 7, name: 'phrases', params: { model: 'wbe-msd', maxLength: 7 }, x: 250, y: 750, width: 150, height: 50 },
+          { id: 8, name: 'reordering', params: { type: 'wbe', orientation: 'msd', model: 'wbe-msd-bidirectional-fe', smoothing: 0.5 }, x: 350, y: 850, width: 150, height: 50 },
+          { id: 9, name: 'lexical', params: {}, x: 50, y: 700, width: 150, height: 50 },
+          { id: 10, name: 'phrasescore', params: {}, x: 50, y: 900, width: 250, height: 50 },
         ],
         links: [
           { from: { id: 1, port: 'src' }, to: { id: 2, port: 'in' } },
@@ -50,8 +53,16 @@ var App = React.createClass({
           { from: { id: 5, port: 'out' }, to: { id: 6, port: 'trg' } },
           { from: { id: 2, port: 'out' }, to: { id: 7, port: 'src' } },
           { from: { id: 5, port: 'out' }, to: { id: 7, port: 'trg' } },
-          { from: { id: 6, port: 'alignments' }, to: { id: 7, port: 'alignments' } },
+          { from: { id: 6, port: 'algn' }, to: { id: 7, port: 'algn' } },
           { from: { id: 3, port: 'out' }, to: { id: 4, port: 'in' } },
+          { from: { id: 7, port: 'o' }, to: { id: 8, port: 'phr' } },
+          { from: { id: 2, port: 'out' }, to: { id: 9, port: 'src' } },
+          { from: { id: 5, port: 'out' }, to: { id: 9, port: 'trg' } },
+          { from: { id: 6, port: 'algn' }, to: { id: 9, port: 'algn' } },
+          { from: { id: 7, port: 'out' }, to: { id: 10, port: 'phr' } },
+          { from: { id: 7, port: 'inv' }, to: { id: 10, port: 'phrinv' } },
+          { from: { id: 9, port: 'srctrg' }, to: { id: 10, port: 'srctrg' } },
+          { from: { id: 9, port: 'trgsrc' }, to: { id: 10, port: 'trgsrc' } },
         ]
       })
     }

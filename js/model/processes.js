@@ -76,47 +76,59 @@ var processes = {
   phrases: {
     name: 'phrases',
     params: { maxLength: 'int', model: 'string' },
-    input: { alignments: 'file<align>', src: 'file<tok>', trg: 'file<tok>' },
-    output: { out: 'file<phrases>', inv: 'file<phrases>' },
+    input: { algn: 'file<align>', src: 'file<tok>', trg: 'file<tok>' },
+    output: { out: 'file<phrases>', inv: 'file<phrases>', o: 'file<any>' },
     toBash: (params, input, output) => {
       return [
         'TEMP=$(shell mktemp -d) && \\',
-        `/tools/extract ${input.trg} ${input.src} ${input.alignments} $$TEMP/extract ${params.maxLength} orientation --model ${params.model} && \\`,
+        `/tools/extract ${input.trg} ${input.src} ${input.algn} $$TEMP/extract ${params.maxLength} orientation --model ${params.model} && \\`,
         `mv $$TEMP/extract ${output.out} && \\`,
         `mv $$TEMP/extract.inv ${output.inv} && \\`,
+        `mv $$TEMP/extract.o ${output.o} && \\`,
         'rm -r $$TEMP'
       ];
     }
   },
-  scorePhrases: {
-    name: 'score-phrases',
-    params: { },
-    input: { phr: 'file<phrases>', phrI: 'file<inv-phrases>', f2e: 'file<lex-f2e>', e2f: 'file<lex-e2f>' },
-    output: { pTable: 'file<phrase-table>' },
+  lexical: {
+    name: 'lexical',
+    params: {},
+    input: { algn: 'file<align>', src: 'file<tok>', trg: 'file<tok>' },
+    output: { srctrg: 'file<lex>', trgsrc: 'file<lex>' },
     toBash: (params, input, output) => {
       return [
         'TEMP=$(shell mktemp -d) && \\',
-        `/tools/score ${input.phr} ${input.f2e} phrase-table.half.e2f.gz  0 && \\`,
-        `/tools/score ${input.phrI} ${input.e2f} phrase-table.half.f2e.gz  --Inverse 1 && \\`,
-        `/tools/consolidate phrase-table.half.e2f.gz phrase-table.half.f2e.gz /dev/stdout | gzip -c > ${output.pTable} && \\`,
-        `rm -f phrase-table.half.* && \\`,
-        `mv $$TEMP/extract ${output.half} && \\`, 		//is this needed?
-        `mv $$TEMP/extract.inv ${output.halfI} && \\`, 	//is this needed?
+        `perl /tools/scripts/training/get-lexical.perl ${input.src} ${input.trg} ${input.algn} $$TEMP/lex && \\`,
+        `mv $$TEMP/lex.e2f ${output.srctrg} && \\`,
+        `mv $$TEMP/lex.f2e ${output.trgsrc} && \\`,
         'rm -r $$TEMP'
       ];
     }
   },
-  reorderingModel: {
-    name: 'reordering-model',
+  phrasescore: {
+    name: 'phrasescore',
     params: { },
-    input: { exOs: 'file<phrase-table>' },				//extract.o.sorted.gz ???
-    output: { rTable: 'file<reordering-table>' },
+    input: { phr: 'file<phrases>', phrinv: 'file<phrases>', srctrg: 'file<lex>', trgsrc: 'file<lex>' },
+    output: { ptable: 'file<phrase-table>' },
     toBash: (params, input, output) => {
       return [
         'TEMP=$(shell mktemp -d) && \\',
-        `/tools/lexical-reordering-score ${input.exOs} 0.5 ${output.rTable}. --model "wbe msd wbe-msd-bidirectional-fe" && \\`,
-        `mv $$TEMP/extract ${output.half} && \\`, 		//is this needed?
-        `mv $$TEMP/extract.inv ${output.halfI} && \\`, 	//is this needed?
+        `/tools/score ${input.phr} ${input.srctrg} $$TEMP/srctrg.gz && \\`,
+        `/tools/score ${input.phrinv} ${input.trgsrc} $$TEMP/trgsrc.gz --Inverse && \\`,
+        `/tools/consolidate $$TEMP/srctrg.gz $$TEMP/trgsrc.gz ${output.ptable} && \\`,
+        'rm -r $$TEMP'
+      ];
+    }
+  },
+  reordering: {
+    name: 'reordering',
+    params: { model: 'string', type: 'string', orientation: 'string', smoothing: 'float' },
+    input: { phr: 'file<any>' },
+    output: { reord: 'file<reordering>' },
+    toBash: (params, input, output) => {
+      return [
+        'TEMP=$(shell mktemp -d) && \\',
+        `/tools/lexical-reordering-score ${input.phr} ${params.smoothing} $$TEMP/output. --model "${params.type} ${params.orientation} ${params.model}" && \\`,
+        `zcat $$TEMP/output.${params.model}.gz > ${output.reord} && \\`,
         'rm -r $$TEMP'
       ];
     }
