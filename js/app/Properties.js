@@ -2,7 +2,7 @@ var Properties = React.createClass({
   mixins: [Reflux.ListenerMixin],
 
   getInitialState: function() {
-    return { selected: [], params: null };
+    return { selected: null };
   },
 
   componentDidMount: function() {
@@ -10,36 +10,30 @@ var Properties = React.createClass({
    },
 
   onSelect: function(obj) {
-     var index = this.state.selected.indexOf(obj);
-     if (index == -1) {
-       this.state.selected.push(obj);
-       this.state.params = obj.params;
-     } else {
-       this.state.selected.splice(index, 1);
-     }
-     this.setState(this.state);
+    this.setState({ selected: obj });
    },
 
    onChange: function(process, key, value) {
-     this.state.params[key] = value;
+     this.state.selected.params[key] = value;
      this.setState(this.state);
      paramChangedAction(process, key, value);
    },
 
   render: function() {
     var body;
-    if (this.state.selected.length == 0) {
+    if (!this.state.selected) {
       body = <div>Nothing selected</div>;
-    } else if (this.state.selected.length == 1) {
-      var p = this.state.selected[0];
-      var children = Object.keys(this.state.params).map(key => {
+    } else {
+      var p = this.state.selected;
+      var children = Object.keys(p.params).map(key => {
         return (
-          <p key={key}>{key}: <input type="text" value={p.params[key]} onChange={(e) => this.onChange(p, key, e.target.value)}/></p>
+          <tr key={key}>
+          <th>{key}</th>
+          <td><input type="text" value={p.params[key]} onChange={(e) => this.onChange(p, key, e.target.value)}/></td>
+          </tr>
         )
       });
-      body = <div>{children}</div>;
-    } else {
-      body = <div>Too many selected: {this.state.selected.length}</div>;
+      body = <table>{children}</table>;
     }
     return (
       <div>
