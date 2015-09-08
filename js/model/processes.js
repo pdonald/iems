@@ -16,10 +16,10 @@ var processes = {
     toBash: (params, input, output) => {
       return [
         'TEMP=$(shell mktemp) && \\',
-        `wget http://opus.lingfil.uu.se/${params.corpus}/${params.srcLang}-${params.trgLang}.txt.zip -O $TEMP && \\`,
-        `unzip -p $TEMP ${params.corpus}.${params.srcLang}-${params.trgLang}.${params.srcLang} > ${output.src} && \\`,
-        `unzip -p $TEMP ${params.corpus}.${params.srcLang}-${params.trgLang}.${params.trgLang} > ${output.trg} && \\`,
-        'rm $TEMP'
+        `wget http://opus.lingfil.uu.se/${params.corpus}/${params.srcLang}-${params.trgLang}.txt.zip -O $$TEMP && \\`,
+        `unzip -p $$TEMP ${params.corpus}.${params.srcLang}-${params.trgLang}.${params.srcLang} > ${output.src} && \\`,
+        `unzip -p $$TEMP ${params.corpus}.${params.srcLang}-${params.trgLang}.${params.trgLang} > ${output.trg} && \\`,
+        'rm $$TEMP'
       ];
     }
   },
@@ -40,9 +40,9 @@ var processes = {
     toBash: (params, input, output) => {
       return [
         'TEMP=$(shell mktemp) && \\',
-        `python /tools/join.py ${input.src} ${input.trg} > $TEMP && \\`,
-        `/tools/fast_align ${params.reverse ? '-r' : ''} -i $TEMP > ${output.out} && \\`,
-        'rm $TEMP'
+        `python /tools/join.py ${input.src} ${input.trg} > $$TEMP && \\`,
+        `/tools/fast_align ${params.reverse ? '-r' : ''} -i $$TEMP > ${output.out} && \\`,
+        'rm $$TEMP'
       ]
     }
   },
@@ -66,15 +66,17 @@ var processes = {
   },
   phrases: {
     name: 'phrases',
-    params: {},
+    params: { maxLength: 'int', model: 'wbe-msd' },
     input: { alignments: 'file<align>', src: 'file<tok>', trg: 'file<tok>' },
-    output: { out: 'file<phrases>' },
+    output: { out: 'file<phrases>', inv: 'file<phrases>' },
     toBash: (params, input, output) => {
-      // /tools/extract aligned.1.0.lv aligned.1.0.en aligned.1.grow-diag-final-and extract.1.0-0 7 orientation --model wbe-msd --GZOutput
-      return [`/tools/extract -s ${input.src} -t ${input.src} -a ${input.alignments} > ${output.out}`];
-    },
-    wordalign: {
-
+      return [
+        'TEMP=$(shell mktemp -d) && \\',
+        `/tools/extract ${input.trg} ${input.src} ${input.alignments} $$TEMP/extract ${params.maxLength} orientation --model ${params.model} && \\`,
+        `mv $$TEMP/extract ${output.out} && \\`,
+        `mv $$TEMP/extract.inv ${output.inv} && \\`,
+        'rm -r $$TEMP'
+      ];
     }
   }
 };

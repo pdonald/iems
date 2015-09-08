@@ -39,7 +39,7 @@ var App = React.createClass({
           { id: 2, name: 'tokenizer', params: { lang: 'en' }, x: 20, y: 200, width: 150, height: 50 },
           { id: 3, name: 'kenlm', params: { order: 5 }, x: 400, y: 200, width: 150, height: 50 },
           { id: 5, name: 'tokenizer', params: { lang: 'lv' }, x: 180, y: 200, width: 150, height: 50 },
-          { id: 7, name: 'phrases', params: { }, x: 180, y: 700, width: 150, height: 50 },
+          { id: 7, name: 'phrases', params: { model: 'wbe-msd', maxLength: 7 }, x: 180, y: 700, width: 150, height: 50 },
         ],
         links: [
           { from: { id: 1, port: 'src' }, to: { id: 2, port: 'in' } },
