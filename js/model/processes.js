@@ -87,5 +87,38 @@ var processes = {
         'rm -r $$TEMP'
       ];
     }
+  },
+  scorePhrases: {
+    name: 'score-phrases',
+    params: { },
+    input: { phr: 'file<phrases>', phrI: 'file<inv-phrases>', f2e: 'file<lex-f2e>', e2f: 'file<lex-e2f>' },
+    output: { pTable: 'file<phrase-table>' },
+    toBash: (params, input, output) => {
+      return [
+        'TEMP=$(shell mktemp -d) && \\',
+        `/tools/score ${input.phr} ${input.f2e} phrase-table.half.e2f.gz  0 && \\`,
+        `/tools/score ${input.phrI} ${input.e2f} phrase-table.half.f2e.gz  --Inverse 1 && \\`,
+        `/tools/consolidate phrase-table.half.e2f.gz phrase-table.half.f2e.gz /dev/stdout | gzip -c > ${output.pTable} && \\`,
+        `rm -f phrase-table.half.* && \\`,
+        `mv $$TEMP/extract ${output.half} && \\`, 		//is this needed?
+        `mv $$TEMP/extract.inv ${output.halfI} && \\`, 	//is this needed?
+        'rm -r $$TEMP'
+      ];
+    }
+  },
+  reorderingModel: {
+    name: 'reordering-model',
+    params: { },
+    input: { exOs: 'file<phrase-table>' },				//extract.o.sorted.gz ???
+    output: { rTable: 'file<reordering-table>' },
+    toBash: (params, input, output) => {
+      return [
+        'TEMP=$(shell mktemp -d) && \\',
+        `/tools/lexical-reordering-score ${input.exOs} 0.5 ${output.rTable}. --model "wbe msd wbe-msd-bidirectional-fe" && \\`,
+        `mv $$TEMP/extract ${output.half} && \\`, 		//is this needed?
+        `mv $$TEMP/extract.inv ${output.halfI} && \\`, 	//is this needed?
+        'rm -r $$TEMP'
+      ];
+    }
   }
 };
