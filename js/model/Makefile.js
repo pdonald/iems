@@ -1,4 +1,4 @@
-function genMakefile(graph, data, ischild) {
+function genMakefile(graph, data, ischild, all) {
 
   function makeData(graph) {
     data.ids[graph.id] = graph
@@ -27,8 +27,8 @@ function genMakefile(graph, data, ischild) {
     makeData(graph)
   }
 
-  var all = [];
   var text = '';
+  if (!ischild) all = [];
 
   if (graph.processes) {
     graph.processes.forEach(p => {
@@ -56,7 +56,7 @@ function genMakefile(graph, data, ischild) {
 
   if (graph.groups) {
     graph.groups.forEach(g => {
-      text += genMakefile(g, data, true) + '\n'
+      text += genMakefile(g, data, true, all) + '\n'
     })
   }
 
