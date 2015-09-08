@@ -138,36 +138,38 @@ var App = React.createClass({
               <h1>Interactive Experiment Management System</h1>
             </div>
           </div>
-          <div className="row" style={{'height': '80%'}}>
-            <div className="table">
-              <div className="row">
-                <div className="cell" style={{'borderRight': '1px solid #000000', 'width': '200px', 'height': '100%'}}>
-                  <div className="table sidebar">
-                    <div className="row">
-                      <div className="cell toolbox">
-                        <Toolbox/>
+          <div className="row">
+            <div className="cell">
+              <div className="table">
+                <div className="row">
+                  <div className="cell" style={{'borderRight': '1px solid #000000', 'width': '200px', 'height': '100%'}}>
+                    <div className="table sidebar">
+                      <div className="row">
+                        <div className="cell toolbox">
+                          <Toolbox/>
+                        </div>
                       </div>
-                    </div>
-                    <div className="row">
-                      <div className="cell properties">
-                        <Properties/>
+                      <div className="row">
+                        <div className="cell properties">
+                          <Properties/>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                <div className="cell">
-                  <div className="cell-scroll-outer" style={{'height': '80%'}}>
-                    <div className="cell-scroll-inner grid">
-                      <Graph ref="graph" graph={this.state.graph}>
-                        <Group blank={true} group={this.state.graph}/>
-                      </Graph>
+                  <div className="cell">
+                    <div className="cell-scroll-outer" style={{'height': '80%'}}>
+                      <div className="cell-scroll-inner grid">
+                        <Graph ref="graph" graph={this.state.graph}>
+                          <Group blank={true} group={this.state.graph}/>
+                        </Graph>
+                      </div>
                     </div>
-                  </div>
-                  <div className="table" style={{'borderTop': '1px solid #000'}}>
-                    <div className="row">
-                      <div className="cell preview">
-                        <button className="copy" ref="copyMakefileButton" data-clipboard-target="makefile">Copy Makefile</button>
-                        <pre id="makefile">{genMakefile(this.state.graph)}</pre>
+                    <div className="table" style={{'borderTop': '1px solid #000'}}>
+                      <div className="row">
+                        <div className="cell preview">
+                          <button className="copy" ref="copyMakefileButton" data-clipboard-target="makefile">Copy Makefile</button>
+                          <pre id="makefile">{genMakefile(this.state.graph)}</pre>
+                        </div>
                       </div>
                     </div>
                   </div>
