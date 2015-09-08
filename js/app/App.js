@@ -37,7 +37,8 @@ var App = React.createClass({
         processes: [
           { id: 1, name: 'opus', params: { corpus: 'EUconst', srcLang: 'en', trgLang: 'lv' }, x: 20, y: 50, width: 150, height: 50 },
           { id: 2, name: 'tokenizer', params: { lang: 'en' }, x: 20, y: 200, width: 150, height: 50 },
-          { id: 3, name: 'kenlm', params: { order: 5 }, x: 400, y: 200, width: 150, height: 50 },
+          { id: 3, name: 'kenlm', params: { order: 5 }, x: 800, y: 300, width: 150, height: 50 },
+          { id: 4, name: 'binlm', params: { type: 'trie' }, x: 800, y: 450, width: 150, height: 50 },
           { id: 5, name: 'tokenizer', params: { lang: 'lv' }, x: 180, y: 200, width: 150, height: 50 },
           { id: 7, name: 'phrases', params: { model: 'wbe-msd', maxLength: 7 }, x: 180, y: 700, width: 150, height: 50 },
         ],
@@ -50,6 +51,7 @@ var App = React.createClass({
           { from: { id: 2, port: 'out' }, to: { id: 7, port: 'src' } },
           { from: { id: 5, port: 'out' }, to: { id: 7, port: 'trg' } },
           { from: { id: 6, port: 'alignments' }, to: { id: 7, port: 'alignments' } },
+          { from: { id: 3, port: 'out' }, to: { id: 4, port: 'in' } },
         ]
       })
     }

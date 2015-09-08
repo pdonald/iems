@@ -55,6 +55,15 @@ var processes = {
       return [`/tools/lmplz -o ${params.order} < ${input.in} > ${output.out}`];
     }
   },
+  binlm: {
+    name: 'binlm',
+    params: { type: 'string' },
+    input: { in: 'file<arpa>' },
+    output: { out: 'file<binlm>' },
+    toBash: (params, input, output) => {
+      return [`/tools/build_binary ${params.type} ${input.in} ${output.out}`];
+    }
+  },
   sym: {
     name: 'sym',
     params: { method: 'string' },
