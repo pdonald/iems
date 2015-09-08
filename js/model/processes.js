@@ -132,5 +132,15 @@ var processes = {
         'rm -r $$TEMP'
       ];
     }
+  },
+  reorderingbin: {
+    name: 'binarize-reordering',
+    input: { reord: 'file<reordering>' },
+    output: { reord: 'file<reordering-bin>' },
+    toBash: (params, input, output) => {
+      return [
+        `/tools/processLexicalTableMin -in ${input.reord} -out ${output.reord}`
+      ];
+    }
   }
 };

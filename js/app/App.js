@@ -42,6 +42,7 @@ var App = React.createClass({
           { id: 5, name: 'tokenizer', params: { lang: 'lv' }, x: 180, y: 200, width: 150, height: 50 },
           { id: 7, name: 'phrases', params: { model: 'wbe-msd', maxLength: 7 }, x: 250, y: 750, width: 150, height: 50 },
           { id: 8, name: 'reordering', params: { type: 'wbe', orientation: 'msd', model: 'wbe-msd-bidirectional-fe', smoothing: 0.5 }, x: 350, y: 850, width: 150, height: 50 },
+          { id: 11, name: 'reorderingbin', params: {}, x: 350, y: 1000, width: 150, height: 50 },
           { id: 9, name: 'lexical', params: {}, x: 50, y: 700, width: 150, height: 50 },
           { id: 10, name: 'phrasescore', params: {}, x: 50, y: 900, width: 250, height: 50 },
         ],
@@ -63,6 +64,7 @@ var App = React.createClass({
           { from: { id: 7, port: 'inv' }, to: { id: 10, port: 'phrinv' } },
           { from: { id: 9, port: 'srctrg' }, to: { id: 10, port: 'srctrg' } },
           { from: { id: 9, port: 'trgsrc' }, to: { id: 10, port: 'trgsrc' } },
+          { from: { id: 8, port: 'reord' }, to: { id: 11, port: 'reord' } },
         ]
       })
     }
