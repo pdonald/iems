@@ -82,9 +82,9 @@ var processes = {
       return [
         'TEMP=$(shell mktemp -d) && \\',
         `/tools/extract ${input.trg} ${input.src} ${input.algn} $$TEMP/extract ${params.maxLength} orientation --model ${params.model} && \\`,
-        `mv $$TEMP/extract ${output.out} && \\`,
-        `mv $$TEMP/extract.inv ${output.inv} && \\`,
-        `mv $$TEMP/extract.o ${output.o} && \\`,
+        `LC_ALL=C sort $$TEMP/extract -T $$TEMP > ${output.out} && \\`,
+        `LC_ALL=C sort $$TEMP/extract.inv -T $$TEMP > ${output.inv} && \\`,
+        `LC_ALL=C sort $$TEMP/extract.o -T $$TEMP > ${output.o} && \\`,
         'rm -r $$TEMP'
       ];
     }
@@ -112,9 +112,11 @@ var processes = {
     toBash: (params, input, output) => {
       return [
         'TEMP=$(shell mktemp -d) && \\',
-        `/tools/score ${input.phr} ${input.srctrg} $$TEMP/srctrg.gz && \\`,
-        `/tools/score ${input.phrinv} ${input.trgsrc} $$TEMP/trgsrc.gz --Inverse && \\`,
-        `/tools/consolidate $$TEMP/srctrg.gz $$TEMP/trgsrc.gz ${output.ptable} && \\`,
+        `/tools/score ${input.phr} ${input.trgsrc} /dev/stdout > $$TEMP/trgsrc && \\`,
+        `/tools/score ${input.phrinv} ${input.srctrg} /dev/stdout --Inverse > $$TEMP/srctrg && \\`,
+        `LC_ALL=C sort $$TEMP/srctrg -T $$TEMP | gzip > $$TEMP/srctrg.sorted.gz && \\`,
+        `LC_ALL=C sort $$TEMP/trgsrc -T $$TEMP | gzip > $$TEMP/trgsrc.sorted.gz && \\`,
+        `/tools/consolidate $$TEMP/trgsrc.sorted.gz $$TEMP/srctrg.sorted.gz ${output.ptable} && \\`,
         'rm -r $$TEMP'
       ];
     }
@@ -139,7 +141,8 @@ var processes = {
     output: { reord: 'file<reordering-bin>' },
     toBash: (params, input, output) => {
       return [
-        `/tools/processLexicalTableMin -in ${input.reord} -out ${output.reord}`
+        `/tools/processLexicalTableMin -in ${input.reord} -out ${output.reord}`,
+        `mv ${output.reord}.minlexr ${output.reord}`
       ];
     }
   }
