@@ -66,6 +66,8 @@ var App = React.createClass({
      this.listenTo(portSelectedAction, p => this.selectedPort = p);
      this.listenTo(portDeselectedAction, p => this.selectedPort = null);
      this.listenTo(paramChangedAction, this.onParamChanged);
+
+     this.clipboard = new ZeroClipboard(this.refs.copyMakefileButton.getDOMNode());
    },
 
   onParamChanged: function(process, key, value) {
@@ -162,7 +164,8 @@ var App = React.createClass({
                   <div className="table" style={{'borderTop': '1px solid #000'}}>
                     <div className="row">
                       <div className="cell preview">
-                        <pre>{genMakefile(this.state.graph)}</pre>
+                        <button className="copy" ref="copyMakefileButton" data-clipboard-target="makefile">Copy Makefile</button>
+                        <pre id="makefile">{genMakefile(this.state.graph)}</pre>
                       </div>
                     </div>
                   </div>

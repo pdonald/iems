@@ -179,3 +179,10 @@ body {
 *:focus {
   outline: none;
 }
+
+button.copy {
+  padding: 10px 20px;
+  position: fixed;
+  bottom: 20px;
+  right: 50px;
+}

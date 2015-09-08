@@ -66,7 +66,7 @@ var processes = {
   },
   phrases: {
     name: 'phrases',
-    params: { maxLength: 'int', model: 'wbe-msd' },
+    params: { maxLength: 'int', model: 'string' },
     input: { alignments: 'file<align>', src: 'file<tok>', trg: 'file<tok>' },
     output: { out: 'file<phrases>', inv: 'file<phrases>' },
     toBash: (params, input, output) => {
