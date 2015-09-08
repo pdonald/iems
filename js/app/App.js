@@ -142,10 +142,10 @@ var App = React.createClass({
             <div className="cell">
               <div className="table">
                 <div className="row">
-                  <div className="cell" style={{'borderRight': '1px solid #000000', 'width': '200px', 'height': '100%'}}>
+                  <div className="cell" style={{'borderRight': '1px solid #000000', 'width': '300px', 'height': '100%'}}>
                     <div className="table sidebar">
                       <div className="row">
-                        <div className="cell toolbox">
+                        <div className="cell toolbox" style={{'height': '1px'}}>
                           <Toolbox/>
                         </div>
                       </div>
