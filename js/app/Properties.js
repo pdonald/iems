@@ -21,7 +21,7 @@ var Properties = React.createClass({
 
   render: function() {
     var body;
-    if (!this.state.selected) {
+    if (!this.state.selected || !this.state.selected.params) {
       body = <div>Nothing selected</div>;
     } else {
       var p = this.state.selected;
