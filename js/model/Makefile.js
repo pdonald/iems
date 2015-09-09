@@ -47,12 +47,17 @@ function genMakefile(graph, data, ischild, all) {
       });
 
       Object.keys(output).forEach(key => all.push(output[key]));
+      var noOutputDone = p.name + p.id + '.done';
 
+      if (Object.keys(output).length == 0) all.push(noOutputDone)
+      if (Object.keys(output).length == 0) text += noOutputDone;
       text += Object.keys(output).map(key => output[key]).join(' ')
       text += ': '
       text += Object.keys(input).map(key => input[key]).join(' ')
       text += '\n'
-      text += '\t' + tpl.toBash(p.params || {}, input, output).join('\n\t') + '\n\n'
+      text += '\t' + tpl.toBash(p.params || {}, input, output).join('\n\t') + '\n';
+      if (Object.keys(output).length == 0) text += '\ttouch ' + noOutputDone + '\n';
+      text += '\n'
     });
   }
 
@@ -64,6 +69,7 @@ function genMakefile(graph, data, ischild, all) {
 
   if (!ischild) {
     text =
+      '.PHONY: all clean\n\n' +
       'all: ' + all.join(' ') + '\n\n' +
       'clean:\n\trm -f ' + all.join(' ') + '\n\n' +
       text;

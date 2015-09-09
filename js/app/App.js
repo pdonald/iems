@@ -284,9 +284,11 @@ var App = React.createClass({
           { id: 14, name: 'echo', title: 'echo source', params: { text: 'European Parlament.' }, x: 600, y: 1175, width: 150, height: 50 },
           { id: 17, name: 'echo', title: 'echo reference', params: { text: 'Eiropas Parlaments.' }, x: 775, y: 1175, width: 150, height: 50 },
           { id: 15, name: 'tokenizer', params: { lang: 'en' }, x: 600, y: 1300, width: 150, height: 50 },
+          { id: 19, name: 'tokenizer', params: { lang: 'lv' }, x: 775, y: 1300, width: 150, height: 50 },
           { id: 13, name: 'moses', params: {}, x: 50, y: 1400, width: 250, height: 50 },
           { id: 18, name: 'detokenizer', params: { lang: 'en' }, x: 150, y: 1550, width: 150, height: 50 },
           { id: 16, name: 'bleu', params: { case: false }, x: 350, y: 1700, width: 150, height: 50 },
+          { id: 111, name: 'compareval', params: {server:'http://localhost:8080',experiment:'testing'}, x: 550, y: 1700, width: 150, height: 50 },
         ],
         links: [
           { from: { id: 1, port: 'src' }, to: { id: 2, port: 'in' } },
@@ -306,6 +308,10 @@ var App = React.createClass({
           { from: { id: 204, port: 'minphr' }, to: { id: 13, port: 'phr' } },
           { from: { id: 699, port: 'lm' }, to: { id: 13, port: 'lm' } },
           { from: { id: 204, port: 'minlexr' }, to: { id: 13, port: 'reord' } },
+          { from: { id: 15, port: 'out' }, to: { id: 111, port: 'src' } },
+          { from: { id: 19, port: 'out' }, to: { id: 111, port: 'ref' } },
+          { from: { id: 13, port: 'out' }, to: { id: 111, port: 'trans' } },
+          { from: { id: 17, port: 'out' }, to: { id: 19, port: 'in' } },
         ]
       })
     }
