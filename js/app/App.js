@@ -46,7 +46,9 @@ var App = React.createClass({
           { id: 9, name: 'lexical', params: {}, x: 50, y: 700, width: 150, height: 50 },
           { id: 10, name: 'phrasescore', params: {}, x: 50, y: 900, width: 250, height: 50 },
           { id: 12, name: 'phrasesbin', params: {}, x: 50, y: 1050, width: 150, height: 50 },
-          { id: 13, name: 'moses', params: {}, x: 50, y: 1250, width: 250, height: 50 },
+          { id: 13, name: 'moses', params: {}, x: 50, y: 1400, width: 250, height: 50 },
+          { id: 14, name: 'echo', params: { text: 'hello world.' }, x: 350, y: 1175, width: 150, height: 50 },
+          { id: 15, name: 'tokenizer', params: { lang: 'en' }, x: 350, y: 1300, width: 150, height: 50 },
         ],
         links: [
           { from: { id: 1, port: 'src' }, to: { id: 2, port: 'in' } },
@@ -68,8 +70,10 @@ var App = React.createClass({
           { from: { id: 9, port: 'trgsrc' }, to: { id: 10, port: 'trgsrc' } },
           { from: { id: 8, port: 'reord' }, to: { id: 11, port: 'reord' } },
           { from: { id: 10, port: 'ptable' }, to: { id: 12, port: 'ptable' } },
-          { from: { id: 12, port: 'bin' }, to: { id: 13, port: 'phr' } },
+          { from: { id: 12, port: 'minphr' }, to: { id: 13, port: 'phr' } },
           { from: { id: 4, port: 'out' }, to: { id: 13, port: 'lm' } },
+          { from: { id: 14, port: 'out' }, to: { id: 15, port: 'in' } },
+          { from: { id: 15, port: 'out' }, to: { id: 13, port: 'in' } },
         ]
       })
     }

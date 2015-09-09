@@ -122,13 +122,13 @@ var processes = {
     }
   },
   phrasesbin: {
-    name: 'binarize-phrases',
+    name: 'phrasesbin',
     input: { ptable: 'file<phrase-table>' },
-    output: { bin: 'file<phrase-table-bin>' },
+    output: { minphr: 'file<phrase-table-bin>' },
     toBash: (params, input, output) => {
       return [
-        `/tools/processPhraseTableMin -nscores 4 -threads 1 -in ${input.ptable} -out ${output.bin}`,
-        `mv ${output.bin}.minphr ${output.bin}`
+        `/tools/processPhraseTableMin -nscores 4 -threads 1 -in ${input.ptable} -out ${output.minphr}`,
+        //`mv ${output.bin}.minphr ${output.bin}`
       ];
     }
   },
@@ -147,7 +147,7 @@ var processes = {
     }
   },
   reorderingbin: {
-    name: 'binarize-reordering',
+    name: 'reorderingbin',
     input: { reord: 'file<reordering>' },
     output: { reord: 'file<reordering-bin>' },
     toBash: (params, input, output) => {
@@ -157,10 +157,19 @@ var processes = {
       ];
     }
   },
+  echo: {
+    name: 'echo',
+    input: {},
+    output: { out: 'file<text>' },
+    params: { text: 'string' },
+    toBash: (params, input, output) => {
+      return [`echo "${params.text}" > ${output.out}`];
+    }
+  },
   moses: {
     name: 'moses',
-    input: { phr: ['file<phrase-table>', 'file<phrase-table-bin'], lm: 'file<binlm>', lex: 'file<lex>' },
-    output: { trans: 'file<tok>' },
+    input: { phr: ['file<phrase-table>', 'file<phrase-table-bin'], lm: 'file<binlm>', lex: 'file<lex>', in: 'file<tok>' },
+    output: { ini: 'file<moses>', out: 'file<tok>' },
     toBash: (params, input, output) => {
       var ini = [];
       ini.push('[input-factors]')
@@ -186,9 +195,11 @@ var processes = {
       ini.push('Distortion0= 0.3');
       if (input.lm) ini.push('LM0= 0.5');
 
-      return [
-        'cat << EOF \\\n' + ini.join(' \\\n') + ' \\\nEOF > moses.ini'
-      ];
+      var cmd = [];
+      cmd.push(`echo > ${output.ini}`);
+      ini.forEach(l => cmd.push(`echo "${l}" >> ${output.ini}`));
+      cmd.push(`/tools/moses -f ${output.ini} < ${input.in} > ${output.out}`)
+      return cmd;
     }
   }
 };
