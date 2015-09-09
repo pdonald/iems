@@ -1,13 +1,5 @@
 var App = React.createClass({
   getInitialState: function() {
-    /*return {
-      last: 1000,
-      id: 0,
-      x: 10, y: 10,
-      groups: [],
-      links: [],
-      processes: []
-    } */
     return {
       last: 1000,
       graph: new GroupX({
@@ -48,10 +40,10 @@ var App = React.createClass({
           { id: 12, name: 'phrasesbin', params: {}, x: 50, y: 1050, width: 150, height: 50 },
           { id: 13, name: 'moses', params: {}, x: 50, y: 1400, width: 250, height: 50 },
           { id: 18, name: 'detokenizer', params: { lang: 'en' }, x: 150, y: 1550, width: 150, height: 50 },
-          { id: 14, name: 'echo', params: { text: 'hello world.' }, x: 350, y: 1175, width: 150, height: 50 },
+          { id: 14, name: 'echo', title: 'echo source', params: { text: 'European Parlament.' }, x: 350, y: 1175, width: 150, height: 50 },
           { id: 15, name: 'tokenizer', params: { lang: 'en' }, x: 250, y: 1300, width: 150, height: 50 },
           { id: 16, name: 'bleu', params: { case: false }, x: 350, y: 1700, width: 150, height: 50 },
-          { id: 17, name: 'echo', params: { text: 'sveika, pasaule.' }, x: 550, y: 1175, width: 150, height: 50 },
+          { id: 17, name: 'echo', title: 'echo reference', params: { text: 'Eiropas Parlaments.' }, x: 550, y: 1175, width: 150, height: 50 },
         ],
         links: [
           { from: { id: 1, port: 'src' }, to: { id: 2, port: 'in' } },

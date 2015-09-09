@@ -36,8 +36,11 @@ var Group = React.createClass({
     if (group.processes) {
       processez = group.processes.map(p => {
         var ports = { in: Object.keys(processes[p.name].input), out: Object.keys(processes[p.name].output) }
+        var name = p.name;
+        if (p.title) name = p.title;
+        if (processes[p.name].toTitle) name = processes[p.name].toTitle(p);
         return <Process width={p.width} height={p.height} x={p.x} y={p.y}
-                        name={p.name} ports={ports} graph={p} id={p.id} key={p.id}
+                        name={name} ports={ports} graph={p} id={p.id} key={p.id}
                         selected={p.selected} parent={group} />;
       });
     }

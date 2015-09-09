@@ -37,10 +37,13 @@ var processes = {
     params: { reverse: 'bool' },
     input: { src: 'file<tok>', trg: 'file<tok>' },
     output: { out: 'file<align>' },
+    toTitle: (p) => {
+      return 'fast align' + (p.params && (p.params.reverse === true || p.params.reverse == 'true') ? ' (reverse)' : '');
+    },
     toBash: (params, input, output) => {
       return [
         'TEMP=$(shell mktemp) && \\',
-        `python /tools/join.py ${input.src} ${input.trg} > $$TEMP && \\`,
+        `/tools/prep_fast_align ${input.src} ${input.trg} > $$TEMP && \\`,
         `/tools/fast_align ${params.reverse ? '-r' : ''} -i $$TEMP > ${output.out} && \\`,
         'rm $$TEMP'
       ]
