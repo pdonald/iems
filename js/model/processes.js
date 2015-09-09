@@ -247,5 +247,17 @@ var processes = {
         `perl /tools/scripts/tokenizer/detokenizer.perl -l ${params.lang} < ${input.in} > ${output.out}`
       ];
     }
+  },
+  compareval: {
+    name: 'compareval',
+    input: { src: 'file<tok>', ref: 'file<tok>', trans: 'file<tok>' },
+    output: {  },
+    params: { server: 'server', expName: 'expName' },
+    toBash: (params, input, output) => {
+      return [
+        `EXPID=$(shell curl -X POST -F "name=${params.expName}" -F "description=${params.expName}" -F "source=@${input.src}" -F "reference=@${input.ref}" ${params.server}/api/experiments/upload) && \\`,
+        `curl -X POST -F "name=First Task" -F "description=${params.expName}" -F "experiment_id=$$EXPID" -F "translation=@${input.trans}" ${params.server}/api/tasks/upload`
+      ];
+    }
   }
 };
