@@ -15,6 +15,28 @@ class GroupX {
     }
   }
 
+  getContainerFor(id) {
+    if (this.id == id) {
+      return this;
+    }
+    if (this.processes) {
+      for (var i in this.processes) {
+        if (this.processes[i].id == id) {
+          return this;
+        }
+      }
+    }
+    if (this.groups) {
+      for (var i in this.groups) {
+        var result = this.groups[i].getContainerFor(id);
+        if (result) {
+          return result;
+        }
+      }
+    }
+    return null;
+  }
+
   getSize() {
     if (this.width && this.height) {
       return { width: this.width, height: this.height };

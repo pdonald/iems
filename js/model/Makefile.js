@@ -1,5 +1,7 @@
 function genMakefile(graph, data, ischild, all) {
 
+  //return JSON.stringify(graph, null, 2)
+
   function makeData(graph) {
     data.ids[graph.id] = graph
     if (graph.processes) graph.processes.forEach(p => data.ids[p.id] = p)

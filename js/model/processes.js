@@ -66,6 +66,9 @@ var processes = {
     params: { order: 'integer' },
     input: { in: 'file<tok>' },
     output: { out: 'file<arpa>' },
+    toTitle: (p) => {
+      return 'KenLM' + (p.params && p.params.order ? `, order = ${p.params.order}` : '');
+    },
     toBash: (params, input, output) => {
       return [`/tools/lmplz -o ${params.order} < ${input.in} > ${output.out}`];
     }
@@ -91,7 +94,7 @@ var processes = {
   phrases: {
     name: 'phrases',
     params: { maxLength: 'int', model: 'string' },
-    input: { algn: 'file<align>', src: 'file<tok>', trg: 'file<tok>' },
+    input: { src: 'file<tok>', trg: 'file<tok>', algn: 'file<align>' },
     output: { out: 'file<phrases>', inv: 'file<phrases>', o: 'file<any>' },
     toBash: (params, input, output) => {
       return [
@@ -107,7 +110,7 @@ var processes = {
   lexical: {
     name: 'lexical',
     params: {},
-    input: { algn: 'file<align>', src: 'file<tok>', trg: 'file<tok>' },
+    input: { src: 'file<tok>', trg: 'file<tok>', algn: 'file<align>' },
     output: { srctrg: 'file<lex>', trgsrc: 'file<lex>' },
     toBash: (params, input, output) => {
       return [
@@ -164,11 +167,11 @@ var processes = {
   reorderingbin: {
     name: 'reorderingbin',
     input: { reord: 'file<reordering>' },
-    output: { reord: 'file<reordering-bin>' },
+    output: { minlexr: 'file<reordering-bin>' },
     toBash: (params, input, output) => {
       return [
-        `/tools/processLexicalTableMin -threads 1 -in ${input.reord} -out ${output.reord}`,
-        `mv ${output.reord}.minlexr ${output.reord}`
+        `/tools/processLexicalTableMin -threads 1 -in ${input.reord} -out ${output.minlexr}`,
+        //`mv ${output.reord}.minlexr ${output.reord}`
       ];
     }
   },
@@ -183,7 +186,7 @@ var processes = {
   },
   moses: {
     name: 'moses',
-    input: { phr: ['file<phrase-table>', 'file<phrase-table-bin'], lm: 'file<binlm>', lex: 'file<lex>', in: 'file<tok>' },
+    input: { phr: ['file<phrase-table>', 'file<phrase-table-bin'], lm: 'file<binlm>', reord: 'file<reord>', in: 'file<tok>' },
     output: { ini: 'file<moses>', out: 'file<tok>' },
     toBash: (params, input, output) => {
       var ini = [];
@@ -199,14 +202,14 @@ var processes = {
       ini.push('PhrasePenalty');
       ini.push('Distortion');
       ini.push(`PhraseDictionaryCompact name=TranslationModel0 num-features=4 path=${input.phr} input-factor=0 output-factor=0`);
-      if (input.lex) ini.push('LexicalReordering name=LexicalReordering0 num-features=6 type=wbe-msd-bidirectional-fe-allff input-factor=0 output-factor=0 path=/opt/letsmt/systems/smt-45de6a0a-2678-4412-8351-6979c1e5a65a/work/model/reordering-table-bin.1.wbe-msd-bidirectional-fe');
+      if (input.reord) ini.push(`LexicalReordering name=LexicalReordering0 num-features=6 type=wbe-msd-bidirectional-fe-allff input-factor=0 output-factor=0 path=${input.reord.replace('.minlexr', '')}`);
       if (input.lm) ini.push(`KENLM lazyken=0 name=LM0 factor=0 path=${input.lm} order=3`);
       ini.push('[weight]');
       ini.push('UnknownWordPenalty0= 1');
       ini.push('WordPenalty0= -1');
       ini.push('PhrasePenalty0= 0.2');
       ini.push('TranslationModel0= 0.2 0.2 0.2 0.2');
-      if (input.lex) ini.push('LexicalReordering0= 0.3 0.3 0.3 0.3 0.3 0.3');
+      if (input.reord) ini.push('LexicalReordering0= 0.3 0.3 0.3 0.3 0.3 0.3');
       ini.push('Distortion0= 0.3');
       if (input.lm) ini.push('LM0= 0.5');
 
