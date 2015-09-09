@@ -201,5 +201,33 @@ var processes = {
       cmd.push(`/tools/moses -f ${output.ini} < ${input.in} > ${output.out}`)
       return cmd;
     }
+  },
+  bleu: {
+    name: 'bleu',
+    input: { trans: 'file<text>', src: 'file<text>', ref: 'file<text>' },
+    output: { out: 'file<bleu>' },
+    params: { case: 'bool' },
+    toBash: (params, input, output) => {
+      return [
+        'TEMP=$(shell mktemp -d) && \\',
+        `perl /tools/wrap-sgm.perl ref xx yy < ${input.ref} > $$TEMP/ref.sgm && \\`,
+        `perl /tools/wrap-sgm.perl src xx < ${input.src} > $$TEMP/src.sgm && \\`,
+        `perl /tools/scripts/ems/support/wrap-xml.perl yy $$TEMP/src.sgm < ${input.trans} > $$TEMP/trans.sgm && \\`,
+        `perl /tools/scripts/generic/mteval-v13a.pl -s $$TEMP/src.sgm -r $$TEMP/ref.sgm -t $$TEMP/trans.sgm -b -d 3 ${params.case ? '-c' : ''} > ${output.out} && \\`,
+        `cat ${output.out} && \\`,
+        'rm -r $$TEMP'
+      ];
+    }
+  },
+  detokenizer: {
+    name: 'detokenizer',
+    input: { in: 'file<tok>' },
+    output: { out: 'file<text>' },
+    params: { lang: 'language' },
+    toBash: (params, input, output) => {
+      return [
+        `perl /tools/scripts/tokenizer/detokenizer.perl -l ${params.lang} < ${input.in} > ${output.out}`
+      ];
+    }
   }
 };

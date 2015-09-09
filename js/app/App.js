@@ -47,8 +47,11 @@ var App = React.createClass({
           { id: 10, name: 'phrasescore', params: {}, x: 50, y: 900, width: 250, height: 50 },
           { id: 12, name: 'phrasesbin', params: {}, x: 50, y: 1050, width: 150, height: 50 },
           { id: 13, name: 'moses', params: {}, x: 50, y: 1400, width: 250, height: 50 },
+          { id: 18, name: 'detokenizer', params: { lang: 'en' }, x: 150, y: 1550, width: 150, height: 50 },
           { id: 14, name: 'echo', params: { text: 'hello world.' }, x: 350, y: 1175, width: 150, height: 50 },
-          { id: 15, name: 'tokenizer', params: { lang: 'en' }, x: 350, y: 1300, width: 150, height: 50 },
+          { id: 15, name: 'tokenizer', params: { lang: 'en' }, x: 250, y: 1300, width: 150, height: 50 },
+          { id: 16, name: 'bleu', params: { case: false }, x: 350, y: 1700, width: 150, height: 50 },
+          { id: 17, name: 'echo', params: { text: 'sveika, pasaule.' }, x: 550, y: 1175, width: 150, height: 50 },
         ],
         links: [
           { from: { id: 1, port: 'src' }, to: { id: 2, port: 'in' } },
@@ -74,6 +77,10 @@ var App = React.createClass({
           { from: { id: 4, port: 'out' }, to: { id: 13, port: 'lm' } },
           { from: { id: 14, port: 'out' }, to: { id: 15, port: 'in' } },
           { from: { id: 15, port: 'out' }, to: { id: 13, port: 'in' } },
+          { from: { id: 17, port: 'out' }, to: { id: 16, port: 'ref' } },
+          { from: { id: 14, port: 'out' }, to: { id: 16, port: 'src' } },
+          { from: { id: 13, port: 'out' }, to: { id: 18, port: 'in' } },
+          { from: { id: 18, port: 'out' }, to: { id: 16, port: 'trans' } },
         ]
       })
     }
