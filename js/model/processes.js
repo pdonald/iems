@@ -12,7 +12,19 @@ var processes = {
     name: 'opus',
     params: { corpus: 'string', srcLang: 'language', trgLang: 'language' },
     input: { },
-    output: { src: 'file<text>', trg: 'file<text>' },
+    output: {
+      src: {
+        type: 'file<text>',
+        title: (p) => p.params && p.params.srcLang ? p.params.srcLang : 'src'
+      },
+      trg: {
+        type: 'file<text>',
+        title: (p) => p.params && p.params.trgLang ? p.params.trgLang : 'trg'
+      },
+    },
+    toTitle: (p) => {
+      return `OPUS (${p.params && p.params.corpus ? p.params.corpus : '<undefined>'})`;
+    },
     toBash: (params, input, output) => {
       return [
         'TEMP=$(shell mktemp) && \\',
