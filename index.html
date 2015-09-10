@@ -28,15 +28,15 @@
   <script type="text/jsx;harmony=true">
     var Actions = {
       add: Reflux.createAction(),
+      delete: Reflux.createAction(),
+      move: Reflux.createAction(),
+      connect: Reflux.createAction(),
       select: Reflux.createAction(),
-      goIntoGroup: Reflux.createAction()
+      goIntoGroup: Reflux.createAction(),
+      portSelected: Reflux.createAction(),
+      portDeselected: Reflux.createAction(),
+      paramChanged: Reflux.createAction(),
     };
-    var moveAction = Reflux.createAction();
-    var connectAction = Reflux.createAction();
-    var portSelectedAction = Reflux.createAction();
-    var portDeselectedAction = Reflux.createAction();
-    var deleteAction = Reflux.createAction();
-    var paramChangedAction = Reflux.createAction();
     React.render(<App/>, document.getElementById('example'));
   </script>
 </body>

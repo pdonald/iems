@@ -209,3 +209,7 @@ nav.depth li {
   display: inline-block;
   cursor: pointer;
 }
+
+.zoom-in {
+  cursor: zoom-in;
+}

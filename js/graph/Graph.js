@@ -7,7 +7,7 @@ var Graph = React.createClass({
 
   onKeyDown: function(e) {
     if (e.keyCode == 46) {
-      deleteAction();
+      Actions.delete();
     }
   },
 

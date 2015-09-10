@@ -16,7 +16,7 @@ var Properties = React.createClass({
    onChange: function(process, key, value) {
      this.state.selected.params[key] = value;
      this.setState(this.state);
-     paramChangedAction(process, key, value);
+     Actions.paramChanged(process, key, value);
    },
 
   render: function() {

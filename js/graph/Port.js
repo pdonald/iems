@@ -36,7 +36,7 @@ var Port = React.createClass({
     this.setState({ dragging: false });
     e.stopPropagation();
     e.preventDefault();
-    connectAction({ id: this.props.process, port: this.props.label })
+    Actions.connect({ id: this.props.process, port: this.props.label })
   },
 
   onMouseMove: function (e) {
@@ -52,12 +52,12 @@ var Port = React.createClass({
 
   onMouseOver: function(e) {
     this.setState({ on: true });
-    portSelectedAction({ id: this.props.process, port: this.props.label })
+    Actions.portSelected({ id: this.props.process, port: this.props.label })
   },
 
   onMouseOut: function(e) {
     this.setState({ on: false });
-    portDeselectedAction({ id: this.props.process, port: this.props.label })
+    Actions.portDeselected({ id: this.props.process, port: this.props.label })
   },
 
   render: function() {

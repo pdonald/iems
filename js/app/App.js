@@ -28,15 +28,15 @@ var App = React.createClass({
   mixins: [Reflux.ListenerMixin],
 
   componentDidMount: function() {
-     this.listenTo(moveAction, this.onMove);
+     this.listenTo(Actions.move, this.onMove);
      this.listenTo(Actions.add, this.onAdd);
-     this.listenTo(deleteAction, this.onDelete);
+     this.listenTo(Actions.delete, this.onDelete);
      this.listenTo(Actions.select, this.onSelect);
      this.listenTo(Actions.goIntoGroup, this.onGoIntoGroup);
-     this.listenTo(connectAction, this.onConnect);
-     this.listenTo(portSelectedAction, p => this.selectedPort = p);
-     this.listenTo(portDeselectedAction, p => this.selectedPort = null);
-     this.listenTo(paramChangedAction, this.onParamChanged);
+     this.listenTo(Actions.connect, this.onConnect);
+     this.listenTo(Actions.portSelected, p => this.selectedPort = p);
+     this.listenTo(Actions.portDeselected, p => this.selectedPort = null);
+     this.listenTo(Actions.paramChanged, this.onParamChanged);
 
      this.clipboard = new ZeroClipboard(this.refs.copyMakefileButton.getDOMNode());
    },
