@@ -269,6 +269,20 @@ var Tools = {
           `curl -s -X POST -F "name=First Task" -F "description=${params.experiment}" -F "experiment_id=$$EXPID" -F "translation=@${input.trans}" ${params.server}/api/tasks/upload`
         ];
       }
+    },
+    phrasesampling: {
+      name: 'phrasesampling', title: 'Sampling phrases',
+      input: { src: 'file<tok>', ref: 'file<tok>', symal: 'file<align>' },
+      output: { lex: 'file<lex>' }, 					// this may need a folder instead of a file
+      params: { server: 'string', experiment: 'string' },
+      toBash: (params, input, output) => {
+        return [
+          `mtt-build < ${input.src} -i -o corpus.src`,	//produces corpus.src.mct, corpus.src.sfa, corpus.src.tdx
+          `mtt-build < ${input.ref} -i -o corpus.trg`,	//produces corpus.trg.mct, corpus.trg.sfa, corpus.trg.tdx
+          `symal2mam < ${input.symal} src-trg.mam`,		//produces src-trg.mam
+          `mmlex-build corpus. src trg -o src-trg.lex`	//produces src-trg.lex
+        ];
+      }
     }
   },
   blocks: {
