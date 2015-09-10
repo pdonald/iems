@@ -162,9 +162,13 @@ var App = React.createClass({
                     </div>
                   </div>
                   <div className="cell">
+                    <nav className="depth">
+                      <ul>
+                        {this.state.stack.map((g, index) => <li key={index} onClick={() => this.goTo(index)}>{(g.title || g.name || '#'+g.id)}</li>)}
+                      </ul>
+                    </nav>
                     <div className="cell-scroll-outer" style={{'height': '80%'}}>
                       <div className="cell-scroll-inner grid">
-                        {this.state.stack.map((g, index) => <a key={index} onClick={() => this.goTo(index)}>{(g.title || g.name || '#'+g.id) + ' -> '}</a>)}
                         <Graph ref="graph" graph={this.currentGraph()}>
                           <Group blank={true} group={this.currentGraph()}/>
                         </Graph>
