@@ -1,30 +1,11 @@
-function genMakefile(graph, data, ischild, all) {
+function genMakefile(graph, ischild, all) {
 
-  function makeData(graph) {
-    data.ids[graph.id] = graph
-    if (graph.processes) graph.processes.forEach(p => data.ids[p.id] = p)
-    if (graph.links) data.links = data.links.concat(graph.links)
-    if (graph.groups) graph.groups.forEach(g => makeData(g))
+  function processName(p, group, port) {
+    return p.name + '-g' + group.id + 'p' + p.id + '.' + port;
   }
 
-  function resolve(id, port) {
-    if (data.ids[id].processes || data.ids[id].groups) {
-      // go up
-      // find links to this
-      var link = data.links.filter(l => l.to.id == id && l.to.port == port)[0]
-      if (!link) return null;
-      return resolve(link.from.id, link.from.port);
-    } else {
-      return { graph: data.ids[id], port: port };
-    }
-  }
-
-  if (!data) {
-    data = {
-      ids: {},
-      links: []
-    }
-    makeData(graph)
+  function groupName(group, port) {
+    return group.name + '-g' + group.id + '.' + port;
   }
 
   var text = '';
@@ -36,16 +17,20 @@ function genMakefile(graph, data, ischild, all) {
       if (!tpl) return;
 
       var output = {};
-      Object.keys(tpl.output).map(key => output[key] = tpl.name + p.id + '.' + key);
+      Object.keys(tpl.output).map(key => output[key] = processName(p, graph, key));
 
       var input = {};
-      data.links.filter(l => l.to.id == p.id).forEach(l => {
-        var x = resolve(l.from.id, l.from.port)
-        if (x) input[l.to.port] = x.graph.name + x.graph.id + '.' + x.port
+      graph.links.filter(l => l.to.id == p.id).forEach(l => {
+        if (l.from.id == graph.id) {
+          input[l.to.port] = groupName(graph, l.from.port);
+        } else {
+          var x = graph.processes.filter(pp => pp.id == l.from.id)[0];
+          if (x) input[l.to.port] = processName(x, graph, l.from.port);
+        }
       });
 
       Object.keys(output).forEach(key => all.push(output[key]));
-      var noOutputDone = p.name + p.id + '.done';
+      var noOutputDone = p.name + p.id + '.done'; // todo
 
       if (Object.keys(output).length == 0) all.push(noOutputDone)
       if (Object.keys(output).length == 0) text += noOutputDone;
@@ -61,8 +46,52 @@ function genMakefile(graph, data, ischild, all) {
 
   if (graph.groups) {
     graph.groups.forEach(g => {
-      text += genMakefile(g, data, true, all) + '\n'
-    })
+      g.ports.in.forEach(port => {
+        var link = graph.links.filter(l => l.to.id == g.id)[0];
+        if (link) {
+          var process = graph.processes.filter(p => p.id == link.from.id)[0];
+          if (process) {
+            text += groupName(g, port) + ': ' + processName(process, graph, link.from.port) + '\n';
+            text += '\tln -f -s $< $@' + '\n';
+            text += '\n';
+            all.push(groupName(g, port));
+            return;
+          }
+          var group = graph.groups.filter(p => p.id == link.from.id)[0];
+          if (group) {
+            text += groupName(g, port) + ': ' + groupName(group, link.from.port) + '\n';
+            text += '\tln -f -s $< $@' + '\n';
+            text += '\n';
+            all.push(groupName(g, port));
+            return;
+          }
+        }
+      });
+      g.ports.out.forEach(port => {
+        var link = g.links.filter(l => l.to.id == g.id)[0];
+        if (link) {
+          var process = g.processes.filter(p => p.id == link.from.id)[0];
+          if (process) {
+            text += groupName(g, port) + ': ' + processName(process, g, link.from.port) + '\n';
+            text += '\tln -f -s $< $@' + '\n';
+            text += '\n';
+            all.push(groupName(g, port));
+            return;
+          }
+          var group = g.groups.filter(p => p.id == link.from.id)[0];
+          if (group) {
+            text += groupName(g, port) + ': ' + groupName(group, link.from.port) + '\n';
+            text += '\tln -f -s $< $@' + '\n';
+            text += '\n';
+            all.push(groupName(g, port));
+            return;
+          }
+        }
+      });
+    });
+    graph.groups.forEach(g => {
+      text += genMakefile(g, true, all) + '\n'
+    });
   }
 
   if (!ischild) {
