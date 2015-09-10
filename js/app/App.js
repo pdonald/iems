@@ -76,6 +76,7 @@ var App = React.createClass({
         //var size = group.getCalculatedSize();
         group.width = 150;
         group.height = 50;
+        group.collapsed = true;
         this.state.graph.addGroup(group);
       } else {
         this.state.graph.addProcess({
@@ -94,6 +95,7 @@ var App = React.createClass({
     //obj.selected = !obj.selected;
     //this.setState({ graph: this.state.graph })
     if (obj.getSize) {
+      obj.collapsed = false;
       this.setState({ graph: obj })
     }
   },

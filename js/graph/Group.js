@@ -9,7 +9,7 @@ var Group = React.createClass({
     var width = obj.width;
     var height = obj.height;
     if (obj.getSize) {
-      var size = obj.getCalculatedSize();
+      var size = obj.collapsed ? obj.getSize() : obj.getCalculatedSize();
       width = size.width;
       height = size.height;
     }

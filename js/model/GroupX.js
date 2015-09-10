@@ -61,7 +61,7 @@ class GroupX {
     var size = { width: this.x, height: this.y };
     var padding = 50;
     this.groups.forEach(g => {
-      var groupSize = g.getCalculatedSize();
+      var groupSize = g.collapsed ? g.getSize() : g.getCalculatedSize();
       if (g.x + groupSize.width + padding > size.width) size.width = g.x + groupSize.width + padding;
       if (g.y + groupSize.height + padding > size.height) size.height = g.y + groupSize.height + padding;
     });
