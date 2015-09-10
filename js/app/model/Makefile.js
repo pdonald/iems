@@ -98,7 +98,7 @@ function genMakefile(graph, ischild, all) {
     text =
       '.PHONY: all clean\n\n' +
       'all: ' + all.join(' ') + '\n\n' +
-      'clean:\n\trm -f ' + all.join(' ') + '\n\n' +
+      'clean:\n\trm -rf ' + all.join(' ') + '\n\n' +
       text;
   }
 

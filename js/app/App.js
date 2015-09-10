@@ -69,7 +69,7 @@ var App = React.createClass({
         this.currentGraph().addProcess({
           id: this.state.last,
           x: x - offset.left, y: y - offset.top,
-          width: 150, height: 50,
+          width: template.width || 150, height: template.height || 50,
           name: template.name, type: template.name, params: {}
         });
       }

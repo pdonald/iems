@@ -186,8 +186,8 @@ var Tools = {
       }
     },
     'moses-ini': {
-      name: 'moses-ini', title: 'Moses INI',
-      input: { phr: ['file<phrase-table>', 'file<phrase-table-bin'], lm: 'file<binlm>', reord: 'file<reord>' },
+      name: 'moses-ini', title: 'Moses INI', width: 300,
+      input: { phr: ['file<phrase-table>', 'file<phrase-table-bin'], lm: 'file<binlm>', reord: 'file<reord>', sample: 'sampling' },
       output: { ini: 'file<moses>' },
       toBash: (params, input, output) => {
         var ini = [];
@@ -210,8 +210,8 @@ var Tools = {
         ini.push('WordPenalty0= -1');
         ini.push('PhrasePenalty0= 0.2');
         ini.push('TranslationModel0= 0.2 0.2 0.2 0.2');
-        if (input.reord) ini.push('LexicalReordering0= 0.3 0.3 0.3 0.3 0.3 0.3');
         ini.push('Distortion0= 0.3');
+        if (input.reord) ini.push('LexicalReordering0= 0.3 0.3 0.3 0.3 0.3 0.3');
         if (input.lm) ini.push('LM0= 0.5');
 
         var cmd = [];
@@ -270,18 +270,67 @@ var Tools = {
         ];
       }
     },
-    phrasesampling: {
-      name: 'phrasesampling', title: 'Sampling phrases',
-      input: { src: 'file<tok>', ref: 'file<tok>', symal: 'file<align>' },
-      output: { lex: 'file<lex>' }, 					// this may need a folder instead of a file
-      params: { server: 'string', experiment: 'string' },
+    bintext: {
+      name: 'bintext', title: 'Binarize text',
+      input: { in: 'file<tok>' },
+      output: { out: 'dir<bin>' },
+      params: {},
       toBash: (params, input, output) => {
         return [
-          `mtt-build < ${input.src} -i -o corpus.src`,	//produces corpus.src.mct, corpus.src.sfa, corpus.src.tdx
-          `mtt-build < ${input.ref} -i -o corpus.trg`,	//produces corpus.trg.mct, corpus.trg.sfa, corpus.trg.tdx
-          `symal2mam < ${input.symal} src-trg.mam`,		//produces src-trg.mam
-          `mmlex-build corpus. src trg -o src-trg.lex`	//produces src-trg.lex
+          `rm -rf ${output.out}`,
+          `mkdir ${output.out}`,
+          `/tools/mtt-build -i -o ${output.out}/corpus < ${input.in}`,
         ];
+      }
+    },
+    binalign: {
+      name: 'binalign', title: 'Binarize align',
+      input: { in: 'file<align>' },
+      output: { out: 'file<bin>' },
+      params: {},
+      toBash: (params, input, output) => {
+        return [
+          `/tools/symal2mam ${output.out} < ${input.in}`,
+        ];
+      }
+    },
+    binlex: {
+      name: 'binlex', title: 'Binarize lex',
+      input: { src: 'dir<bin>', trg: 'dir<bin>', algn: 'file<bin>' },
+      output: { out: 'file<bin>' },
+      params: {},
+      toBash: (params, input, output) => {
+        return [
+          'TEMP=$(shell mktemp -d) && \\',
+          `ln -s \`readlink -f ${input.src}/corpus.mct\` $$TEMP/corpus.src.mct && \\`,
+          `ln -s \`readlink -f ${input.src}/corpus.sfa\` $$TEMP/corpus.src.sfa && \\`,
+          `ln -s \`readlink -f ${input.src}/corpus.tdx\` $$TEMP/corpus.src.tdx && \\`,
+          `ln -s \`readlink -f ${input.trg}/corpus.mct\` $$TEMP/corpus.trg.mct && \\`,
+          `ln -s \`readlink -f ${input.trg}/corpus.sfa\` $$TEMP/corpus.trg.sfa && \\`,
+          `ln -s \`readlink -f ${input.trg}/corpus.tdx\` $$TEMP/corpus.trg.tdx && \\`,
+          `ln -s \`readlink -f ${input.algn}\` $$TEMP/corpus.src-trg.mam && \\`,
+          `/tools/mmlex-build $$TEMP/corpus. src trg -o ${output.out} && \\`,
+          'rm -rf $$TEMP'
+        ];
+      }
+    },
+    psamplemodel: {
+      name: 'psamplemodel', title: 'Sampling model',
+      input: { src: 'dir<bin>', trg: 'dir<bin>', algn: 'file<bin>', lex: 'file<bin>' },
+      output: { out: 'file<ini>' },
+      params: {},
+      toBash: (params, input, output) => {
+        var ini = [];
+        ini.push('[feature]');
+        ini.push('LexicalReordering name=DM0 type=hier-mslr-bidirectional-fe-allff input-factor=0 output-factor=0');
+        ini.push('Mmsapt name=PT0 lr-func=DM0 path=/path/ L1=src L2=trg sample=1000');
+        ini.push('[weight]');
+        ini.push('DM0= 0.3 0.3 0.3 0.3 0.3 0.3 0.3 0.3');
+
+        var cmd = [];
+        cmd.push(`echo > ${output.out}`)
+        ini.forEach(line => cmd.push(`echo "${line}" >> ${output.out}`));
+        return cmd;
       }
     }
   },
@@ -298,6 +347,31 @@ var Tools = {
         { from: { id: 2, port: 'out' }, to: { id: 3, port: 'in' } },
         { from: { id: 1, port: 'trg' }, to: { id: 2, port: 'in' } },
         { from: { id: 3, port: 'out' }, to: { id: 1, port: 'lm' } },
+      ]
+    },
+    'phrasesampling': {
+      id: 1, title: 'Sampling Phrases', name: 'phrasesampling',
+      width: 200, height: 600,
+      ports: { in: ['src', 'trg', 'algn'], out: ['model'] },
+      processes: [
+        { id: 2, name: 'bintext', params: {}, x: 20, y: 50, width: 150, height: 50 },
+        { id: 3, name: 'bintext', params: {}, x: 20, y: 175, width: 150, height: 50 },
+        { id: 4, name: 'binalign', params: {}, x: 20, y: 375, width: 150, height: 50 },
+        { id: 5, name: 'binlex', params: {}, x: 20, y: 475, width: 150, height: 50 },
+        { id: 6, name: 'psamplemodel', params: {}, x: 20, y: 575, width: 150, height: 50 },
+      ],
+      links: [
+        { from: { id: 1, port: 'src' }, to: { id: 2, port: 'in' } },
+        { from: { id: 1, port: 'trg' }, to: { id: 3, port: 'in' } },
+        { from: { id: 1, port: 'algn' }, to: { id: 4, port: 'in' } },
+        { from: { id: 2, port: 'out' }, to: { id: 5, port: 'src' } },
+        { from: { id: 3, port: 'out' }, to: { id: 5, port: 'trg' } },
+        { from: { id: 4, port: 'out' }, to: { id: 6, port: 'algn' } },
+        { from: { id: 2, port: 'out' }, to: { id: 6, port: 'src' } },
+        { from: { id: 3, port: 'out' }, to: { id: 6, port: 'trg' } },
+        { from: { id: 5, port: 'out' }, to: { id: 6, port: 'lex' } },
+        { from: { id: 4, port: 'out' }, to: { id: 5, port: 'algn' } },
+        { from: { id: 6, port: 'out' }, to: { id: 1, port: 'model' } },
       ]
     },
     'word-alignment': {
