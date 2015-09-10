@@ -3,23 +3,25 @@ var App = React.createClass({
     return {
       output: 'makefile',
       last: 1000,
-      graph: new GroupX({
-        id: 0,
-        x: 0, y: 0,
-        groups: [],
-        processes: [
-          { id: 1, name: 'opus', params: { corpus: 'EUconst', srcLang: 'en', trgLang: 'lv' }, x: 20, y: 50, width: 150, height: 50 },
-          { id: 2, name: 'tokenizer', params: { lang: 'en' }, x: 20, y: 200, width: 150, height: 50 },
-          { id: 5, name: 'tokenizer', params: { lang: 'lv' }, x: 180, y: 200, width: 150, height: 50 },
-          { id: 14, name: 'echo', title: 'echo source', params: { text: 'European Parlament.' }, x: 220, y: 50, width: 150, height: 50 },
-          { id: 17, name: 'echo', title: 'echo reference', params: { text: 'Eiropas Parlaments.' }, x: 440, y: 50, width: 150, height: 50 },
-          { id: 20, name: 'moses-ini', params: {}, x: 50, y: 500, width: 250, height: 50 },
-        ],
-        links: [
-          { from: { id: 1, port: 'src' }, to: { id: 2, port: 'in' } },
-          { from: { id: 1, port: 'trg' }, to: { id: 5, port: 'in' } },
-        ]
-      })
+      stack: [
+        new GroupX({
+          id: 0, title: 'Main',
+          x: 0, y: 0,
+          groups: [],
+          processes: [
+            { id: 1, name: 'opus', params: { corpus: 'EUconst', srcLang: 'en', trgLang: 'lv' }, x: 20, y: 50, width: 150, height: 50 },
+            { id: 2, name: 'tokenizer', params: { lang: 'en' }, x: 20, y: 200, width: 150, height: 50 },
+            { id: 5, name: 'tokenizer', params: { lang: 'lv' }, x: 180, y: 200, width: 150, height: 50 },
+            { id: 14, name: 'echo', title: 'echo source', params: { text: 'European Parlament.' }, x: 220, y: 50, width: 150, height: 50 },
+            { id: 17, name: 'echo', title: 'echo reference', params: { text: 'Eiropas Parlaments.' }, x: 440, y: 50, width: 150, height: 50 },
+            { id: 20, name: 'moses-ini', params: {}, x: 50, y: 500, width: 250, height: 50 },
+          ],
+          links: [
+            { from: { id: 1, port: 'src' }, to: { id: 2, port: 'in' } },
+            { from: { id: 1, port: 'trg' }, to: { id: 5, port: 'in' } },
+          ]
+        })
+      ]
     }
   },
 
@@ -40,12 +42,13 @@ var App = React.createClass({
 
   onParamChanged: function(process, key, value) {
     process[key] = value;
-    this.setState({ graph: this.state.graph });
+    this.setState({ stack: this.state.stack });
   },
 
   onMove: function(pos, graph, parent) {
      graph.x = pos.x;
      graph.y = pos.y;
+     this.setState({ stack: this.state.stack });
      //console.log(parent)
      /*if (!parent) {
 
@@ -60,7 +63,7 @@ var App = React.createClass({
        }
 
      } */
-     this.setState({ graph: this.state.graph });
+     //this.setState({ graph: this.state.graph });
      //this.forceUpdate();
      //console.log(graph.id, pos.x, pos.y)
   },
@@ -77,16 +80,16 @@ var App = React.createClass({
         group.width = 150;
         group.height = 50;
         group.collapsed = true;
-        this.state.graph.addGroup(group);
+        this.currentGraph().addGroup(group);
       } else {
-        this.state.graph.addProcess({
+        this.currentGraph().addProcess({
           id: this.state.last,
           x: x - offset.left, y: y - offset.top,
           width: 150, height: 50,
           name: template.name, type: template.name, params: {}
         });
       }
-      this.setState({ last: this.state.last+1, graph: this.state.graph })
+      this.setState({ last: this.state.last+1, stack: this.state.stack })
     }
   },
 
@@ -96,26 +99,39 @@ var App = React.createClass({
     //this.setState({ graph: this.state.graph })
     if (obj.getSize) {
       obj.collapsed = false;
-      this.setState({ graph: obj })
+      this.state.stack.push(obj);
+      this.setState({ stack: this.state.stack })
     }
   },
 
   onDelete: function() {
-    this.state.graph.deleteSelected();
-    this.setState({ graph: this.state.graph });
+    throw 'Not implemented';
+    //this.state.graph.deleteSelected();
+    //this.setState({ graph: this.state.graph });
   },
 
   onConnect: function(from, to) {
     if (from && this.selectedPort) {
       // validate connection
       //this.state.graph.getContainerFor(from.id).links.push({ from: from, to: this.selectedPort });
-      this.state.graph.links.push({ from: from, to: this.selectedPort });
-      this.setState({ graph: this.state.graph })
+      this.currentGraph().links.push({ from: from, to: this.selectedPort });
+      this.setState({ stack: this.state.stack })
     }
   },
 
   changeOutputType: function(type) {
     this.setState({ output: type });
+  },
+
+  currentGraph: function() {
+    return this.state.stack[this.state.stack.length-1];
+  },
+
+  goTo: function(index) {
+    while (this.state.stack.length-1 != index) {
+      this.state.stack.pop();
+    }
+    this.setState({ stack: this.state.stack })
   },
 
   render: function() {
@@ -148,8 +164,9 @@ var App = React.createClass({
                   <div className="cell">
                     <div className="cell-scroll-outer" style={{'height': '80%'}}>
                       <div className="cell-scroll-inner grid">
-                        <Graph ref="graph" graph={this.state.graph}>
-                          <Group blank={true} group={this.state.graph}/>
+                        {this.state.stack.map((g, index) => <a key={index} onClick={() => this.goTo(index)}>{(g.title || g.name || '#'+g.id) + ' -> '}</a>)}
+                        <Graph ref="graph" graph={this.currentGraph()}>
+                          <Group blank={true} group={this.currentGraph()}/>
                         </Graph>
                       </div>
                     </div>
@@ -158,11 +175,11 @@ var App = React.createClass({
                         <div className="cell preview">
                           <button className="copy" ref="copyMakefileButton" data-clipboard-target="makefile">Copy to clipboard</button>
                           <div className="options">
-                            <label><input type="radio" name="outtype" checked={this.state.output=='makefile'?'checked':''} onClick={e => this.changeOutputType('makefile')}/> Makefile</label>
-                            <label><input type="radio" name="outtype" checked={this.state.output=='json'?'checked':''} onClick={e => this.changeOutputType('json')}/> JSON</label>
+                            <label><input type="radio" readOnly name="outtype" checked={this.state.output=='makefile'?'checked':''} onClick={e => this.changeOutputType('makefile')}/> Makefile</label>
+                            <label><input type="radio" readOnly name="outtype" checked={this.state.output=='json'?'checked':''} onClick={e => this.changeOutputType('json')}/> JSON</label>
                           </div>
                           <pre id="makefile">
-                            {(this.state.output == 'makefile' ? genMakefile(this.state.graph) : JSON.stringify(this.state.graph, null, 2)) + '\n\n\n\n'}
+                            {(this.state.output == 'makefile' ? genMakefile(this.currentGraph()) : JSON.stringify(this.currentGraph(), null, 2)) + '\n\n\n\n'}
                           </pre>
                         </div>
                       </div>
