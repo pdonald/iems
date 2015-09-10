@@ -15,7 +15,7 @@ var Graph = React.createClass({
     var size = this.props.graph.getCalculatedSize();
     return (
       <div ref="container" onKeyDown={this.onKeyDown} style={{height: '100%'}} tabIndex="0">
-        <svg style={{width: (size.width+100)+'px', height: (size.height+100)+'px'}} {...this.props}>{this.props.children}</svg>
+        <svg style={{width: (size.width+25)+'px', height: (size.height+100)+'px'}} {...this.props}>{this.props.children}</svg>
       </div>
     );
   }

@@ -11,8 +11,8 @@ var App = React.createClass({
           { id: 1, name: 'opus', params: { corpus: 'EUconst', srcLang: 'en', trgLang: 'lv' }, x: 20, y: 50, width: 150, height: 50 },
           { id: 2, name: 'tokenizer', params: { lang: 'en' }, x: 20, y: 200, width: 150, height: 50 },
           { id: 5, name: 'tokenizer', params: { lang: 'lv' }, x: 180, y: 200, width: 150, height: 50 },
-          { id: 14, name: 'echo', title: 'echo source', params: { text: 'European Parlament.' }, x: 20, y: 50, width: 150, height: 50 },
-          { id: 17, name: 'echo', title: 'echo reference', params: { text: 'Eiropas Parlaments.' }, x: 200, y: 50, width: 150, height: 50 },
+          { id: 14, name: 'echo', title: 'echo source', params: { text: 'European Parlament.' }, x: 220, y: 50, width: 150, height: 50 },
+          { id: 17, name: 'echo', title: 'echo reference', params: { text: 'Eiropas Parlaments.' }, x: 440, y: 50, width: 150, height: 50 },
           { id: 20, name: 'moses-ini', params: {}, x: 50, y: 500, width: 250, height: 50 },
         ],
         links: [

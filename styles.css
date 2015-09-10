@@ -177,8 +177,10 @@ body {
   stroke: red;
   fill: yellow;
 }
-.process.blank > g> rect {
+.process.blank > g > rect {
   fill: none;
+}
+.process.main.blank > g > rect {
   stroke: none;
 }
 

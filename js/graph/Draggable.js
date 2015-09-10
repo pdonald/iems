@@ -5,6 +5,7 @@ var Draggable = React.createClass({
     return {
       pos: { x: 0, y: 0 },
       min: null, max: null,
+      onMove: function() {},
       onClick: function() {}
     };
   },

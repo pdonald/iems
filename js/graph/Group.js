@@ -6,6 +6,14 @@ var Group = React.createClass({
   },
 
   getPortPos: function(obj, portName, dir, self) {
+    var width = obj.width;
+    var height = obj.height;
+    if (obj.getSize) {
+      var size = obj.getCalculatedSize();
+      width = size.width;
+      height = size.height;
+    }
+
     var x = self ? 0 : obj.x;
     var y = self ? 0 : obj.y;
     if (self) dir = dir == 'in' ? 'out' : 'in';
@@ -18,8 +26,8 @@ var Group = React.createClass({
       }
     }
 
-    x += (ports[dir].indexOf(portName)+1) * (obj.width / (ports[dir].length + 1));
-    y += dir == 'out' ? obj.height : 0;
+    x += (ports[dir].indexOf(portName)+1) * (width / (ports[dir].length + 1));
+    y += dir == 'out' ? height : 0;
     y += (dir == 'out' ? 10 : -10) * (self ? - 1 : 1);
 
     return { x: x, y: y };
@@ -44,7 +52,7 @@ var Group = React.createClass({
         if (Tools.processes[p.name].toTitle) name = Tools.processes[p.name].toTitle(p);
         return <Process width={p.width} height={p.height} x={p.x} y={p.y}
                         name={name} ports={ports} graph={p} id={p.id} key={p.id}
-                        selected={p.selected} parent={group} />;
+                        selected={p.selected} />;
       });
     }
 
@@ -64,18 +72,19 @@ var Group = React.createClass({
     var children = [ groups, processez, links ];
 
     if (this.props.blank) {
+      var size = group.getCalculatedSize();
       return (
-        <g>
+        <Process width={size.width} height={size.height} name={group.title || group.name} ports={group.ports}
+                 graph={group} id={group.id} blank={true} x={20} y={50}>
           {groups}
           {processez}
           {links}
-        </g>
+        </Process>
       );
     } else {
       return (
         <Process width={group.width} height={group.height} name={group.title || group.name} ports={group.ports}
                  x={group.x} y={group.y} graph={group} id={group.id} selected={group.selected}>
-           
         </Process>
       );
     }
