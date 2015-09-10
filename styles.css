@@ -207,4 +207,5 @@ nav.depth li {
   border: 1px solid black;
   padding: 5px 5px;
   display: inline-block;
+  cursor: pointer;
 }

@@ -49,23 +49,6 @@ var App = React.createClass({
      graph.x = pos.x;
      graph.y = pos.y;
      this.setState({ stack: this.state.stack });
-     //console.log(parent)
-     /*if (!parent) {
-
-     } else {
-       if (parent.groups.indexOf(graph)) {
-       }
-       if (parent.processes.indexOf(graph) != -1) {
-         console.log('te')
-         var update = {};
-         update[parent.processes.indexOf(graph)] = { x: { $set: pos.x }, y: { $set: pos.y } };
-         parent.processes = React.addons.update(parent.processes, update);
-       }
-
-     } */
-     //this.setState({ graph: this.state.graph });
-     //this.forceUpdate();
-     //console.log(graph.id, pos.x, pos.y)
   },
 
   onAdd: function(template, x, y) {
@@ -94,26 +77,24 @@ var App = React.createClass({
   },
 
   onSelect: function(obj) {
-    //console.log(obj)
-    //obj.selected = !obj.selected;
-    //this.setState({ graph: this.state.graph })
     if (obj.getSize) {
       obj.collapsed = false;
       this.state.stack.push(obj);
+      this.setState({ stack: this.state.stack })
+    } else {
+      obj.selected = !obj.selected;
       this.setState({ stack: this.state.stack })
     }
   },
 
   onDelete: function() {
-    throw 'Not implemented';
-    //this.state.graph.deleteSelected();
-    //this.setState({ graph: this.state.graph });
+    this.currentGraph().deleteSelected();
+    this.setState({ stack: this.state.stack });
   },
 
   onConnect: function(from, to) {
     if (from && this.selectedPort) {
       // validate connection
-      //this.state.graph.getContainerFor(from.id).links.push({ from: from, to: this.selectedPort });
       this.currentGraph().links.push({ from: from, to: this.selectedPort });
       this.setState({ stack: this.state.stack })
     }
@@ -129,8 +110,10 @@ var App = React.createClass({
 
   goTo: function(index) {
     while (this.state.stack.length-1 != index) {
-      this.state.stack.pop();
+      var graph = this.state.stack.pop();
+      graph.collapsed = true;
     }
+    this.currentGraph().collapsed = false;
     this.setState({ stack: this.state.stack })
   },
 
