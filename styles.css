@@ -100,8 +100,6 @@ body {
 .toolbox ul {
   margin: 0;
   padding: 0;
-  height: 100%;
-  width: 100%;
   list-style-type: none;
 }
 .toolbox li {
@@ -110,11 +108,13 @@ body {
   color: white;
   cursor: pointer;
   padding: 10px 10px;
-  margin: 5px 0;
-  width: 150px;
   background: #2ECC71;
   color: black;
   border: 1px solid black;
+  font-size: 10px;
+  width: 40%;
+  float: left;
+  margin: 5px 5px;
 }
 
 .grid {
@@ -170,9 +170,16 @@ body {
   fill: yellow;
 }
 
+.process.error rect {
+  stroke: red;
+}
 .process.selected rect {
   stroke: red;
   fill: yellow;
+}
+.process.blank > g> rect {
+  fill: none;
+  stroke: none;
 }
 
 *:focus {
@@ -184,4 +191,11 @@ button.copy {
   position: fixed;
   bottom: 20px;
   right: 50px;
+}
+
+.options {
+  margin: 10px 0;
+}
+.options label {
+  margin: 10px;
 }

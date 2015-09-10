@@ -34,7 +34,7 @@ function genMakefile(graph, data, ischild, all) {
 
   if (graph.processes) {
     graph.processes.forEach(p => {
-      var tpl = processes[p.name];
+      var tpl = Tools.processes[p.name];
       if (!tpl) return;
 
       var output = {};

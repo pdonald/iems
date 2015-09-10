@@ -3,16 +3,22 @@ var Toolbox = React.createClass({
     return { dragging: null };
   },
 
-  dragStart: function(e, key) {
+  dragStart: function(e, obj) {
     // todo: set image
-    this.setState({ dragging: key });
+    this.setState({ dragging: obj });
   },
 
   dragEnd: function(e) {
     if (this.state.dragging) {
-      addAction(this.state.dragging, e.pageX, e.pageY)
+      Actions.add(this.state.dragging, e.pageX, e.pageY)
       this.setState({ dragging: null });
     }
+  },
+
+  displayItemName: function(item) {
+    if (item.title) return item.title;
+    if (item.name) return item.name;
+    return 'undefined';
   },
 
   render: function() {
@@ -20,12 +26,20 @@ var Toolbox = React.createClass({
       <div>
         <h2>Toolbox</h2>
         <ul>
-          {Object.keys(processes).map((key) => (
+          {Object.keys(Tools.processes).map(key => (
             <li key={key}
               draggable="true"
-              onDragStart={(e) => this.dragStart(e, key)}
+              onDragStart={(e) => this.dragStart(e, Tools.processes[key])}
               onDragEnd={this.dragEnd}>
-              {processes[key].name}
+              {this.displayItemName(Tools.processes[key])}
+            </li>
+          ))}
+          {Object.keys(Tools.blocks).map(key => (
+            <li key={key}
+              draggable="true"
+              onDragStart={(e) => this.dragStart(e, Tools.blocks[key])}
+              onDragEnd={this.dragEnd}>
+              {this.displayItemName(Tools.blocks[key])}
             </li>
           ))}
         </ul>

@@ -13,7 +13,7 @@
   <div id="example"></div>
 
   <link rel="stylesheet" href="styles.css" />
-  <script src="js/model/processes.js" type="text/jsx;harmony=true"></script>
+  <script src="js/model/Tools.js" type="text/jsx;harmony=true"></script>
   <script src="js/model/GroupX.js" type="text/jsx;harmony=true"></script>
   <script src="js/model/Makefile.js" type="text/jsx;harmony=true"></script>
   <script src="js/graph/Connector.js" type="text/jsx;harmony=true"></script>
@@ -26,8 +26,10 @@
   <script src="js/app/Properties.js" type="text/jsx;harmony=true"></script>
   <script src="js/app/App.js" type="text/jsx;harmony=true"></script>
   <script type="text/jsx;harmony=true">
+    var Actions = {
+      add: Reflux.createAction()
+    };
     var moveAction = Reflux.createAction();
-    var addAction = Reflux.createAction();
     var connectAction = Reflux.createAction();
     var portSelectedAction = Reflux.createAction();
     var portDeselectedAction = Reflux.createAction();
