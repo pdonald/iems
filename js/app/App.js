@@ -38,7 +38,7 @@ var App = React.createClass({
      this.listenTo(Actions.portDeselected, p => this.selectedPort = null);
      this.listenTo(Actions.paramChanged, this.onParamChanged);
 
-     this.clipboard = new ZeroClipboard(this.refs.copyMakefileButton.getDOMNode());
+     this.clipboard = new ZeroClipboard(this.refs.copyMakefileButton);
    },
 
   onParamChanged: function(process, key, value) {
@@ -53,7 +53,7 @@ var App = React.createClass({
   },
 
   onAdd: function(template, x, y) {
-    var offset = this.refs.graph.getDOMNode().getBoundingClientRect();
+    var offset = ReactDOM.findDOMNode(this.refs.graph).getBoundingClientRect();
     if (x >= offset.left && x <= offset.right && y >= offset.top && y <= offset.bottom) {
       if (template.id) {
         var group = new GroupX(JSON.parse(JSON.stringify(template)));

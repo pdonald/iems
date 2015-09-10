@@ -4,14 +4,14 @@
   <meta charset="utf-8">
   <title>iEMS</title>
   <link rel="stylesheet" href="styles.css" />
-  <script src="react/react-0.13.3.js"></script>
-  <script src="react/react-with-addons-0.13.3.js"></script>
-  <script src="react/reflux.js"></script>
-  <script src="react/ZeroClipboard.js"></script>
 </head>
 <body>
   <div id="app"></div>
-  <script src="all.js"></script>
-  <script>React.render(React.createElement(App), document.getElementById('app'));</script>
+  <script src="js/lib/react-with-addons-0.14.0-rc1.js"></script>
+  <script src="js/lib/react-dom-0.14.0-rc1.js"></script>
+  <script src="js/lib/reflux-0.2.12.js"></script>
+  <script src="js/lib/ZeroClipboard.js"></script>
+  <script src="dist/app.js"></script>
+  <script>ReactDOM.render(React.createElement(App), document.getElementById('app'));</script>
 </body>
 </html>

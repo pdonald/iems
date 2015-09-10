@@ -2,7 +2,7 @@ var Graph = React.createClass({
   mixins: [React.addons.PureRenderMixin],
 
   componentDidMount: function() {
-    this.refs.container.getDOMNode().focus();
+    this.refs.container.focus();
   },
 
   onKeyDown: function(e) {
