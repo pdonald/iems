@@ -31,7 +31,8 @@ var App = React.createClass({
      this.listenTo(moveAction, this.onMove);
      this.listenTo(Actions.add, this.onAdd);
      this.listenTo(deleteAction, this.onDelete);
-     this.listenTo(selectAction, this.onSelect);
+     this.listenTo(Actions.select, this.onSelect);
+     this.listenTo(Actions.goIntoGroup, this.onGoIntoGroup);
      this.listenTo(connectAction, this.onConnect);
      this.listenTo(portSelectedAction, p => this.selectedPort = p);
      this.listenTo(portDeselectedAction, p => this.selectedPort = null);
@@ -77,12 +78,18 @@ var App = React.createClass({
   },
 
   onSelect: function(obj) {
+    obj.selected = !obj.selected;
+    this.setState({ stack: this.state.stack })
+  },
+
+  onGoIntoGroup: function(obj) {
+    // prevents double click bugs
+    if (obj == this.state.stack[0]) return;
+    if (obj == this.state.stack[this.state.stack.length-1]) return;
+
     if (obj.getSize) {
       obj.collapsed = false;
       this.state.stack.push(obj);
-      this.setState({ stack: this.state.stack })
-    } else {
-      obj.selected = !obj.selected;
       this.setState({ stack: this.state.stack })
     }
   },

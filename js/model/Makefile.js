@@ -1,7 +1,5 @@
 function genMakefile(graph, data, ischild, all) {
 
-  //return JSON.stringify(graph, null, 2)
-
   function makeData(graph) {
     data.ids[graph.id] = graph
     if (graph.processes) graph.processes.forEach(p => data.ids[p.id] = p)
@@ -75,6 +73,5 @@ function genMakefile(graph, data, ischild, all) {
       text;
   }
 
-  //if (!graph.id) console.log(text)
   return text;
 }

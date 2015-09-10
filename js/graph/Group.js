@@ -2,7 +2,7 @@ var Group = React.createClass({
   //mixins: [React.addons.PureRenderMixin],
 
   onClick: function() {
-    selectAction(this.props.group);
+    Action.select(this.props.group);
   },
 
   getPortPos: function(obj, portName, dir, self) {

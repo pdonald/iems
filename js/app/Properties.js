@@ -6,7 +6,7 @@ var Properties = React.createClass({
   },
 
   componentDidMount: function() {
-     this.listenTo(selectAction, this.onSelect);
+     this.listenTo(Actions.select, this.onSelect);
    },
 
   onSelect: function(obj) {
