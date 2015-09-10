@@ -3,41 +3,15 @@
 <head>
   <meta charset="utf-8">
   <title>iEMS</title>
+  <link rel="stylesheet" href="styles.css" />
   <script src="react/react-0.13.3.js"></script>
   <script src="react/react-with-addons-0.13.3.js"></script>
-  <script src="react/JSXTransformer-0.13.3.js"></script>
   <script src="react/reflux.js"></script>
   <script src="react/ZeroClipboard.js"></script>
 </head>
 <body>
-  <div id="example"></div>
-
-  <link rel="stylesheet" href="styles.css" />
-  <script src="js/model/Tools.js" type="text/jsx;harmony=true"></script>
-  <script src="js/model/GroupX.js" type="text/jsx;harmony=true"></script>
-  <script src="js/model/Makefile.js" type="text/jsx;harmony=true"></script>
-  <script src="js/graph/Connector.js" type="text/jsx;harmony=true"></script>
-  <script src="js/graph/Draggable.js" type="text/jsx;harmony=true"></script>
-  <script src="js/graph/Graph.js" type="text/jsx;harmony=true"></script>
-  <script src="js/graph/Group.js" type="text/jsx;harmony=true"></script>
-  <script src="js/graph/Port.js" type="text/jsx;harmony=true"></script>
-  <script src="js/graph/Process.js" type="text/jsx;harmony=true"></script>
-  <script src="js/app/Toolbox.js" type="text/jsx;harmony=true"></script>
-  <script src="js/app/Properties.js" type="text/jsx;harmony=true"></script>
-  <script src="js/app/App.js" type="text/jsx;harmony=true"></script>
-  <script type="text/jsx;harmony=true">
-    var Actions = {
-      add: Reflux.createAction(),
-      delete: Reflux.createAction(),
-      move: Reflux.createAction(),
-      connect: Reflux.createAction(),
-      select: Reflux.createAction(),
-      goIntoGroup: Reflux.createAction(),
-      portSelected: Reflux.createAction(),
-      portDeselected: Reflux.createAction(),
-      paramChanged: Reflux.createAction(),
-    };
-    React.render(<App/>, document.getElementById('example'));
-  </script>
+  <div id="app"></div>
+  <script src="all.js"></script>
+  <script>React.render(React.createElement(App), document.getElementById('app'));</script>
 </body>
 </html>
