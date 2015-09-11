@@ -189,8 +189,8 @@ br{
   stroke: red;
 }
 .process.selected rect {
-  stroke: red;
-  fill: yellow;
+  stroke: red !important;
+  fill: yellow !important;
 }
 .process.blank > g > rect {
   fill: none !important;

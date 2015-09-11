@@ -46,7 +46,7 @@ function genMakefile(graph, root, all) {
       text += '\t' + `touch status.${processName(p, graph)}.running` + '\n';
       text += '\t' + tpl.toBash(p.params || {}, input, output).join('\n\t') + '\n';
       if (Object.keys(output).length == 0) text += '\ttouch ' + noOutputDone + '\n';
-      text += '\t' + `sleep 1` + '\n';
+      //text += '\t' + `sleep 1` + '\n';
       text += '\t' + `touch status.${processName(p, graph)}.done` + '\n';
       text += '\n'
     });
