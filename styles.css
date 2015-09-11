@@ -222,10 +222,13 @@ button.copy {
   margin: 10px;
 }
 
+nav.depth {
+  margin-left: 5px;
+}
 nav.depth li {
   margin: 5px 3px;
   border: 1px solid black;
-  padding: 5px 5px;
+  padding: 5px 15px;
   display: inline-block;
   cursor: pointer;
 }
