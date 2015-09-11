@@ -28,6 +28,31 @@ class GroupX {
     this.processes.push(process);
   }
 
+  getLinkToGroup(id, port) {
+    if (this.links) {
+      var link = this.links.filter(l => l.to.id == id && l.to.port == port)[0];
+      if (link) {
+        var process = this.processes.filter(p => p.id == link.from.id)[0];
+        if (process) {
+          return { p: process, g: this, port: link.from.port };
+        }
+        var group = this.groups.filter(g => g.id == link.from.id)[0];
+        if (group) {
+          return group.getLinkToGroup(group.id, link.to.port);
+        }
+      }
+    }
+    if (this.groups) {
+      for (var i in this.groups) {
+        var result = this.groups[i].getLinkToGroup(id, port);
+        if (result) {
+          return result;
+        }
+      }
+    }
+    return null;
+  }
+
   getContainerFor(id) {
     if (this.id == id) {
       return this;

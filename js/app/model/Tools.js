@@ -202,14 +202,14 @@ var Tools = {
         ini.push('WordPenalty');
         ini.push('PhrasePenalty');
         ini.push('Distortion');
-        ini.push(`PhraseDictionaryCompact name=TranslationModel0 num-features=4 path=${input.phr} input-factor=0 output-factor=0`);
+        if (input.phr) ini.push(`PhraseDictionaryCompact name=TranslationModel0 num-features=4 path=${input.phr} input-factor=0 output-factor=0`);
         if (input.reord) ini.push(`LexicalReordering name=LexicalReordering0 num-features=6 type=wbe-msd-bidirectional-fe-allff input-factor=0 output-factor=0 path=${input.reord.replace('.minlexr', '')}`);
         if (input.lm) ini.push(`KENLM lazyken=0 name=LM0 factor=0 path=${input.lm} order=3`);
         ini.push('[weight]');
         ini.push('UnknownWordPenalty0= 1');
         ini.push('WordPenalty0= -1');
         ini.push('PhrasePenalty0= 0.2');
-        ini.push('TranslationModel0= 0.2 0.2 0.2 0.2');
+        if (input.phr) ini.push('TranslationModel0= 0.2 0.2 0.2 0.2');
         ini.push('Distortion0= 0.3');
         if (input.reord) ini.push('LexicalReordering0= 0.3 0.3 0.3 0.3 0.3 0.3');
         if (input.lm) ini.push('LM0= 0.5');
@@ -217,6 +217,7 @@ var Tools = {
         var cmd = [];
         cmd.push(`echo > ${output.ini}`);
         ini.forEach(l => cmd.push(`echo "${l}" >> ${output.ini}`));
+        if (input.sample) cmd.push(`cat ${input.sample}/moses.ini >> ${output.ini}`);
         return cmd;
       }
     },
@@ -317,19 +318,29 @@ var Tools = {
     psamplemodel: {
       name: 'psamplemodel', title: 'Sampling model',
       input: { src: 'dir<bin>', trg: 'dir<bin>', algn: 'file<bin>', lex: 'file<bin>' },
-      output: { out: 'file<ini>' },
+      output: { out: 'dir' },
       params: {},
       toBash: (params, input, output) => {
         var ini = [];
         ini.push('[feature]');
         ini.push('LexicalReordering name=DM0 type=hier-mslr-bidirectional-fe-allff input-factor=0 output-factor=0');
-        ini.push('Mmsapt name=PT0 lr-func=DM0 path=/path/ L1=src L2=trg sample=1000');
+        ini.push(`Mmsapt name=PT0 lr-func=DM0 path=${output.out}/ L1=src L2=trg sample=1000`);
         ini.push('[weight]');
         ini.push('DM0= 0.3 0.3 0.3 0.3 0.3 0.3 0.3 0.3');
 
         var cmd = [];
-        cmd.push(`echo > ${output.out}`)
-        ini.forEach(line => cmd.push(`echo "${line}" >> ${output.out}`));
+        cmd.push(`rm -rf ${output.out}`);
+        cmd.push(`mkdir ${output.out}`);
+        cmd.push(`echo > ${output.out}/moses.ini`);
+        cmd.push(`ln -s \`readlink -f ${input.src}/corpus.mct\` ${output.out}/src.mct`);
+        cmd.push(`ln -s \`readlink -f ${input.src}/corpus.sfa\` ${output.out}/src.sfa`);
+        cmd.push(`ln -s \`readlink -f ${input.src}/corpus.tdx\` ${output.out}/src.tdx`);
+        cmd.push(`ln -s \`readlink -f ${input.trg}/corpus.mct\` ${output.out}/trg.mct`);
+        cmd.push(`ln -s \`readlink -f ${input.trg}/corpus.sfa\` ${output.out}/trg.sfa`);
+        cmd.push(`ln -s \`readlink -f ${input.trg}/corpus.tdx\` ${output.out}/trg.tdx`);
+        cmd.push(`ln -s \`readlink -f ${input.algn}\` ${output.out}/src-trg.mam`);
+        cmd.push(`ln -s \`readlink -f ${input.lex}\` ${output.out}/src-trg.lex`);
+        ini.forEach(line => cmd.push(`echo "${line}" >> ${output.out}/moses.ini`));
         return cmd;
       }
     }
