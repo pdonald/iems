@@ -202,9 +202,9 @@ var Tools = {
         ini.push('WordPenalty');
         ini.push('PhrasePenalty');
         ini.push('Distortion');
-        if (input.phr) ini.push(`PhraseDictionaryCompact name=TranslationModel0 num-features=4 path=${input.phr} input-factor=0 output-factor=0`);
-        if (input.reord) ini.push(`LexicalReordering name=LexicalReordering0 num-features=6 type=wbe-msd-bidirectional-fe-allff input-factor=0 output-factor=0 path=${input.reord.replace('.minlexr', '')}`);
-        if (input.lm) ini.push(`KENLM lazyken=0 name=LM0 factor=0 path=${input.lm} order=3`);
+        if (input.phr) ini.push(`PhraseDictionaryCompact name=TranslationModel0 num-features=4 path=/tools/train/${input.phr} input-factor=0 output-factor=0`);
+        if (input.reord) ini.push(`LexicalReordering name=LexicalReordering0 num-features=6 type=wbe-msd-bidirectional-fe-allff input-factor=0 output-factor=0 path=/tools/train/${input.reord.replace('.minlexr', '')}`);
+        if (input.lm) ini.push(`KENLM lazyken=0 name=LM0 factor=0 path=/tools/train/${input.lm} order=3`);
         ini.push('[weight]');
         ini.push('UnknownWordPenalty0= 1');
         ini.push('WordPenalty0= -1');
@@ -324,7 +324,7 @@ var Tools = {
         var ini = [];
         ini.push('[feature]');
         ini.push('LexicalReordering name=DM0 type=hier-mslr-bidirectional-fe-allff input-factor=0 output-factor=0');
-        ini.push(`Mmsapt name=PT0 lr-func=DM0 path=${output.out}/ L1=src L2=trg sample=1000`);
+        ini.push(`Mmsapt name=PT0 lr-func=DM0 path=/tools/train/${output.out}/ L1=src L2=trg sample=1000`);
         ini.push('[weight]');
         ini.push('DM0= 0.3 0.3 0.3 0.3 0.3 0.3 0.3 0.3');
 
@@ -348,11 +348,13 @@ var Tools = {
       name: 'mert', title: 'MERT',
       input: { src: 'file<tok>', ref: 'file<tok>', ini: 'file<ini>' },
       output: { ini: 'file<ini>'},
-      params: { trg: 'string' },
+      params: {},
       toBash: (params, input, output) => {
         return [
-          `perl /tools/scripts/training/mert-moses.pl ${input.src} ${input.ref} /tools/moses ${input.ini} --mertdir /tools/ -e ${params.trg} --decoder-flags '-threads all'`,
-		  `cp moses-mert.ini ${output.ini}`
+          'TEMP=$(shell mktemp -d) && \\',
+          `perl /tools/scripts/training/mert-moses.pl ${input.src} ${input.ref} /tools/moses ${input.ini} --no-filter-phrase-table --mertdir /tools/ --working-dir $$TEMP && \\`,
+          `cp $$TEMP/moses.ini ${output.ini} && \\`,
+          'rm -rf $$TEMP'
         ];
       }
     }
