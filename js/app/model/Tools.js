@@ -2,6 +2,7 @@ var Tools = {
   processes: {
     wget: {
       name: 'wget',
+	  group: 'corpora',
       params: { url: 'string' },
       input: { },
       output: { out: 'file<any>' },
@@ -11,6 +12,7 @@ var Tools = {
     },
     opus: {
       name: 'opus',
+	  group: 'corpora',
       params: { corpus: 'string', srcLang: 'language', trgLang: 'language' },
       input: { },
       output: {
@@ -38,6 +40,7 @@ var Tools = {
     },
     tokenizer: {
       name: 'tokenizer',
+	  group: 'corpora',
       params: { lang: 'string' },
       input: { in: 'file<text>' },
       output: { out: 'file<tok>' },
@@ -47,6 +50,7 @@ var Tools = {
     },
     fastalign: {
       name: 'fastalign',
+	  group: 'general',
       params: { reverse: 'bool' },
       input: { src: 'file<tok>', trg: 'file<tok>' },
       output: { out: 'file<align>' },
@@ -64,6 +68,7 @@ var Tools = {
     },
     kenlm: {
       name: 'kenlm',
+	  group: 'general',
       params: { order: 'integer' },
       input: { in: 'file<tok>' },
       output: { out: 'file<arpa>' },
@@ -76,6 +81,7 @@ var Tools = {
     },
     binlm: {
       name: 'binlm',
+	  group: 'bin',
       params: { type: 'string' },
       input: { in: 'file<arpa>' },
       output: { out: 'file<binlm>' },
@@ -85,6 +91,7 @@ var Tools = {
     },
     sym: {
       name: 'sym',
+	  group: 'general',
       params: { method: 'string' },
       input: { srctrg: 'file<align>', trgsrc: 'file<align>' },
       output: { out: 'file<align>' },
@@ -94,6 +101,7 @@ var Tools = {
     },
     phrases: {
       name: 'phrases',
+	  group: 'general',
       params: { maxLength: 'int', model: 'string' },
       input: { src: 'file<tok>', trg: 'file<tok>', algn: 'file<align>' },
       output: { out: 'file<phrases>', inv: 'file<phrases>', o: 'file<any>' },
@@ -110,6 +118,7 @@ var Tools = {
     },
     lexical: {
       name: 'lexical',
+	  group: 'general',
       params: {},
       input: { src: 'file<tok>', trg: 'file<tok>', algn: 'file<align>' },
       output: { srctrg: 'file<lex>', trgsrc: 'file<lex>' },
@@ -125,6 +134,7 @@ var Tools = {
     },
     phrasescore: {
       name: 'phrasescore',
+	  group: 'general',
       params: { },
       input: { phr: 'file<phrases>', phrinv: 'file<phrases>', srctrg: 'file<lex>', trgsrc: 'file<lex>' },
       output: { ptable: 'file<phrase-table>' },
@@ -142,6 +152,7 @@ var Tools = {
     },
     phrasesbin: {
       name: 'phrasesbin',
+	  group: 'bin',
       input: { ptable: 'file<phrase-table>' },
       output: { minphr: 'file<phrase-table-bin>' },
       toBash: (params, input, output) => {
@@ -153,6 +164,7 @@ var Tools = {
     },
     reordering: {
       name: 'reordering',
+	  group: 'general',
       params: { model: 'string', type: 'string', orientation: 'string', smoothing: 'float' },
       input: { phr: 'file<any>' },
       output: { reord: 'file<reordering>' },
@@ -167,6 +179,7 @@ var Tools = {
     },
     reorderingbin: {
       name: 'reorderingbin',
+	  group: 'bin',
       input: { reord: 'file<reordering>' },
       output: { minlexr: 'file<reordering-bin>' },
       toBash: (params, input, output) => {
@@ -178,6 +191,7 @@ var Tools = {
     },
     echo: {
       name: 'echo',
+	  group: 'corpora',
       input: {},
       output: { out: 'file<text>' },
       params: { text: 'string' },
@@ -187,6 +201,7 @@ var Tools = {
     },
     'moses-ini': {
       name: 'moses-ini', title: 'Moses INI', width: 300,
+	  group: 'general',
       input: { phr: ['file<phrase-table>', 'file<phrase-table-bin'], lm: 'file<binlm>', reord: 'file<reord>', sample: 'sampling' },
       output: { ini: 'file<moses>' },
       toBash: (params, input, output) => {
@@ -223,6 +238,7 @@ var Tools = {
     },
     moses: {
       name: 'moses', title: 'moses decoder',
+	  group: 'general',
       input: { in: 'file<tok>', ini: 'file<moses>' },
       output: { out: 'file<tok>' },
       toBash: (params, input, output) => {
@@ -233,6 +249,7 @@ var Tools = {
     },
     bleu: {
       name: 'bleu', title: 'BLEU',
+	  group: 'evaluation',
       input: { trans: 'file<text>', src: 'file<text>', ref: 'file<text>' },
       output: { out: 'file<bleu>' },
       params: { case: 'bool' },
@@ -250,6 +267,7 @@ var Tools = {
     },
     detokenizer: {
       name: 'detokenizer',
+	  group: 'corpora',
       input: { in: 'file<tok>' },
       output: { out: 'file<text>' },
       params: { lang: 'language' },
@@ -261,6 +279,7 @@ var Tools = {
     },
     compareval: {
       name: 'compareval', title: ' MT-ComparEval',
+	  group: 'evaluation',
       input: { src: 'file<tok>', ref: 'file<tok>', trans: 'file<tok>' },
       output: {},
       params: { server: 'string', experiment: 'string', task: 'string' },
@@ -273,6 +292,7 @@ var Tools = {
     },
     bintext: {
       name: 'bintext', title: 'Binarize text',
+	  group: 'bin',
       input: { in: 'file<tok>' },
       output: { out: 'dir<bin>' },
       params: {},
@@ -286,6 +306,7 @@ var Tools = {
     },
     binalign: {
       name: 'binalign', title: 'Binarize align',
+	  group: 'bin',
       input: { in: 'file<align>' },
       output: { out: 'file<bin>' },
       params: {},
@@ -297,6 +318,7 @@ var Tools = {
     },
     binlex: {
       name: 'binlex', title: 'Binarize lex',
+	  group: 'bin',
       input: { src: 'dir<bin>', trg: 'dir<bin>', algn: 'file<bin>' },
       output: { out: 'file<bin>' },
       params: {},
@@ -317,6 +339,7 @@ var Tools = {
     },
     psamplemodel: {
       name: 'psamplemodel', title: 'Sampling model',
+	  group: 'general',
       input: { src: 'dir<bin>', trg: 'dir<bin>', algn: 'file<bin>', lex: 'file<bin>' },
       output: { out: 'dir' },
       params: {},
@@ -346,6 +369,7 @@ var Tools = {
     },
     mert: {
       name: 'mert', title: 'MERT',
+	  group: 'general',
       input: { src: 'file<tok>', ref: 'file<tok>', ini: 'file<ini>' },
       output: { ini: 'file<ini>'},
       params: {},

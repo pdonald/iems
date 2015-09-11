@@ -97,6 +97,14 @@ body {
   color: #fff;
   margin-bottom: 15px;
 }
+.sidebar h3 {
+  font-size: 11px;
+  color: #fff;
+  margin-bottom: 15px;
+}
+br{
+	clear:both;
+}
 .toolbox ul {
   margin: 0;
   padding: 0;
