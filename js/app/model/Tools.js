@@ -343,6 +343,18 @@ var Tools = {
         ini.forEach(line => cmd.push(`echo "${line}" >> ${output.out}/moses.ini`));
         return cmd;
       }
+    },
+    mert: {
+      name: 'mert', title: 'MERT',
+      input: { src: 'file<tok>', ref: 'file<tok>', ini: 'file<ini>' },
+      output: { ini: 'file<ini>'},
+      params: { trg: 'string' },
+      toBash: (params, input, output) => {
+        return [
+          `perl /tools/scripts/training/mert-moses.pl ${input.src} ${input.ref} /tools/moses ${input.ini} --mertdir /tools/ -e ${params.trg} --decoder-flags '-threads all'`,
+		  `cp moses-mert.ini ${output.ini}`
+        ];
+      }
     }
   },
   blocks: {
