@@ -43,6 +43,7 @@ var Process = React.createClass({
     if (this.props.blank) classes.push('blank');
     if (this.props.graph.id == 0) classes.push('main');
     if (this.props.selected) classes.push('selected');
+    if (this.props.status) classes.push(this.props.status);
 
     var min, max;
     var padding = 10;

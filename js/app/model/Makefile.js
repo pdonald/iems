@@ -1,7 +1,7 @@
 function genMakefile(graph, root, all) {
 
   function processName(p, group, port) {
-    return p.name + '-g' + group.id + 'p' + p.id + '.' + port;
+    return p.name + '-g' + group.id + 'p' + p.id + (port ? '.' + port : '');
   }
 
   var gen = !all;
@@ -43,8 +43,11 @@ function genMakefile(graph, root, all) {
       text += ': '
       text += Object.keys(input).map(key => input[key]).join(' ')
       text += '\n'
+      text += '\t' + `touch status.${processName(p, graph)}.running` + '\n';
       text += '\t' + tpl.toBash(p.params || {}, input, output).join('\n\t') + '\n';
       if (Object.keys(output).length == 0) text += '\ttouch ' + noOutputDone + '\n';
+      text += '\t' + `sleep 1` + '\n';
+      text += '\t' + `touch status.${processName(p, graph)}.done` + '\n';
       text += '\n'
     });
   }
@@ -59,7 +62,7 @@ function genMakefile(graph, root, all) {
     text =
       '.PHONY: all clean\n\n' +
       'all: ' + all.join(' ') + '\n\n' +
-      'clean:\n\trm -rf ' + all.join(' ') + '\n\n' +
+      'clean:\n\trm -rf status.* ' + all.join(' ') + '\n\n' +
       text;
   }
 

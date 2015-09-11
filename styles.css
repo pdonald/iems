@@ -193,10 +193,18 @@ br{
   fill: yellow;
 }
 .process.blank > g > rect {
-  fill: none;
+  fill: none !important;
 }
 .process.main.blank > g > rect {
   stroke: none;
+}
+.process.running > g > rect {
+  stroke: black;
+  fill: purple;
+}
+.process.done > g > rect {
+  stroke: black;
+  fill: lime;
 }
 
 *:focus {
@@ -249,6 +257,12 @@ nav.depth li {
 }
 nav.depth li.active {
   background: #ccc;
+}
+nav.depth li.run {
+  background: lime;
+}
+nav.depth li.right {
+  float: right;
 }
 
 .zoom-in {

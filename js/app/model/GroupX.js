@@ -15,6 +15,26 @@ class GroupX {
     }
   }
 
+  getStatus(status) {
+    if (!status) return;
+
+    var procs = this.processes.map(p => p.name + '-g' + this.id + 'p' + p.id);
+    var pstatuses = procs.map(p => status[p]).filter(s => s);
+    var gstatuses = this.groups.map(g => g.getStatus(status));
+
+    if (pstatuses.indexOf('running') !== -1 || gstatuses.indexOf('running') !== -1) {
+      return 'running';
+    }
+
+    if (pstatuses.filter(s => s == 'done').length == procs.length && gstatuses.filter(s => s == 'done').length == this.groups.length) {
+      return 'done';
+    }
+
+    //console.log(this.id, this.name, pstatuses, gstatuses, gstatuses.length, this.groups.length);
+
+    return;
+  }
+
   addGroup(group) {
     group.links.forEach(l => {
       // todo: id 1 is hardcoded

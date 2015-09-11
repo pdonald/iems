@@ -36,6 +36,16 @@ var App = React.createClass({
      this.listenTo(Actions.paramChanged, this.onParamChanged);
 
      this.clipboard = new ZeroClipboard(this.refs.copyMakefileButton);
+
+     setInterval(() => this.updateStatus(), 1000);
+   },
+
+   updateStatus: function() {
+     console.log('updating status')
+     $.get('/status', result => {
+       this.currentDoc().status = result;
+       this.setState(this.state);
+     });
    },
 
   onParamChanged: function(process, key, value) {
@@ -153,6 +163,16 @@ var App = React.createClass({
     this.setState(this.state);
   },
 
+  runExp: function() {
+    $.ajax({ type: 'POST', url: '/run', data: this.getMakefile(), contentType: 'text/plain' }, res => {
+      console.log(res);
+    });
+  },
+
+  getMakefile: function() {
+    return genMakefile(this.currentGraph(), this.currentDoc().stack[0]);
+  },
+
   render: function() {
     return (
       <div className="container">
@@ -188,19 +208,20 @@ var App = React.createClass({
                     <nav className="depth">
                       <ul>
                         {this.state.documents.map((doc, index) => <li className={index==this.state.currentDocument?'active':''} key={index} onClick={() => this.goToDoc(index)}>{doc.name}</li>)}
-                        <li onClick={() => this.cloneDoc(this.currentDoc())}>Clone</li>
-                        <li onClick={this.addDoc}>New</li>
+                        <li className="right" onClick={() => this.cloneDoc(this.currentDoc())}>Clone</li>
+                        <li className="right" onClick={this.addDoc}>New</li>
                       </ul>
                     </nav>
                     <nav className="depth">
                       <ul>
                         {this.currentDoc().stack.map((g, index) => <li key={index} onClick={() => this.goTo(index)}>{(g.title || g.name || '#'+g.id)}</li>)}
+                        <li className="run right" onClick={this.runExp}>Run</li>
                       </ul>
                     </nav>
                     <div className="cell-scroll-outer" style={{'height': '80%'}}>
                       <div className="cell-scroll-inner grid">
                         <Graph ref="graph" graph={this.currentGraph()}>
-                          <Group blank={true} group={this.currentGraph()}/>
+                          <Group blank={true} group={this.currentGraph()} status={this.currentDoc().status}/>
                         </Graph>
                       </div>
                     </div>
@@ -213,7 +234,7 @@ var App = React.createClass({
                             <label><input type="radio" readOnly name="outtype" checked={this.state.output=='json'?'checked':''} onClick={e => this.changeOutputType('json')}/> JSON</label>
                           </div>
                           <pre id="makefile">
-                            {(this.state.output == 'makefile' ? genMakefile(this.currentGraph(), this.currentDoc().stack[0]) : JSON.stringify(this.currentGraph(), null, 2)) + '\n\n\n\n'}
+                            {(this.state.output == 'makefile' ? this.getMakefile() : JSON.stringify(this.currentGraph(), null, 2)) + '\n\n\n\n'}
                           </pre>
                         </div>
                       </div>

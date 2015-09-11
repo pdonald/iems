@@ -37,14 +37,15 @@ var Group = React.createClass({
     var group = this.props.group;
     var groups, processez, links;
 
-    //if (!this.props.blank) group.height = 50;
-
     if (group.groups) {
-      groups = group.groups.map(g => <Group key={g.id} group={g}/>);
+      groups = group.groups.map(g => <Group key={g.id} group={g} status={this.props.status}/>);
     }
 
     if (group.processes) {
       processez = group.processes.map(p => {
+        var id = p.name + '-g' + group.id + 'p' + p.id;
+        var status;
+        if (this.props.status) status = this.props.status[id];
         var ports = { in: Object.keys(Tools.processes[p.name].input), out: Object.keys(Tools.processes[p.name].output) }
         var name = p.name;
         if (p.title) name = p.title;
@@ -52,7 +53,7 @@ var Group = React.createClass({
         if (Tools.processes[p.name].toTitle) name = Tools.processes[p.name].toTitle(p);
         return <Process width={p.width} height={p.height} x={p.x} y={p.y}
                         name={name} ports={ports} graph={p} id={p.id} key={group.id+'/'+p.id}
-                        selected={p.selected} />;
+                        selected={p.selected} status={status} />;
       });
     }
 
@@ -69,11 +70,13 @@ var Group = React.createClass({
       });
     }
 
+    var gstatus = group.getStatus(this.props.status);
+
     if (this.props.blank) {
       var size = group.getCalculatedSize();
       return (
         <Process width={size.width} height={size.height} name={group.title || group.name} ports={group.ports}
-                 graph={group} id={group.id} blank={true} x={group.id == 0 ? 0 : 20} y={group.id == 0 ? 0 : 50}>
+                 graph={group} id={group.id} blank={true} x={group.id == 0 ? 0 : 20} y={group.id == 0 ? 0 : 50} status={gstatus}>
           {groups}
           {processez}
           {links}
@@ -82,7 +85,7 @@ var Group = React.createClass({
     } else {
       return (
         <Process width={group.width} height={group.height} name={group.title || group.name} ports={group.ports}
-                 x={group.x} y={group.y} graph={group} id={group.id} selected={group.selected}>
+                 x={group.x} y={group.y} graph={group} id={group.id} selected={group.selected} status={gstatus}>
         </Process>
       );
     }

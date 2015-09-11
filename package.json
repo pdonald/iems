@@ -1,0 +1,16 @@
+{
+  "name": "iems",
+  "version": "1.0.0",
+  "description": "An Interactive Experiment Management System for the [Moses Toolkit](https://github.com/moses-smt).",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.13.3",
+    "express": "^4.13.3"
+  }
+}
