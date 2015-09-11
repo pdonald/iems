@@ -126,13 +126,13 @@ var App = React.createClass({
                       <div className="cell-scroll-inner">
                         <div className="table sidebar">
                           <div className="row">
-                            <div className="cell toolbox">
-                              <Toolbox/>
+                            <div className="cell properties">
+                              <Properties/>
                             </div>
                           </div>
                           <div className="row">
-                            <div className="cell properties">
-                              <Properties/>
+                            <div className="cell toolbox">
+                              <Toolbox/>
                             </div>
                           </div>
                         </div>
