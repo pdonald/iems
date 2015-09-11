@@ -122,15 +122,19 @@ var App = React.createClass({
               <div className="table">
                 <div className="row">
                   <div className="cell" style={{'borderRight': '1px solid #000000', 'width': '300px', 'height': '100%'}}>
-                    <div className="table sidebar">
-                      <div className="row">
-                        <div className="cell toolbox">
-                          <Toolbox/>
-                        </div>
-                      </div>
-                      <div className="row">
-                        <div className="cell properties">
-                          <Properties/>
+                    <div className="cell-scroll-outer" style={{'height': '100%'}}>
+                      <div className="cell-scroll-inner">
+                        <div className="table sidebar">
+                          <div className="row">
+                            <div className="cell toolbox">
+                              <Toolbox/>
+                            </div>
+                          </div>
+                          <div className="row">
+                            <div className="cell properties">
+                              <Properties/>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
