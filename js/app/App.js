@@ -2,9 +2,22 @@ var App = React.createClass({
   getInitialState: function() {
     return {
       output: 'makefile',
-      last: 1400,
-      stack: [
-        new GroupX(AppDefaultGraph)
+      currentDocument: 0,
+      documents: [
+        {
+          name: 'Experiment #1',
+          last: 1400,
+          stack: [
+            new GroupX(AppDefaultGraph)
+          ]
+        },
+        {
+          name: 'Experiment #2',
+          last: 1,
+          stack: [
+            new GroupX({ id: 0, title: 'Main', x:0, y:0 })
+          ]
+        }
       ]
     }
   },
@@ -27,13 +40,13 @@ var App = React.createClass({
 
   onParamChanged: function(process, key, value) {
     process[key] = value;
-    this.setState({ stack: this.state.stack });
+    this.setState(this.state);
   },
 
   onMove: function(pos, graph, parent) {
      graph.x = pos.x;
      graph.y = pos.y;
-     this.setState({ stack: this.state.stack });
+     this.setState(this.state);
   },
 
   onAdd: function(template, x, y) {
@@ -57,37 +70,38 @@ var App = React.createClass({
           name: template.name, type: template.name, params: {}
         });
       }
-      this.setState({ last: this.state.last+1, stack: this.state.stack })
+      this.currentDoc().last++;
+      this.setState(this.state);
     }
   },
 
   onSelect: function(obj) {
     obj.selected = !obj.selected;
-    this.setState({ stack: this.state.stack })
+    this.setState(this.state);
   },
 
   onGoIntoGroup: function(obj) {
     // prevents double click bugs
-    if (obj == this.state.stack[0]) return;
-    if (obj == this.state.stack[this.state.stack.length-1]) return;
+    if (obj == this.currentDoc().stack[0]) return;
+    if (obj == this.currentDoc().stack[this.currentDoc().stack.length-1]) return;
 
     if (obj.getSize) {
       obj.collapsed = false;
-      this.state.stack.push(obj);
-      this.setState({ stack: this.state.stack })
+      this.currentDoc().stack.push(obj);
+      this.setState(this.state);
     }
   },
 
   onDelete: function() {
     this.currentGraph().deleteSelected();
-    this.setState({ stack: this.state.stack });
+    this.setState(this.state);
   },
 
   onConnect: function(from, to) {
     if (from && this.selectedPort) {
       // validate connection
       this.currentGraph().links.push({ from: from, to: this.selectedPort });
-      this.setState({ stack: this.state.stack })
+      this.setState(this.state);
     }
   },
 
@@ -95,17 +109,48 @@ var App = React.createClass({
     this.setState({ output: type });
   },
 
+  addDoc: function() {
+    var doc = {
+      name: 'Experiment #' + (this.state.documents.length+1),
+      last: 1,
+      stack: [
+        new GroupX({ id: 0, title: 'Main', x:0, y:0 })
+      ]
+    };
+    this.state.documents.push(doc);
+    this.state.currentDocument = this.state.documents.length - 1;
+    this.setState(this.state);
+  },
+
+  cloneDoc: function(doc) {
+    var clone = JSON.parse(JSON.stringify(doc));
+    clone.name += ' (clone)';
+    clone.stack = [new GroupX(clone.stack[0])]
+    this.state.documents.push(clone);
+    this.state.currentDocument = this.state.documents.length - 1;
+    this.setState(this.state);
+  },
+
+  currentDoc: function() {
+    return this.state.documents[this.state.currentDocument];
+  },
+
+  goToDoc: function(index) {
+    this.state.currentDocument = index;
+    this.setState(this.state);
+  },
+
   currentGraph: function() {
-    return this.state.stack[this.state.stack.length-1];
+    return this.currentDoc().stack[this.currentDoc().stack.length-1];
   },
 
   goTo: function(index) {
-    while (this.state.stack.length-1 != index) {
-      var graph = this.state.stack.pop();
+    while (this.currentDoc().stack.length-1 != index) {
+      var graph = this.currentDoc().stack.pop();
       graph.collapsed = true;
     }
     this.currentGraph().collapsed = false;
-    this.setState({ stack: this.state.stack })
+    this.setState(this.state);
   },
 
   render: function() {
@@ -142,7 +187,14 @@ var App = React.createClass({
                   <div className="cell">
                     <nav className="depth">
                       <ul>
-                        {this.state.stack.map((g, index) => <li key={index} onClick={() => this.goTo(index)}>{(g.title || g.name || '#'+g.id)}</li>)}
+                        {this.state.documents.map((doc, index) => <li className={index==this.state.currentDocument?'active':''} key={index} onClick={() => this.goToDoc(index)}>{doc.name}</li>)}
+                        <li onClick={() => this.cloneDoc(this.currentDoc())}>Clone</li>
+                        <li onClick={this.addDoc}>New</li>
+                      </ul>
+                    </nav>
+                    <nav className="depth">
+                      <ul>
+                        {this.currentDoc().stack.map((g, index) => <li key={index} onClick={() => this.goTo(index)}>{(g.title || g.name || '#'+g.id)}</li>)}
                       </ul>
                     </nav>
                     <div className="cell-scroll-outer" style={{'height': '80%'}}>
@@ -161,7 +213,7 @@ var App = React.createClass({
                             <label><input type="radio" readOnly name="outtype" checked={this.state.output=='json'?'checked':''} onClick={e => this.changeOutputType('json')}/> JSON</label>
                           </div>
                           <pre id="makefile">
-                            {(this.state.output == 'makefile' ? genMakefile(this.currentGraph(), this.state.stack[0]) : JSON.stringify(this.currentGraph(), null, 2)) + '\n\n\n\n'}
+                            {(this.state.output == 'makefile' ? genMakefile(this.currentGraph(), this.currentDoc().stack[0]) : JSON.stringify(this.currentGraph(), null, 2)) + '\n\n\n\n'}
                           </pre>
                         </div>
                       </div>

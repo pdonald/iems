@@ -247,6 +247,9 @@ nav.depth li {
   display: inline-block;
   cursor: pointer;
 }
+nav.depth li.active {
+  background: #ccc;
+}
 
 .zoom-in {
   cursor: zoom-in;
