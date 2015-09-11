@@ -38,7 +38,7 @@ var Group = React.createClass({
     var groups, processez, links;
 
     if (group.groups) {
-      groups = group.groups.map(g => <Group key={g.id} group={g} status={this.props.status}/>);
+      groups = group.groups.map(g => <Group key={group.id+'/'+g.id} group={g} status={this.props.status}/>);
     }
 
     if (group.processes) {
@@ -66,7 +66,7 @@ var Group = React.createClass({
       links = group.links.map(l => {
         var source = this.getPortPos(ids[l.from.id], l.from.port, 'out', l.from.id == group.id);
         var target = this.getPortPos(ids[l.to.id], l.to.port, 'in', l.to.id == group.id);
-        return <Connector key={l.from.id+'/'+l.from.port+'/'+l.to.id+'/'+l.to.port} source={source} target={target} graph={l}/>;
+        return <Connector key={group.id+'/'+l.from.id+'/'+l.from.port+'/'+l.to.id+'/'+l.to.port} source={source} target={target} graph={l}/>;
       });
     }
 
