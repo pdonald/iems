@@ -75,7 +75,7 @@ var Group = React.createClass({
       var size = group.getCalculatedSize();
       return (
         <Process width={size.width} height={size.height} name={group.title || group.name} ports={group.ports}
-                 graph={group} id={group.id} blank={true} x={20} y={50}>
+                 graph={group} id={group.id} blank={true} x={group.id == 0 ? 0 : 20} y={group.id == 0 ? 0 : 50}>
           {groups}
           {processez}
           {links}
