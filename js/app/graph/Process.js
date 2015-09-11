@@ -60,7 +60,7 @@ var Process = React.createClass({
                  onMove={this.onMove}>
         <g>
           <rect x="0" y="0" width={width} height={height} onDoubleClick={this.onClick}/>
-          <g className="zoom-in" onClick={this.goIntoGroup}><text x="10" y="30">{!this.props.blank ? this.props.name : ''}</text></g>
+          <g className={this.props.graph.collapsed?'zoom-in':''} onClick={this.goIntoGroup}><text x="10" y="30">{!this.props.blank ? this.props.name : ''}</text></g>
           <g>{ports.in.map((port, index) => <Port process={this.props.id} key={port} label={this.portName(this.props.graph, 'input', port)} type="in" x={(index+1)*offset.x} y={0}/>)}</g>
           <g>{ports.out.map((port, index) => <Port process={this.props.id} key={port} label={this.portName(this.props.graph, 'output', port)} type="out" x={(index+1)*offset.y} y={height}/>)}</g>
         </g>
