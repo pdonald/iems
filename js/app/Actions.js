@@ -8,4 +8,5 @@ var Actions = {
   portSelected: Reflux.createAction(),
   portDeselected: Reflux.createAction(),
   paramChanged: Reflux.createAction(),
+  viewFile: Reflux.createAction(),
 };

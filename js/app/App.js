@@ -3,6 +3,11 @@ var App = React.createClass({
     return {
       output: 'makefile',
       currentDocument: 0,
+      modal: {
+        open: false,
+        title: '',
+        content: ''
+      },
       documents: [
         {
           name: 'Experiment #1',
@@ -34,6 +39,7 @@ var App = React.createClass({
      this.listenTo(Actions.portSelected, p => this.selectedPort = p);
      this.listenTo(Actions.portDeselected, p => this.selectedPort = null);
      this.listenTo(Actions.paramChanged, this.onParamChanged);
+     this.listenTo(Actions.viewFile, this.onViewFile);
 
      this.clipboard = new ZeroClipboard(this.refs.copyMakefileButton);
 
@@ -47,6 +53,22 @@ var App = React.createClass({
        this.setState(this.state);
      });
    },
+
+  onViewFile: function(info) {
+    if (info.type != 'out') return;
+    if (info.group.id == info.process.id) return;
+
+    var filename = info.process.name + '-g' + info.group.id + 'p' + info.process.id + '.' + info.label;
+
+    this.state.modal.title = filename;
+    this.state.modal.open = true;
+    this.setState({ modal: this.state.modal });
+
+    $.get('/file?name=' + filename, result => {
+      this.state.modal.content = result;
+      this.setState({ modal: this.state.modal });
+    });
+  },
 
   onParamChanged: function(process, key, value) {
     process[key] = value;
@@ -107,8 +129,9 @@ var App = React.createClass({
     this.setState(this.state);
   },
 
-  onConnect: function(from, to) {
+  onConnect: function(from) {
     if (from && this.selectedPort) {
+      if (from.id == this.selectedPort.id && from.port == this.selectedPort.port) return;
       // validate connection
       this.currentGraph().links.push({ from: from, to: this.selectedPort });
       this.setState(this.state);
@@ -176,6 +199,13 @@ var App = React.createClass({
   render: function() {
     return (
       <div className="container">
+        <div className={'modal ' + (this.state.modal.open ? 'open' : 'closed')}>
+          <div className="modal-header">
+            <button onClick={() => this.setState({ modal: { open: false } })}>Close</button>
+            <h1>{this.state.modal.title}</h1>
+          </div>
+          <pre>{this.state.modal.content}</pre>
+        </div>
         <div className="table">
           <div className="row header-row">
             <div className="cell header-cell">

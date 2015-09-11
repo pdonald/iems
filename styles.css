@@ -5,6 +5,12 @@
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     box-sizing: border-box; /* Border boxing is used, so the padding, margin and borders are within de width and height of de element. */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 html, body {
@@ -346,4 +352,32 @@ th{
 	color: lightgrey;
 	padding-right:3px;
 	text-transform: capitalize;
+}
+
+.modal {
+  position: absolute;
+  border: 1px solid black;
+  background: white;
+  z-index: 1000;
+  left: 20%;
+  top: 20%;
+  width: 70%;
+  height: 50%;
+  padding: 20px;
+  overflow: auto;
+}
+.modal.closed {
+  display: none;
+}
+.modal pre {
+  clear: both;
+}
+.modal-header {
+  margin-bottom: 10px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid black;
+}
+.modal-header button {
+  float: right;
+  padding: 10px;
 }

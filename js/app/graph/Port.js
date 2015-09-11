@@ -36,7 +36,7 @@ var Port = React.createClass({
     this.setState({ dragging: false });
     e.stopPropagation();
     e.preventDefault();
-    Actions.connect({ id: this.props.process, port: this.props.label })
+    Actions.connect({ id: this.props.process.id, port: this.props.label })
   },
 
   onMouseMove: function (e) {
@@ -52,12 +52,16 @@ var Port = React.createClass({
 
   onMouseOver: function(e) {
     this.setState({ on: true });
-    Actions.portSelected({ id: this.props.process, port: this.props.label })
+    Actions.portSelected({ id: this.props.process.id, port: this.props.label })
   },
 
   onMouseOut: function(e) {
     this.setState({ on: false });
-    Actions.portDeselected({ id: this.props.process, port: this.props.label })
+    Actions.portDeselected({ id: this.props.process.id, port: this.props.label })
+  },
+
+  onDoubleClick: function(e) {
+    Actions.viewFile(this.props);
   },
 
   render: function() {
@@ -73,7 +77,8 @@ var Port = React.createClass({
         <circle cx={this.props.x} cy={this.props.y} r="10"
                 onMouseDown={this.onMouseDown}
                 onMouseOver={this.onMouseOver}
-                onMouseOut={this.onMouseOut} />
+                onMouseOut={this.onMouseOut}
+                onDoubleClick={this.onDoubleClick} />
         {line}
       </g>
     );

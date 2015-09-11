@@ -53,7 +53,7 @@ var Group = React.createClass({
         if (Tools.processes[p.name].toTitle) name = Tools.processes[p.name].toTitle(p);
         return <Process width={p.width} height={p.height} x={p.x} y={p.y}
                         name={name} ports={ports} graph={p} id={p.id} key={group.id+'/'+p.id}
-                        selected={p.selected} status={status} />;
+                        selected={p.selected} status={status} group={group} />;
       });
     }
 
@@ -75,7 +75,7 @@ var Group = React.createClass({
     if (this.props.blank) {
       var size = group.getCalculatedSize();
       return (
-        <Process width={size.width} height={size.height} name={group.title || group.name} ports={group.ports}
+        <Process width={size.width} height={size.height} name={group.title || group.name} ports={group.ports} group={group}
                  graph={group} id={group.id} blank={true} x={group.id == 0 ? 0 : 20} y={group.id == 0 ? 0 : 50} status={gstatus}>
           {groups}
           {processez}
@@ -85,7 +85,7 @@ var Group = React.createClass({
     } else {
       return (
         <Process width={group.width} height={group.height} name={group.title || group.name} ports={group.ports}
-                 x={group.x} y={group.y} graph={group} id={group.id} selected={group.selected} status={gstatus}>
+                 x={group.x} y={group.y} graph={group} id={group.id} selected={group.selected} status={gstatus} group={group}>
         </Process>
       );
     }

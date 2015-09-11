@@ -10,6 +10,10 @@ var running = [];
 app.use(express.static('.'));
 app.use(bodyParser.text());
 
+app.get('/file', function(req, res) {
+  res.send(fs.readFileSync('/tools/train/' + req.query.name));
+});
+
 app.get('/status', function(req, res) {
   var status = {};
 
