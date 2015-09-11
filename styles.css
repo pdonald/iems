@@ -308,3 +308,9 @@ body {
   scrollbar-face-color: slategray;
   scrollbar-track-color: #b7bfc7;
 }
+
+th{
+	color: lightgrey;
+	padding-right:3px;
+	text-transform: capitalize;
+}
