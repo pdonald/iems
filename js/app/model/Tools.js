@@ -2,7 +2,7 @@ var Tools = {
   processes: {
     wget: {
       name: 'wget',
-	  group: 'corpora',
+      group: 'corpora',
       params: { url: 'string' },
       input: { },
       output: { out: 'file<any>' },
@@ -12,7 +12,7 @@ var Tools = {
     },
     opus: {
       name: 'opus',
-	  group: 'corpora',
+      group: 'corpora',
       params: { corpus: 'string', srcLang: 'language', trgLang: 'language' },
       input: { },
       output: {
@@ -40,7 +40,7 @@ var Tools = {
     },
     tokenizer: {
       name: 'tokenizer',
-	  group: 'corpora',
+      group: 'corpora',
       params: { lang: 'string' },
       input: { in: 'file<text>' },
       output: { out: 'file<tok>' },
@@ -50,7 +50,7 @@ var Tools = {
     },
     fastalign: {
       name: 'fastalign',
-	  group: 'general',
+      group: 'alignment',
       params: { reverse: 'bool' },
       input: { src: 'file<tok>', trg: 'file<tok>' },
       output: { out: 'file<align>' },
@@ -68,7 +68,7 @@ var Tools = {
     },
     kenlm: {
       name: 'kenlm',
-	  group: 'general',
+      group: 'lm',
       params: { order: 'integer' },
       input: { in: 'file<tok>' },
       output: { out: 'file<arpa>' },
@@ -81,7 +81,7 @@ var Tools = {
     },
     binlm: {
       name: 'binlm',
-	  group: 'bin',
+      group: 'lm',
       params: { type: 'string' },
       input: { in: 'file<arpa>' },
       output: { out: 'file<binlm>' },
@@ -91,7 +91,7 @@ var Tools = {
     },
     sym: {
       name: 'sym',
-	  group: 'general',
+      group: 'alignment',
       params: { method: 'string' },
       input: { srctrg: 'file<align>', trgsrc: 'file<align>' },
       output: { out: 'file<align>' },
@@ -101,7 +101,7 @@ var Tools = {
     },
     phrases: {
       name: 'phrases',
-	  group: 'general',
+      group: 'phrases',
       params: { maxLength: 'int', model: 'string' },
       input: { src: 'file<tok>', trg: 'file<tok>', algn: 'file<align>' },
       output: { out: 'file<phrases>', inv: 'file<phrases>', o: 'file<any>' },
@@ -118,7 +118,7 @@ var Tools = {
     },
     lexical: {
       name: 'lexical',
-	  group: 'general',
+      group: 'phrases',
       params: {},
       input: { src: 'file<tok>', trg: 'file<tok>', algn: 'file<align>' },
       output: { srctrg: 'file<lex>', trgsrc: 'file<lex>' },
@@ -134,7 +134,7 @@ var Tools = {
     },
     phrasescore: {
       name: 'phrasescore',
-	  group: 'general',
+      group: 'phrases',
       params: { },
       input: { phr: 'file<phrases>', phrinv: 'file<phrases>', srctrg: 'file<lex>', trgsrc: 'file<lex>' },
       output: { ptable: 'file<phrase-table>' },
@@ -152,7 +152,7 @@ var Tools = {
     },
     phrasesbin: {
       name: 'phrasesbin',
-	  group: 'bin',
+      group: 'phrases',
       input: { ptable: 'file<phrase-table>' },
       output: { minphr: 'file<phrase-table-bin>' },
       toBash: (params, input, output) => {
@@ -164,7 +164,7 @@ var Tools = {
     },
     reordering: {
       name: 'reordering',
-	  group: 'general',
+      group: 'phrases',
       params: { model: 'string', type: 'string', orientation: 'string', smoothing: 'float' },
       input: { phr: 'file<any>' },
       output: { reord: 'file<reordering>' },
@@ -179,7 +179,7 @@ var Tools = {
     },
     reorderingbin: {
       name: 'reorderingbin',
-	  group: 'bin',
+      group: 'phrases',
       input: { reord: 'file<reordering>' },
       output: { minlexr: 'file<reordering-bin>' },
       toBash: (params, input, output) => {
@@ -191,7 +191,7 @@ var Tools = {
     },
     echo: {
       name: 'echo',
-	  group: 'corpora',
+      group: 'corpora',
       input: {},
       output: { out: 'file<text>' },
       params: { text: 'string' },
@@ -201,7 +201,7 @@ var Tools = {
     },
     'moses-ini': {
       name: 'moses-ini', title: 'Moses INI', width: 300,
-	  group: 'general',
+      group: 'decoder',
       input: { phr: ['file<phrase-table>', 'file<phrase-table-bin'], lm: 'file<binlm>', reord: 'file<reord>', sample: 'sampling' },
       output: { ini: 'file<moses>' },
       toBash: (params, input, output) => {
@@ -238,7 +238,7 @@ var Tools = {
     },
     moses: {
       name: 'moses', title: 'moses decoder',
-	  group: 'general',
+      group: 'decoder',
       input: { in: 'file<tok>', ini: 'file<moses>' },
       output: { out: 'file<tok>' },
       toBash: (params, input, output) => {
@@ -249,7 +249,7 @@ var Tools = {
     },
     bleu: {
       name: 'bleu', title: 'BLEU',
-	  group: 'evaluation',
+      group: 'evaluation',
       input: { trans: 'file<text>', src: 'file<text>', ref: 'file<text>' },
       output: { out: 'file<bleu>' },
       params: { case: 'bool' },
@@ -267,7 +267,7 @@ var Tools = {
     },
     detokenizer: {
       name: 'detokenizer',
-	  group: 'corpora',
+      group: 'corpora',
       input: { in: 'file<tok>' },
       output: { out: 'file<text>' },
       params: { lang: 'language' },
@@ -279,7 +279,7 @@ var Tools = {
     },
     compareval: {
       name: 'compareval', title: ' MT-ComparEval',
-	  group: 'evaluation',
+      group: 'evaluation',
       input: { src: 'file<tok>', ref: 'file<tok>', trans: 'file<tok>' },
       output: {},
       params: { server: 'string', experiment: 'string', task: 'string' },
@@ -292,7 +292,7 @@ var Tools = {
     },
     bintext: {
       name: 'bintext', title: 'Binarize text',
-	  group: 'bin',
+      group: 'phrases',
       input: { in: 'file<tok>' },
       output: { out: 'dir<bin>' },
       params: {},
@@ -306,7 +306,7 @@ var Tools = {
     },
     binalign: {
       name: 'binalign', title: 'Binarize align',
-	  group: 'bin',
+      group: 'phrases',
       input: { in: 'file<align>' },
       output: { out: 'file<bin>' },
       params: {},
@@ -318,7 +318,7 @@ var Tools = {
     },
     binlex: {
       name: 'binlex', title: 'Binarize lex',
-	  group: 'bin',
+      group: 'phrases',
       input: { src: 'dir<bin>', trg: 'dir<bin>', algn: 'file<bin>' },
       output: { out: 'file<bin>' },
       params: {},
@@ -339,7 +339,7 @@ var Tools = {
     },
     psamplemodel: {
       name: 'psamplemodel', title: 'Sampling model',
-	  group: 'general',
+      group: 'phrases',
       input: { src: 'dir<bin>', trg: 'dir<bin>', algn: 'file<bin>', lex: 'file<bin>' },
       output: { out: 'dir' },
       params: {},
@@ -369,7 +369,7 @@ var Tools = {
     },
     mert: {
       name: 'mert', title: 'MERT',
-	  group: 'general',
+      group: 'tuning',
       input: { src: 'file<tok>', ref: 'file<tok>', ini: 'file<ini>' },
       output: { ini: 'file<ini>'},
       params: {},
@@ -385,7 +385,7 @@ var Tools = {
   },
   blocks: {
     'lm-kenlm': {
-      id: 1, title: 'Language model', name: 'lm-kenlm',
+      id: 1, title: 'Language model', name: 'lm-kenlm', group: 'lm',
       width: 200, height: 300,
       ports: { in: ['trg'], out: ['lm'] },
       processes: [
@@ -399,7 +399,7 @@ var Tools = {
       ]
     },
     'phrasesampling': {
-      id: 1, title: 'Sampling Phrases', name: 'phrasesampling',
+      id: 1, title: 'Sampling Phrases', name: 'phrasesampling', group: 'phrases',
       width: 200, height: 600,
       ports: { in: ['src', 'trg', 'algn'], out: ['model'] },
       processes: [
@@ -424,7 +424,7 @@ var Tools = {
       ]
     },
     'word-alignment': {
-      id: 1, title: 'Word alignment', name: 'word-alignment',
+      id: 1, title: 'Word alignment', name: 'word-alignment', group: 'alignment',
       width: 400, height: 300,
       ports: { in: ['src', 'trg'], out: ['algn'] },
       processes: [
@@ -443,7 +443,7 @@ var Tools = {
       ]
     },
     evaluation: {
-      id: 1, title: 'Evaluation', name: 'evaluation',
+      id: 1, title: 'Evaluation', name: 'evaluation', group: 'evaluation',
       width: 800, height: 1000,
       ports: { in: ['src', 'ref', 'ini'], out: ['trans', 'bleu'] },
       processes: [
@@ -471,7 +471,7 @@ var Tools = {
       ]
     },
     'phrase-extraction': {
-      id: 1, title: 'Phrase extraction', name: 'phrase-extraction',
+      id: 1, title: 'Phrase extraction', name: 'phrase-extraction', group: 'phrases',
       "processes": [
         {
           "id": 777,
@@ -705,3 +705,13 @@ var Tools = {
     }
   }
 };
+
+var GroupNames = {
+  'lm': 'Language models',
+  'alignment': 'Word alignment',
+  'decoder': 'Decoding',
+  'corpora': 'Corpora tools',
+  'evaluation': 'Evaluation',
+  'phrases': 'Phrase based tools',
+  'tuning': 'Tuning'
+}

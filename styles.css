@@ -91,6 +91,13 @@ body {
 .toolbox, .properties {
   padding: 20px;
 }
+.toolbox-group {
+  clear: both;
+}
+.toolbox .toolbox-group h3 {
+  margin: 0px 0;
+  padding: 0;
+}
 
 .sidebar h2 {
   font-size: 14px;

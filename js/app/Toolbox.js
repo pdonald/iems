@@ -27,68 +27,33 @@ var Toolbox = React.createClass({
   },
 
   render: function() {
+    var all = [];
+    for (var i in Tools.processes) all.push(Tools.processes[i]);
+    for (var i in Tools.blocks) all.push(Tools.blocks[i]);
+
+    var groups = all
+      .map(p => p.group)
+      .filter((g, i, arr) => arr.lastIndexOf(g) === i)
+      .map(group => (
+        <div key={group} className="toolbox-group">
+          <h3>{GroupNames[group] || group}</h3>
+          <ul>
+            {all.filter(p => p.group == group).map(p => (
+              <li key={p.name}
+                draggable="true"
+                onDragStart={(e) => this.dragStart(e, p)}
+                onDragEnd={this.dragEnd}>
+                {this.displayItemName(p)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ));
+
     return (
       <div>
         <h2>Toolbox</h2>
-        <h3>Corpora tools</h3>
-        <ul>
-          {Object.keys(Tools.processes).filter(key => Tools.processes[key].group == 'corpora').map(key => (
-            <li key={key}
-              draggable="true"
-              onDragStart={(e) => this.dragStart(e, Tools.processes[key])}
-              onDragEnd={this.dragEnd}>
-              {this.displayItemName(Tools.processes[key])}
-            </li>
-          ))}
-        </ul>
-		<br/>
-        <h3>General tools</h3>
-        <ul>
-          {Object.keys(Tools.processes).filter(key => Tools.processes[key].group == 'general').map(key => (
-            <li key={key}
-              draggable="true"
-              onDragStart={(e) => this.dragStart(e, Tools.processes[key])}
-              onDragEnd={this.dragEnd}>
-              {this.displayItemName(Tools.processes[key])}
-            </li>
-          ))}
-        </ul>
-		<br/>
-        <h3>Binarization tools</h3>
-        <ul>
-          {Object.keys(Tools.processes).filter(key => Tools.processes[key].group == 'bin').map(key => (
-            <li key={key}
-              draggable="true"
-              onDragStart={(e) => this.dragStart(e, Tools.processes[key])}
-              onDragEnd={this.dragEnd}>
-              {this.displayItemName(Tools.processes[key])}
-            </li>
-          ))}
-        </ul>
-		<br/>
-        <h3>Evaluation tools</h3>
-        <ul>
-          {Object.keys(Tools.processes).filter(key => Tools.processes[key].group == 'evaluation').map(key => (
-            <li key={key}
-              draggable="true"
-              onDragStart={(e) => this.dragStart(e, Tools.processes[key])}
-              onDragEnd={this.dragEnd}>
-              {this.displayItemName(Tools.processes[key])}
-            </li>
-          ))}
-        </ul>
-		<br/>
-        <h3>Complex tools</h3>
-        <ul>
-          {Object.keys(Tools.blocks).map(key => (
-            <li key={key}
-              draggable="true"
-              onDragStart={(e) => this.dragStart(e, Tools.blocks[key])}
-              onDragEnd={this.dragEnd}>
-              {this.displayItemName(Tools.blocks[key])}
-            </li>
-          ))}
-        </ul>
+        {groups}
       </div>
     );
   }
