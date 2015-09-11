@@ -64,7 +64,7 @@ var App = React.createClass({
         this.currentGraph().addGroup(group);
       } else {
         this.currentGraph().addProcess({
-          id: this.state.last,
+          id: this.currentDoc().last,
           x: x - offset.left, y: y - offset.top,
           width: template.width || 150, height: template.height || 50,
           name: template.name, type: template.name, params: {}

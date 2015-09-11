@@ -51,7 +51,7 @@ var Group = React.createClass({
         if (Tools.processes[p.name].title) name = Tools.processes[p.name].title;
         if (Tools.processes[p.name].toTitle) name = Tools.processes[p.name].toTitle(p);
         return <Process width={p.width} height={p.height} x={p.x} y={p.y}
-                        name={name} ports={ports} graph={p} id={p.id} key={p.id}
+                        name={name} ports={ports} graph={p} id={p.id} key={group.id+'/'+p.id}
                         selected={p.selected} />;
       });
     }
@@ -68,8 +68,6 @@ var Group = React.createClass({
         return <Connector key={l.from.id+'/'+l.from.port+'/'+l.to.id+'/'+l.to.port} source={source} target={target} graph={l}/>;
       });
     }
-
-    var children = [ groups, processez, links ];
 
     if (this.props.blank) {
       var size = group.getCalculatedSize();

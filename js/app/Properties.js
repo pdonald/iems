@@ -25,7 +25,8 @@ var Properties = React.createClass({
       body = <div>Nothing selected</div>;
     } else {
       var p = this.state.selected;
-      var children = Object.keys(p.params).map(key => {
+      var tpl = Tools.processes[p.name];
+      var children = Object.keys(tpl.params).map(key => {
         return (
           <tr key={key}>
           <th>{key}</th>
