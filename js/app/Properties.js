@@ -33,7 +33,7 @@ var Properties = React.createClass({
           </tr>
         )
       });
-      body = <table>{children}</table>;
+      body = <table><tbody>{children}</tbody></table>;
     }
     return (
       <div>
