@@ -15,6 +15,7 @@ function genMakefile(graph, root, all) {
 
       var output = {};
       Object.keys(tpl.output).map(key => output[key] = processName(p, graph, key));
+      var noOutputDone = p.name + '-g' + graph.id + 'p' + p.id + '.done';
 
       var input = {};
       graph.links.filter(l => l.to.id == p.id).forEach(l => {
@@ -33,11 +34,17 @@ function genMakefile(graph, root, all) {
 
       Object.keys(output).forEach(key => all.push(output[key]));
 
-      text += Object.keys(output).map(key => output[key]).join(' ')
+      if (Object.keys(output).length == 0) {
+        all.push(noOutputDone);
+        text += noOutputDone;
+      } else {
+        text += Object.keys(output).map(key => output[key]).join(' ')
+      }
       text += ': '
       text += Object.keys(input).map(key => input[key]).join(' ')
       text += '\n'
       text += '\t' + tpl.toBash(p.params || {}, input, output).join('\n\t') + '\n';
+      if (Object.keys(output).length == 0) text += '\ttouch ' + noOutputDone + '\n';
       text += '\n'
     });
   }

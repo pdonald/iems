@@ -263,11 +263,11 @@ var Tools = {
       name: 'compareval', title: ' MT-ComparEval',
       input: { src: 'file<tok>', ref: 'file<tok>', trans: 'file<tok>' },
       output: {},
-      params: { server: 'string', experiment: 'string' },
+      params: { server: 'string', experiment: 'string', task: 'string' },
       toBash: (params, input, output) => {
         return [
           `EXPID=$(shell curl -s -X POST -F "name=${params.experiment}" -F "description=${params.experiment}" -F "source=@${input.src}" -F "reference=@${input.ref}" ${params.server}/api/experiments/upload | jq ".experiment_id") && \\`,
-          `curl -s -X POST -F "name=First Task" -F "description=${params.experiment}" -F "experiment_id=$$EXPID" -F "translation=@${input.trans}" ${params.server}/api/tasks/upload`
+          `curl -s -X POST -F "name=${params.task}" -F "description=${params.task}" -F "experiment_id=$$EXPID" -F "translation=@${input.trans}" ${params.server}/api/tasks/upload`
         ];
       }
     },

@@ -446,7 +446,8 @@ var App = React.createClass({
           "name": "compareval",
           "params": {
             "server": "http://localhost:8080",
-            "experiment": "testing"
+            "experiment": "iEMS",
+            task: 'sampling'
           },
           "x": 550,
           "y": 800,
