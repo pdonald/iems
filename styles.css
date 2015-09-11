@@ -147,11 +147,11 @@ body {
   color: black;
 }
 .process .port-in circle {
-  fill: #16A085;
+  fill: lightblue;
   stroke: #000;
 }
 .process .port-out circle {
-  fill: #E74C3C;
+  fill: hotpink;
   stroke: #000;
 }
 .connector:hover line {
