@@ -290,3 +290,21 @@ nav.depth li {
   text-decoration:none;
   text-shadow:0px 1px 0px #ffffff;
 }
+
+::-webkit-scrollbar {
+  width: 0.5em;
+  height: 0.5em;
+}
+
+::-webkit-scrollbar-thumb {
+  background: slategray;
+}
+
+::-webkit-scrollbar-track {
+  background: #b7bfc7;
+}
+
+body {
+  scrollbar-face-color: slategray;
+  scrollbar-track-color: #b7bfc7;
+}
