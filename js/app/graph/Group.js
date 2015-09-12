@@ -63,7 +63,7 @@ var Group = React.createClass({
         }
 
         return <Connector key={group.getKey()+'/'+l.from.id+'/'+l.from.port+'/'+l.to.id+'/'+l.to.port}
-          selected={l.selected}
+          selected={l.selected} graph={l}
           source={source} target={target}
           sourceType={from ? from.process.template.output[from.port] : null}
           targetType={to ? to.template.input[l.to.port] : null}/>;

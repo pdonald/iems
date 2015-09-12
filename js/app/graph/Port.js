@@ -36,7 +36,7 @@ var Port = React.createClass({
     this.setState({ dragging: false });
     e.stopPropagation();
     e.preventDefault();
-    Actions.connect({ id: this.props.process.id, port: this.props.label })
+    Actions.connect({ id: this.props.process.id, port: this.props.port })
   },
 
   onMouseMove: function (e) {
@@ -52,12 +52,12 @@ var Port = React.createClass({
 
   onMouseOver: function(e) {
     this.setState({ on: true });
-    Actions.portSelected({ id: this.props.process.id, port: this.props.label })
+    Actions.portSelected({ id: this.props.process.id, port: this.props.port })
   },
 
   onMouseOut: function(e) {
     this.setState({ on: false });
-    Actions.portDeselected({ id: this.props.process.id, port: this.props.label })
+    Actions.portDeselected({ id: this.props.process.id, port: this.props.port })
   },
 
   onDoubleClick: function(e) {
@@ -66,7 +66,7 @@ var Port = React.createClass({
 
   render: function() {
     var line = null;
-    
+
     if (this.state.dragging) {
       line = <line x1={this.props.x} y1={this.props.y}
                    x2={this.state.pos.x} y2={this.state.pos.y} className="port-line"/>;

@@ -141,11 +141,12 @@ var App = React.createClass({
   addDoc: function() {
     var doc = {
       name: 'Experiment #' + (this.state.documents.length+1),
-      last: 1,
-      stack: [
-        new GroupX({ id: 0, title: 'Main', x:0, y:0 })
-      ]
+      vars: { srclang: 'en', trglang: 'lv', 'lm-order': 5, toolsdir: '/tools', workdir: '/tools/train', tempdir: '/tmp' },
+      stack: []
     };
+
+    doc.stack.push(new GroupModel({ id: 0, type: 'main', title: 'Main', x:0, y:0 }, null, doc));
+
     this.state.documents.push(doc);
     this.state.currentDocument = this.state.documents.length - 1;
     this.setState(this.state);
