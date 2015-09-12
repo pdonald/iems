@@ -54,3 +54,11 @@ node server.js
 * The shell commands will be automatically generated on the bottom of the screen
 * Copy the contents, save as a makefile, run make
 * For now there is no validation so inspect the workflow of your experiment on your own
+
+## TODO
+
+* validate connections
+* global parameters
+* reuse
+* load/save
+* refactor model
