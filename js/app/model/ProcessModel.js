@@ -19,4 +19,11 @@ class ProcessModel {
   getKey() {
     return this.type + '-g' + this.group.id + 'p' + this.id;
   }
+
+  static isLinkValid(a, b) {
+    var atype = a.type || a;
+    var btype = b.type || b;
+    //console.log(atype, btype)
+    return atype == btype;
+  }
 }

@@ -11,7 +11,7 @@ var Output = {
     var json = pad1 + '{' + '\n';
     json += pad + `id: ${graph.id}, title: '${graph.title.replace("'", "\\'")}', `
                 + `type: '${graph.type}', category: '${graph.category}',` + '\n';
-    json += pad + `x: ${graph.x}, y: ${graph.y},` + '\n';
+    json += pad + `x: ${graph.x}, y: ${graph.y}, collapsed: ${graph.collapsed?true:false},` + '\n';
     if (graph.ports) json += pad + `ports: { in: ['${graph.ports.in.join("', '")}'], out: ['${graph.ports.out.join("', '")}'] },` + '\n';
 
     // processes data

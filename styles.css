@@ -150,7 +150,6 @@ br{
 }
 
 .preview pre {
-  height: 200px;
   padding: 10px 10px;
   overflow: auto;
   -moz-tab-size:    2;
@@ -159,7 +158,7 @@ br{
   white-space: pre;
 }
 
-.process rect {
+.process .process-rect {
   cursor: move;
   fill: #2ECC71;
   stroke: #000;
@@ -184,6 +183,16 @@ br{
   stroke-width: 1px;
   cursor: pointer;
 }
+.connector.incompatible-types line {
+  stroke: red;
+}
+.connector.incompatible-types rect {
+  fill: yellow;
+  stroke: red;
+}
+.connector.incompatible-types text {
+  fill: red;
+}
 .connector.selected line {
   stroke: red;
 }
@@ -191,24 +200,24 @@ br{
   fill: yellow;
 }
 
-.process.error rect {
+.process.error .process-rect {
   stroke: red;
 }
-.process.selected rect {
+.process.selected .process-rect {
   stroke: red !important;
   fill: yellow !important;
 }
-.process.blank > g > rect {
+.process.blank > g > .process-rect {
   fill: none !important;
 }
-.process.main.blank > g > rect {
+.process.main.blank > g > .process-rect {
   stroke: none;
 }
-.process.running > g > rect {
+.process.running > g > .process-rect {
   stroke: black;
   fill: purple;
 }
-.process.done > g > rect {
+.process.done > g > .process-rect {
   stroke: black;
   fill: lime;
 }

@@ -119,4 +119,12 @@ class GroupModel {
     }
     return;
   }
+
+  resolveLinkOutput(from) {
+    var links = this.links
+      .filter(l => l.from.id == from.id && l.from.port == from.port)
+      .map(l => this.getChildById(l.to.id));
+
+    return  [].concat.apply([], links);
+  }
 }
