@@ -1,15 +1,15 @@
 # Interactive EMS
-An Interactive Experiment Management System for the [Moses Toolkit](https://github.com/moses-smt).
+
+An Interactive Experiment Management System for machine translation.
 
 A project at the [Machine Translation Marathon 2015](http://ufal.mff.cuni.cz/mtm15).
 
 ## Installation
 
-The IEMS should run fine in any modern web browser if you just download it and open **index.html**.
+iEMS should run fine in any modern web browser if you just download it and open `index.html`.
 
-But just in case it doesn't - put it on a server or localhost and try using Google Chrome.
-
-For compatibility with the Moses Toolkit all binaries and scripts from Moses should be located in **/your/path/tools/** folder and the makefile generated with IEMS in **/your/path/Makefile**
+Right now lots of stuff is hard coded and your executables and scripts should be in `/tools/`
+and the training will take place in `/tools/train`.
 
 ## Build
 
@@ -31,6 +31,12 @@ While developing run
 
 ```
 babel --watch --source-maps inline --out-file dist/app.js js/app
+```
+
+Run backend server to run Makefiles
+
+```
+node server.js
 ```
 
 ## Description
