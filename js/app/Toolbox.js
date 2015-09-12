@@ -15,35 +15,24 @@ var Toolbox = React.createClass({
     }
   },
 
-  displayItemName: function(item) {
-    if (item.title) return item.title;
-    if (item.name) return item.name;
-    return 'undefined';
-  },
-
-  displayItemGroup: function(item) {
-    if (item.group) return item.group;
-    return 'undefined';
-  },
-
   render: function() {
     var all = [];
     for (var i in Tools.processes) all.push(Tools.processes[i]);
-    for (var i in Tools.blocks) all.push(Tools.blocks[i]);
+    for (var i in Tools.groups) all.push(Tools.groups[i]);
 
-    var groups = all
-      .map(p => p.group)
+    var children = all
+      .map(p => p.category)
       .filter((g, i, arr) => arr.lastIndexOf(g) === i)
-      .map(group => (
-        <div key={group} className="toolbox-group">
-          <h3>{GroupNames[group] || group}</h3>
+      .map(cat => (
+        <div key={cat} className="toolbox-group">
+          <h3>{CategoryTitles[cat] || cat}</h3>
           <ul>
-            {all.filter(p => p.group == group).map(p => (
-              <li key={p.name}
+            {all.filter(p => p.category == cat).map(p => (
+              <li key={cat + '/' + p.type}
                 draggable="true"
                 onDragStart={(e) => this.dragStart(e, p)}
                 onDragEnd={this.dragEnd}>
-                {this.displayItemName(p)}
+                {p.title || p.type}
               </li>
             ))}
           </ul>
@@ -53,7 +42,7 @@ var Toolbox = React.createClass({
     return (
       <div>
         <h2>Toolbox</h2>
-        {groups}
+        {children}
       </div>
     );
   }

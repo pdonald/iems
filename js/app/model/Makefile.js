@@ -1,5 +1,7 @@
 function genMakefile(graph, root, all) {
 
+  return 'refact in progress';
+
   function processName(p, group, port) {
     return p.name + '-g' + group.id + 'p' + p.id + (port ? '.' + port : '');
   }

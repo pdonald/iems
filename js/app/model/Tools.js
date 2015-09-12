@@ -1,8 +1,7 @@
 var Tools = {
   processes: {
     wget: {
-      name: 'wget',
-      group: 'corpora',
+      type: 'wget', category: 'corpora',
       params: { url: 'string' },
       input: { },
       output: { out: 'file<any>' },
@@ -11,8 +10,7 @@ var Tools = {
       }
     },
     opus: {
-      name: 'opus',
-      group: 'corpora',
+      type: 'opus', title: 'OPUS', category: 'corpora',
       params: { corpus: 'string', srcLang: 'language', trgLang: 'language' },
       input: { },
       output: {
@@ -26,7 +24,8 @@ var Tools = {
         },
       },
       toTitle: (p) => {
-        return `OPUS (${p.params && p.params.corpus ? p.params.corpus : '<undefined>'})`;
+        if (p.params.corpus) return `OPUS (${p.params.corpus})`;
+        return `OPUS`;
       },
       toBash: (params, input, output) => {
         return [
@@ -39,8 +38,7 @@ var Tools = {
       }
     },
     tokenizer: {
-      name: 'tokenizer',
-      group: 'corpora',
+      type: 'tokenizer', title: 'Tokenizer (moses)', category: 'corpora',
       params: { lang: 'string' },
       input: { in: 'file<text>' },
       output: { out: 'file<tok>' },
@@ -49,8 +47,7 @@ var Tools = {
       }
     },
     fastalign: {
-      name: 'fastalign',
-      group: 'alignment',
+      type: 'fastalign', category: 'alignment',
       params: { reverse: 'bool' },
       input: { src: 'file<tok>', trg: 'file<tok>' },
       output: { out: 'file<align>' },
@@ -67,8 +64,7 @@ var Tools = {
       }
     },
     kenlm: {
-      name: 'kenlm',
-      group: 'lm',
+      type: 'kenlm', category: 'lm',
       params: { order: 'integer' },
       input: { in: 'file<tok>' },
       output: { out: 'file<arpa>' },
@@ -80,8 +76,7 @@ var Tools = {
       }
     },
     binlm: {
-      name: 'binlm',
-      group: 'lm',
+      type: 'binlm', category: 'lm',
       params: { type: 'string' },
       input: { in: 'file<arpa>' },
       output: { out: 'file<binlm>' },
@@ -90,8 +85,7 @@ var Tools = {
       }
     },
     sym: {
-      name: 'sym',
-      group: 'alignment',
+      type: 'sym', category: 'alignment',
       params: { method: 'string' },
       input: { srctrg: 'file<align>', trgsrc: 'file<align>' },
       output: { out: 'file<align>' },
@@ -100,8 +94,7 @@ var Tools = {
       }
     },
     phrases: {
-      name: 'phrases',
-      group: 'phrases',
+      type: 'phrases', category: 'phrases',
       params: { maxLength: 'int', model: 'string' },
       input: { src: 'file<tok>', trg: 'file<tok>', algn: 'file<align>' },
       output: { out: 'file<phrases>', inv: 'file<phrases>', o: 'file<any>' },
@@ -117,9 +110,8 @@ var Tools = {
       }
     },
     lexical: {
-      name: 'lexical',
-      group: 'phrases',
-      params: {},
+      type: 'lexical', category: 'phrases',
+      params: { },
       input: { src: 'file<tok>', trg: 'file<tok>', algn: 'file<align>' },
       output: { srctrg: 'file<lex>', trgsrc: 'file<lex>' },
       toBash: (params, input, output) => {
@@ -133,8 +125,7 @@ var Tools = {
       }
     },
     phrasescore: {
-      name: 'phrasescore',
-      group: 'phrases',
+      type: 'phrasescore', category: 'phrases',
       params: { },
       input: { phr: 'file<phrases>', phrinv: 'file<phrases>', srctrg: 'file<lex>', trgsrc: 'file<lex>' },
       output: { ptable: 'file<phrase-table>' },
@@ -151,8 +142,7 @@ var Tools = {
       }
     },
     phrasesbin: {
-      name: 'phrasesbin',
-      group: 'phrases',
+      type: 'phrasesbin', category: 'phrases',
       input: { ptable: 'file<phrase-table>' },
       output: { minphr: 'file<phrase-table-bin>' },
       toBash: (params, input, output) => {
@@ -163,8 +153,7 @@ var Tools = {
       }
     },
     reordering: {
-      name: 'reordering',
-      group: 'phrases',
+      type: 'reordering', category: 'phrases',
       params: { model: 'string', type: 'string', orientation: 'string', smoothing: 'float' },
       input: { phr: 'file<any>' },
       output: { reord: 'file<reordering>' },
@@ -178,8 +167,7 @@ var Tools = {
       }
     },
     reorderingbin: {
-      name: 'reorderingbin',
-      group: 'phrases',
+      type: 'reorderingbin', category: 'phrases',
       input: { reord: 'file<reordering>' },
       output: { minlexr: 'file<reordering-bin>' },
       toBash: (params, input, output) => {
@@ -190,9 +178,8 @@ var Tools = {
       }
     },
     echo: {
-      name: 'echo',
-      group: 'corpora',
-      input: {},
+      type: 'echo', category: 'corpora',
+      input: { },
       output: { out: 'file<text>' },
       params: { text: 'string' },
       toBash: (params, input, output) => {
@@ -200,8 +187,8 @@ var Tools = {
       }
     },
     'moses-ini': {
-      name: 'moses-ini', title: 'Moses INI', width: 300,
-      group: 'decoder',
+      type: 'moses-ini', title: 'Moses INI', category: 'decoder',
+      width: 300,
       input: { phr: ['file<phrase-table>', 'file<phrase-table-bin'], lm: 'file<binlm>', reord: 'file<reord>', sample: 'sampling' },
       output: { ini: 'file<moses>' },
       toBash: (params, input, output) => {
@@ -237,8 +224,7 @@ var Tools = {
       }
     },
     moses: {
-      name: 'moses', title: 'moses decoder',
-      group: 'decoder',
+      type: 'moses', title: 'moses decoder', category: 'decoder',
       input: { in: 'file<tok>', ini: 'file<moses>' },
       output: { out: 'file<tok>' },
       toBash: (params, input, output) => {
@@ -248,8 +234,7 @@ var Tools = {
       }
     },
     bleu: {
-      name: 'bleu', title: 'BLEU',
-      group: 'evaluation',
+      type: 'bleu', title: 'BLEU', category: 'evaluation',
       input: { trans: 'file<text>', src: 'file<text>', ref: 'file<text>' },
       output: { out: 'file<bleu>' },
       params: { case: 'bool' },
@@ -266,8 +251,7 @@ var Tools = {
       }
     },
     detokenizer: {
-      name: 'detokenizer',
-      group: 'corpora',
+      type: 'detokenizer', title: 'Detokenizer (moses)', category: 'corpora',
       input: { in: 'file<tok>' },
       output: { out: 'file<text>' },
       params: { lang: 'language' },
@@ -278,10 +262,9 @@ var Tools = {
       }
     },
     compareval: {
-      name: 'compareval', title: ' MT-ComparEval',
-      group: 'evaluation',
+      type: 'compareval', title: ' MT-ComparEval', category: 'evaluation',
       input: { src: 'file<tok>', ref: 'file<tok>', trans: 'file<tok>' },
-      output: {},
+      output: { },
       params: { server: 'string', experiment: 'string', task: 'string' },
       toBash: (params, input, output) => {
         return [
@@ -291,11 +274,10 @@ var Tools = {
       }
     },
     bintext: {
-      name: 'bintext', title: 'Binarize text',
-      group: 'phrases',
+      type: 'bintext', title: 'Binarize text', category: 'phrases',
       input: { in: 'file<tok>' },
       output: { out: 'dir<bin>' },
-      params: {},
+      params: { },
       toBash: (params, input, output) => {
         return [
           `rm -rf ${output.out}`,
@@ -305,11 +287,10 @@ var Tools = {
       }
     },
     binalign: {
-      name: 'binalign', title: 'Binarize align',
-      group: 'phrases',
+      type: 'binalign', title: 'Binarize align', category: 'phrases',
       input: { in: 'file<align>' },
       output: { out: 'file<bin>' },
-      params: {},
+      params: { },
       toBash: (params, input, output) => {
         return [
           `/tools/symal2mam ${output.out} < ${input.in}`,
@@ -317,11 +298,10 @@ var Tools = {
       }
     },
     binlex: {
-      name: 'binlex', title: 'Binarize lex',
-      group: 'phrases',
+      type: 'binlex', title: 'Binarize lex', category: 'phrases',
       input: { src: 'dir<bin>', trg: 'dir<bin>', algn: 'file<bin>' },
       output: { out: 'file<bin>' },
-      params: {},
+      params: { },
       toBash: (params, input, output) => {
         return [
           'TEMP=$(shell mktemp -d) && \\',
@@ -338,11 +318,10 @@ var Tools = {
       }
     },
     psamplemodel: {
-      name: 'psamplemodel', title: 'Sampling model',
-      group: 'phrases',
+      type: 'psamplemodel', title: 'Sampling model', category: 'phrases',
       input: { src: 'dir<bin>', trg: 'dir<bin>', algn: 'file<bin>', lex: 'file<bin>' },
       output: { out: 'dir' },
-      params: {},
+      params: { },
       toBash: (params, input, output) => {
         var ini = [];
         ini.push('[feature]');
@@ -368,11 +347,10 @@ var Tools = {
       }
     },
     mert: {
-      name: 'mert', title: 'MERT',
-      group: 'tuning',
+      type: 'mert', title: 'MERT', category: 'tuning',
       input: { src: 'file<tok>', ref: 'file<tok>', ini: 'file<ini>' },
       output: { ini: 'file<ini>'},
-      params: {},
+      params: { },
       toBash: (params, input, output) => {
         return [
           'TEMP=$(shell mktemp -d) && \\',
@@ -383,36 +361,34 @@ var Tools = {
       }
     }
   },
-  blocks: {
+  groups: {
     'lm-kenlm': {
-      id: 1, title: 'Language model', name: 'lm-kenlm', group: 'lm',
-      width: 200, height: 300,
+      type: 'lm-kenlm', title: 'Language model', category: 'lm',
       ports: { in: ['trg'], out: ['lm'] },
       processes: [
-        { id: 2, name: 'kenlm', params: { order: 5 }, x: 20, y: 50, width: 150, height: 50 },
-        { id: 3, name: 'binlm', params: { type: 'trie' }, x: 20, y: 175, width: 150, height: 50 },
+        { id: 2, type: 'kenlm', params: { order: 5 }, x: 20, y: 50, width: 150, height: 50 },
+        { id: 3, type: 'binlm', params: { type: 'trie' }, x: 20, y: 175, width: 150, height: 50 },
       ],
       links: [
         { from: { id: 2, port: 'out' }, to: { id: 3, port: 'in' } },
-        { from: { id: 1, port: 'trg' }, to: { id: 2, port: 'in' } },
-        { from: { id: 3, port: 'out' }, to: { id: 1, port: 'lm' } },
+        { from: { id: undefined, port: 'trg' }, to: { id: 2, port: 'in' } },
+        { from: { id: 3, port: 'out' }, to: { id: undefined, port: 'lm' } },
       ]
     },
     'phrasesampling': {
-      id: 1, title: 'Sampling Phrases', name: 'phrasesampling', group: 'phrases',
-      width: 200, height: 600,
+      type: 'phrasesampling', title: 'Sampling Phrases', category: 'phrases',
       ports: { in: ['src', 'trg', 'algn'], out: ['model'] },
       processes: [
-        { id: 2, name: 'bintext', params: {}, x: 20, y: 50, width: 150, height: 50 },
-        { id: 3, name: 'bintext', params: {}, x: 20, y: 175, width: 150, height: 50 },
-        { id: 4, name: 'binalign', params: {}, x: 20, y: 375, width: 150, height: 50 },
-        { id: 5, name: 'binlex', params: {}, x: 20, y: 475, width: 150, height: 50 },
-        { id: 6, name: 'psamplemodel', params: {}, x: 20, y: 575, width: 150, height: 50 },
+        { id: 2, type: 'bintext', params: {}, x: 20, y: 50, width: 150, height: 50 },
+        { id: 3, type: 'bintext', params: {}, x: 20, y: 175, width: 150, height: 50 },
+        { id: 4, type: 'binalign', params: {}, x: 20, y: 375, width: 150, height: 50 },
+        { id: 5, type: 'binlex', params: {}, x: 20, y: 475, width: 150, height: 50 },
+        { id: 6, type: 'psamplemodel', params: {}, x: 20, y: 575, width: 150, height: 50 },
       ],
       links: [
-        { from: { id: 1, port: 'src' }, to: { id: 2, port: 'in' } },
-        { from: { id: 1, port: 'trg' }, to: { id: 3, port: 'in' } },
-        { from: { id: 1, port: 'algn' }, to: { id: 4, port: 'in' } },
+        { from: { id: undefined, port: 'src' }, to: { id: 2, port: 'in' } },
+        { from: { id: undefined, port: 'trg' }, to: { id: 3, port: 'in' } },
+        { from: { id: undefined, port: 'algn' }, to: { id: 4, port: 'in' } },
         { from: { id: 2, port: 'out' }, to: { id: 5, port: 'src' } },
         { from: { id: 3, port: 'out' }, to: { id: 5, port: 'trg' } },
         { from: { id: 4, port: 'out' }, to: { id: 6, port: 'algn' } },
@@ -420,58 +396,56 @@ var Tools = {
         { from: { id: 3, port: 'out' }, to: { id: 6, port: 'trg' } },
         { from: { id: 5, port: 'out' }, to: { id: 6, port: 'lex' } },
         { from: { id: 4, port: 'out' }, to: { id: 5, port: 'algn' } },
-        { from: { id: 6, port: 'out' }, to: { id: 1, port: 'model' } },
+        { from: { id: 6, port: 'out' }, to: { id: undefined, port: 'model' } },
       ]
     },
     'word-alignment': {
-      id: 1, title: 'Word alignment', name: 'word-alignment', group: 'alignment',
-      width: 400, height: 300,
+      type: 'word-alignment', title: 'Word alignment', category: 'alignment',
       ports: { in: ['src', 'trg'], out: ['algn'] },
       processes: [
-        { id: 601, name: 'fastalign', x: 20, y: 50, width: 150, height: 50 },
-        { id: 602, name: 'fastalign', params: { reverse: true }, x: 200, y: 50, width: 150, height: 50 },
-        { id: 603, name: 'sym', params: { method: 'grow-diag-final-and' }, x: 120, y: 200, width: 150, height: 50 },
+        { id: 601, type: 'fastalign', x: 20, y: 50, width: 150, height: 50 },
+        { id: 602, type: 'fastalign', params: { reverse: true }, x: 200, y: 50, width: 150, height: 50 },
+        { id: 603, type: 'sym', params: { method: 'grow-diag-final-and' }, x: 120, y: 200, width: 150, height: 50 },
       ],
       links: [
-        { from: { id: 1, port: 'src' }, to: { id: 601, port: 'src' } },
-        { from: { id: 1, port: 'trg' }, to: { id: 602, port: 'trg' } },
-        { from: { id: 1, port: 'src' }, to: { id: 602, port: 'src' } },
-        { from: { id: 1, port: 'trg' }, to: { id: 601, port: 'trg' } },
+        { from: { id: undefined, port: 'src' }, to: { id: 601, port: 'src' } },
+        { from: { id: undefined, port: 'trg' }, to: { id: 602, port: 'trg' } },
+        { from: { id: undefined, port: 'src' }, to: { id: 602, port: 'src' } },
+        { from: { id: undefined, port: 'trg' }, to: { id: 601, port: 'trg' } },
         { from: { id: 601, port: 'out' }, to: { id: 603, port: 'srctrg' } },
         { from: { id: 602, port: 'out' }, to: { id: 603, port: 'trgsrc' } },
-        { from: { id: 603, port: 'out' }, to: { id: 1, port: 'algn' } },
+        { from: { id: 603, port: 'out' }, to: { id: undefined, port: 'algn' } },
       ]
     },
     evaluation: {
-      id: 1, title: 'Evaluation', name: 'evaluation', group: 'evaluation',
-      width: 800, height: 1000,
+      title: 'Evaluation', type: 'evaluation', category: 'evaluation',
       ports: { in: ['src', 'ref', 'ini'], out: ['trans', 'bleu'] },
       processes: [
-        { id: 2, name: 'tokenizer', params: { lang: 'en' }, x: 20, y: 175, width: 150, height: 50 },
-        { id: 3, name: 'tokenizer', params: { lang: 'lv' }, x: 200, y: 175, width: 150, height: 50 },
-        { id: 4, name: 'moses', params: {}, x: 50, y: 500, width: 250, height: 50 },
-        { id: 5, name: 'detokenizer', params: { lang: 'en' }, x: 150, y: 650, width: 150, height: 50 },
-        { id: 6, name: 'bleu', params: { case: false }, x: 350, y: 750, width: 150, height: 50 },
-        { id: 7, name: 'compareval', params: {server:'http://localhost:8080',experiment:'testing'}, x: 550, y: 800, width: 150, height: 50 },
+        { id: 2, type: 'tokenizer', params: { lang: 'en' }, x: 20, y: 175, width: 150, height: 50 },
+        { id: 3, type: 'tokenizer', params: { lang: 'lv' }, x: 200, y: 175, width: 150, height: 50 },
+        { id: 4, type: 'moses', params: {}, x: 50, y: 500, width: 250, height: 50 },
+        { id: 5, type: 'detokenizer', params: { lang: 'en' }, x: 150, y: 650, width: 150, height: 50 },
+        { id: 6, type: 'bleu', params: { case: false }, x: 350, y: 750, width: 150, height: 50 },
+        { id: 7, type: 'compareval', params: {server:'http://localhost:8080',experiment:'testing'}, x: 550, y: 800, width: 150, height: 50 },
       ],
       links: [
-        { from: { id: 1, port: 'src' }, to: { id: 2, port: 'in' } },
-        { from: { id: 1, port: 'ref' }, to: { id: 3, port: 'in' } },
-        { from: { id: 1, port: 'ini' }, to: { id: 4, port: 'ini' } },
+        { from: { id: undefined, port: 'src' }, to: { id: 2, port: 'in' } },
+        { from: { id: undefined, port: 'ref' }, to: { id: 3, port: 'in' } },
+        { from: { id: undefined, port: 'ini' }, to: { id: 4, port: 'ini' } },
         { from: { id: 2, port: 'out' }, to: { id: 4, port: 'in' } },
         { from: { id: 4, port: 'out' }, to: { id: 5, port: 'in' } },
         { from: { id: 4, port: 'out' }, to: { id: 6, port: 'trans' } },
-        { from: { id: 1, port: 'src' }, to: { id: 6, port: 'src' } },
-        { from: { id: 1, port: 'ref' }, to: { id: 6, port: 'ref' } },
+        { from: { id: undefined, port: 'src' }, to: { id: 6, port: 'src' } },
+        { from: { id: undefined, port: 'ref' }, to: { id: 6, port: 'ref' } },
         { from: { id: 2, port: 'out' }, to: { id: 7, port: 'src' } },
         { from: { id: 3, port: 'out' }, to: { id: 7, port: 'ref' } },
         { from: { id: 5, port: 'out' }, to: { id: 7, port: 'trans' } },
-        { from: { id: 5, port: 'out' }, to: { id: 1, port: 'trans' } },
-        { from: { id: 6, port: 'out' }, to: { id: 1, port: 'bleu' } },
+        { from: { id: 5, port: 'out' }, to: { id: undefined, port: 'trans' } },
+        { from: { id: 6, port: 'out' }, to: { id: undefined, port: 'bleu' } },
       ]
     },
     'phrase-extraction': {
-      id: 1, title: 'Phrase extraction', name: 'phrase-extraction', group: 'phrases',
+      type: 'phrase-extraction', title: 'Phrase extraction', category: 'phrases',
       "processes": [
         {
           "id": 777,
@@ -614,7 +588,7 @@ var Tools = {
             "port": "minphr"
           },
           "to": {
-            "id": 1,
+            "id": undefined,
             "port": "minphr"
           }
         },
@@ -624,13 +598,13 @@ var Tools = {
             "port": "minlexr"
           },
           "to": {
-            "id": 1,
+            "id": undefined,
             "port": "minlexr"
           }
         },
         {
           "from": {
-            "id": 1,
+            "id": undefined,
             "port": "src"
           },
           "to": {
@@ -640,7 +614,7 @@ var Tools = {
         },
         {
           "from": {
-            "id": 1,
+            "id": undefined,
             "port": "trg"
           },
           "to": {
@@ -650,7 +624,7 @@ var Tools = {
         },
         {
           "from": {
-            "id": 1,
+            "id": undefined,
             "port": "src"
           },
           "to": {
@@ -660,7 +634,7 @@ var Tools = {
         },
         {
           "from": {
-            "id": 1,
+            "id": undefined,
             "port": "trg"
           },
           "to": {
@@ -670,7 +644,7 @@ var Tools = {
         },
         {
           "from": {
-            "id": 1,
+            "id": undefined,
             "port": "algn"
           },
           "to": {
@@ -680,7 +654,7 @@ var Tools = {
         },
         {
           "from": {
-            "id": 1,
+            "id": undefined,
             "port": "algn"
           },
           "to": {
@@ -699,14 +673,12 @@ var Tools = {
           "minphr",
           "minlexr"
         ]
-      },
-      "width": 550,
-      "height": 550
+      }
     }
   }
 };
 
-var GroupNames = {
+var CategoryTitles = {
   'lm': 'Language models',
   'alignment': 'Word alignment',
   'decoder': 'Decoding',
@@ -714,4 +686,4 @@ var GroupNames = {
   'evaluation': 'Evaluation',
   'phrases': 'Phrase based tools',
   'tuning': 'Tuning'
-}
+};

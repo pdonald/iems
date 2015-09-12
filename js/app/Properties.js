@@ -6,18 +6,18 @@ var Properties = React.createClass({
   },
 
   componentDidMount: function() {
-     this.listenTo(Actions.select, this.onSelect);
-   },
+    this.listenTo(Actions.select, this.onSelect);
+  },
 
   onSelect: function(obj) {
     this.setState({ selected: obj });
-   },
+  },
 
-   onChange: function(process, key, value) {
-     this.state.selected.params[key] = value;
-     this.setState(this.state);
-     Actions.paramChanged(process, key, value);
-   },
+  onChange: function(process, key, value) {
+    this.state.selected.params[key] = value;
+    this.setState(this.state);
+    Actions.paramChanged(process, key, value);
+  },
 
   render: function() {
     var body;
@@ -25,8 +25,7 @@ var Properties = React.createClass({
       body = <div>Nothing selected</div>;
     } else {
       var p = this.state.selected;
-      var tpl = Tools.processes[p.name];
-      var children = Object.keys(tpl.params).map(key => {
+      var children = Object.keys(p.template.params).map(key => {
         return (
           <tr key={key}>
           <th>{key}</th>

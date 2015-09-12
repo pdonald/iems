@@ -13,14 +13,14 @@ var App = React.createClass({
           name: 'Experiment #1',
           last: 1400,
           stack: [
-            new GroupX(AppDefaultGraph)
+            new GroupModel(AppDefaultGraph)
           ]
         },
         {
           name: 'Experiment #2',
           last: 1,
           stack: [
-            new GroupX({ id: 0, title: 'Main', x:0, y:0 })
+            new GroupModel({ id: 0, title: 'Main', x:0, y:0 })
           ]
         }
       ]
@@ -43,7 +43,7 @@ var App = React.createClass({
 
      this.clipboard = new ZeroClipboard(this.refs.copyMakefileButton);
 
-     setInterval(() => this.updateStatus(), 1000);
+     //setInterval(() => this.updateStatus(), 1000);
    },
 
    updateStatus: function() {
@@ -84,8 +84,8 @@ var App = React.createClass({
   onAdd: function(template, x, y) {
     var offset = ReactDOM.findDOMNode(this.refs.graph).getBoundingClientRect();
     if (x >= offset.left && x <= offset.right && y >= offset.top && y <= offset.bottom) {
-      if (template.id) {
-        var group = new GroupX(JSON.parse(JSON.stringify(template)));
+      if (!template.toBash) {
+        var group = JSON.parse(JSON.stringify(template));
         group.id = this.state.last;
         group.x = x - offset.left;
         group.y = y - offset.top;
@@ -99,7 +99,7 @@ var App = React.createClass({
           id: this.currentDoc().last,
           x: x - offset.left, y: y - offset.top,
           width: template.width || 150, height: template.height || 50,
-          name: template.name, type: template.name, params: {}
+          type: template.type, params: {}
         });
       }
       this.currentDoc().last++;
@@ -251,7 +251,7 @@ var App = React.createClass({
                     <div className="cell-scroll-outer" style={{'height': '80%'}}>
                       <div className="cell-scroll-inner grid">
                         <Graph ref="graph" graph={this.currentGraph()}>
-                          <Group blank={true} group={this.currentGraph()} status={this.currentDoc().status}/>
+                          <Group group={this.currentGraph()} blank={true} main={true}/>
                         </Graph>
                       </div>
                     </div>

@@ -1,11 +1,7 @@
 var Group = React.createClass({
   //mixins: [React.addons.PureRenderMixin],
 
-  onClick: function() {
-    Action.select(this.props.group);
-  },
-
-  getPortPos: function(obj, portName, dir, self) {
+  getPortPosition: function(obj, portName, dir, self) {
     var width = obj.width;
     var height = obj.height;
     if (obj.getSize) {
@@ -19,10 +15,10 @@ var Group = React.createClass({
     if (self) dir = dir == 'in' ? 'out' : 'in';
 
     var ports = obj.ports;
-    if (!ports) {
+    if (!ports && obj.template) {
       ports = {
-        in: Object.keys(Tools.processes[obj.name].input),
-        out: Object.keys(Tools.processes[obj.name].output)
+        in: Object.keys(obj.template.input),
+        out: Object.keys(obj.template.output)
       }
     }
 
@@ -35,57 +31,39 @@ var Group = React.createClass({
 
   render: function() {
     var group = this.props.group;
-    var groups, processez, links;
 
-    if (group.groups) {
-      groups = group.groups.map(g => <Group key={group.id+'/'+g.id} group={g} status={this.props.status}/>);
-    }
+    var groups = group.groups.map(g => <Group key={g.getKey()} group={g} />);
 
-    if (group.processes) {
-      processez = group.processes.map(p => {
-        var id = p.name + '-g' + group.id + 'p' + p.id;
-        var status;
-        if (this.props.status) status = this.props.status[id];
-        var ports = { in: Object.keys(Tools.processes[p.name].input), out: Object.keys(Tools.processes[p.name].output) }
-        var name = p.name;
-        if (p.title) name = p.title;
-        if (Tools.processes[p.name].title) name = Tools.processes[p.name].title;
-        if (Tools.processes[p.name].toTitle) name = Tools.processes[p.name].toTitle(p);
-        return <Process width={p.width} height={p.height} x={p.x} y={p.y}
-                        name={name} ports={ports} graph={p} id={p.id} key={group.id+'/'+p.id}
-                        selected={p.selected} status={status} group={group} />;
-      });
-    }
+    var processes = group.processes.map(p => {
+      var ports = { in: Object.keys(p.template.input), out: Object.keys(p.template.output) }
+      return <Process width={p.width} height={p.height} x={p.x} y={p.y}
+                      graph={p} title={p.getTitle()} key={p.getKey()} selected={p.selected}
+                      ports={ports} />;
+    });
 
-    if (group.links) {
-      var ids = {};
-      ids[group.id] = group;
-      if (group.groups) group.groups.forEach(g => ids[g.id] = g)
-      if (group.processes) group.processes.forEach(p => ids[p.id] = p)
-
-      links = group.links.map(l => {
-        var source = this.getPortPos(ids[l.from.id], l.from.port, 'out', l.from.id == group.id);
-        var target = this.getPortPos(ids[l.to.id], l.to.port, 'in', l.to.id == group.id);
-        return <Connector key={group.id+'/'+l.from.id+'/'+l.from.port+'/'+l.to.id+'/'+l.to.port} source={source} target={target} graph={l}/>;
-      });
-    }
-
-    var gstatus = group.getStatus(this.props.status);
+    var links = group.links.map(l => {
+      var source = this.getPortPosition(group.getLinkTo(l.from.id), l.from.port, 'out', l.from.id == group.id);
+      var target = this.getPortPosition(group.getLinkTo(l.to.id), l.to.port, 'in', l.to.id == group.id);
+      return <Connector key={group.getKey()+'/'+l.from.id+'/'+l.from.port+'/'+l.to.id+'/'+l.to.port} source={source} target={target} graph={l}/>;
+    });
 
     if (this.props.blank) {
       var size = group.getCalculatedSize();
       return (
-        <Process width={size.width} height={size.height} name={group.title || group.name} ports={group.ports} group={group}
-                 graph={group} id={group.id} blank={true} x={group.id == 0 ? 0 : 20} y={group.id == 0 ? 0 : 50} status={gstatus}>
+        <Process width={size.width} height={size.height}
+                 x={group.id == 0 ? 0 : 20} y={group.id == 0 ? 0 : 50}
+                 graph={group} ports={group.ports}
+                 blank={true} main={group.id == 0}>
           {groups}
-          {processez}
+          {processes}
           {links}
         </Process>
       );
     } else {
       return (
-        <Process width={group.width} height={group.height} name={group.title || group.name} ports={group.ports}
-                 x={group.x} y={group.y} graph={group} id={group.id} selected={group.selected} status={gstatus} group={group}>
+        <Process width={group.width} height={group.height} x={group.x} y={group.y}
+                 title={group.getTitle()} graph={group} selected={group.selected}
+                 ports={group.ports}>
         </Process>
       );
     }

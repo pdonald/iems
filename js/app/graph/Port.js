@@ -66,6 +66,7 @@ var Port = React.createClass({
 
   render: function() {
     var line = null;
+    
     if (this.state.dragging) {
       line = <line x1={this.props.x} y1={this.props.y}
                    x2={this.state.pos.x} y2={this.state.pos.y} className="port-line"/>;
