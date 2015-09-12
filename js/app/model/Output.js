@@ -1,8 +1,12 @@
 function resolveParams(params, vars) {
   var result = {};
   for (var key in params) {
-    if (params[key][0] == '$' && params[key].substr(1) in vars) {
-      result[key] = vars[params[key].substr(1)];
+    if (params[key][0] == '$') {
+      if (params[key].substr(1) in vars) {
+        result[key] = vars[params[key].substr(1)];
+      } else {
+        result[key] = undefined;
+      }
     } else {
       result[key] = params[key];
     }
@@ -11,9 +15,9 @@ function resolveParams(params, vars) {
 }
 
 var Output = {
-  nothing: () => '',
+  Nothing: () => '',
 
-  json: (graph, depth) => {
+  JSON: (graph, depth) => {
     if (!depth) depth = 0;
     var pad = ''; for (var i = 0; i < depth + (1*depth) + 1; i++) pad += '  ';
     var pad1 = ''; for (var i = 0; i < depth + (1*depth); i++) pad1 += '  ';
@@ -46,17 +50,19 @@ var Output = {
     if (graph.groups.length) {
       json += ',' + '\n';
       json += pad + 'groups: [' + '\n';
-      json += graph.groups.map(g => Output.json(g, depth + 1)).join(',\n') + '\n';
+      json += graph.groups.map(g => Output.JSON(g, depth + 1)).join(',\n') + '\n';
       json += pad + ']';
     }
 
     json += '\n';
     json += pad1 + '}';
 
+    if (depth == 0) json += '\n';
+
     return json;
   },
 
-  makefile: (graph, all) => {
+  Makefile: (graph, all) => {
     function processName(p, port) {
       return p.type + '-g' + p.group.id + 'p' + p.id + (port ? '.' + port : '');
     }
@@ -99,7 +105,7 @@ var Output = {
       text += '\n'
     });
 
-    graph.groups.forEach(g => text += Output.makefile(g, all) + '\n');
+    graph.groups.forEach(g => text += Output.Makefile(g, all) + '\n');
 
     if (root) {
       text =

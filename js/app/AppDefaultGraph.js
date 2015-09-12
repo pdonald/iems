@@ -17,7 +17,7 @@ var AppDefaultGraph = {
       ports: { in: ['trg'], out: ['lm'] },
       processes: [
         { id: 2, x: 20, y: 50, width: 150, height: 50, type: 'kenlm', params: {} },
-        { id: 3, x: 20, y: 175, width: 150, height: 50, type: 'binlm', params: {} }
+        { id: 3, x: 20, y: 175, width: 150, height: 50, type: 'binarpa', params: {} }
       ],
       links: [
         { from: { id: 2, port: 'out' }, to: { id: 3, port: 'in' } },
@@ -31,7 +31,7 @@ var AppDefaultGraph = {
       ports: { in: ['trg'], out: ['lm'] },
       processes: [
         { id: 2, x: 20, y: 50, width: 150, height: 50, type: 'kenlm', params: {} },
-        { id: 3, x: 20, y: 175, width: 150, height: 50, type: 'binlm', params: {} }
+        { id: 3, x: 20, y: 175, width: 150, height: 50, type: 'binarpa', params: {} }
       ],
       links: [
         { from: { id: 2, port: 'out' }, to: { id: 3, port: 'in' } },

@@ -2,12 +2,12 @@ var App = React.createClass({
   getInitialState: function() {
     var doc = {
       name: 'Experiment #1',
-      vars: { srclang: 'en', trglang: 'lv', 'lm-order': 5 },
+      vars: { srclang: 'en', trglang: 'lv', 'lm-order': 5, toolsdir: '/tools', workdir: '/tools/train', tempdir: '/tmp' },
       stack: []
     };
     doc.stack.push(new GroupModel(AppDefaultGraph, null, doc));
     return {
-      output: 'makefile',
+      output: 'Makefile',
       currentDocument: 0,
       modal: {
         open: false,
@@ -236,33 +236,40 @@ var App = React.createClass({
                     </div>
                   </div>
                   <div className="cell">
-                    <nav className="depth">
-                      <ul>
-                        {this.state.documents.map((doc, index) => <li className={index==this.state.currentDocument?'active':''} key={index} onClick={() => this.goToDoc(index)}>{doc.name}</li>)}
-                        <li className="right" onClick={() => this.cloneDoc(this.currentDoc())}>Clone</li>
-                        <li className="right" onClick={this.addDoc}>New</li>
-                      </ul>
-                    </nav>
-                    <nav className="depth">
-                      <ul>
-                        {this.currentDoc().stack.map((g, index) => <li key={index} onClick={() => this.goTo(index)}>{(g.title || g.name || '#'+g.id)}</li>)}
-                        <li className="run right" onClick={this.runExp}>Run</li>
-                      </ul>
-                    </nav>
-                    <div className="cell-scroll-outer" style={{'height': '40%'}}>
-                      <div className="cell-scroll-inner grid">
-                        <Graph ref="graph" graph={this.currentGraph()}>
-                          <Group group={this.currentGraph()} blank={true} main={true}/>
-                        </Graph>
+                    <div className="table">
+                      <div className="row" style={{height: '80%'}}>
+                        <div className="cell">
+                          <nav className="depth">
+                            <ul>
+                              {this.state.documents.map((doc, index) => <li className={index==this.state.currentDocument?'active':''} key={index} onClick={() => this.goToDoc(index)}>{doc.name}</li>)}
+                              <li className="right" onClick={() => this.cloneDoc(this.currentDoc())}>Clone</li>
+                              <li className="right" onClick={this.addDoc}>New</li>
+                            </ul>
+                          </nav>
+                          <nav className="depth">
+                            <ul>
+                              {this.currentDoc().stack.map((g, index) => <li key={index} onClick={() => this.goTo(index)}>{(g.title || g.name || '#'+g.id)}</li>)}
+                              <li className="run right" onClick={this.runExp}>Run</li>
+                            </ul>
+                          </nav>
+                          <div className="cell-scroll-outer" style={{'height': '100%'}}>
+                            <div className="cell-scroll-inner grid"  style={{'borderTop': '1px solid #000'}}>
+                              <Graph ref="graph" graph={this.currentGraph()}>
+                                <Group group={this.currentGraph()} blank={true} main={true}/>
+                              </Graph>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                    <div className="table" style={{'borderTop': '1px solid #000'}}>
-                      <div className="row">
+                      <div className="row" style={{'borderTop': '1px solid #000'}}>
                         <div className="cell preview">
                           <button className="copy" ref="copyMakefileButton" data-clipboard-target="makefile">Copy to clipboard</button>
                           <div className="options">
-                            <label><input type="radio" readOnly name="outtype" checked={this.state.output=='makefile'?'checked':''} onClick={e => this.changeOutputType('makefile')}/> Makefile</label>
-                            <label><input type="radio" readOnly name="outtype" checked={this.state.output=='json'?'checked':''} onClick={e => this.changeOutputType('json')}/> JSON</label>
+                            {Object.keys(Output).map(key => (
+                              <span key={key}>
+                                <label><input type="radio" readOnly name="outtype" checked={this.state.output == key ? 'checked' : ''} onClick={e => this.changeOutputType(key)}/> {key}</label>
+                              </span>
+                            ))}
                           </div>
                           <pre id="makefile">
                             {Output[this.state.output](this.currentGraph())}

@@ -157,12 +157,19 @@ br{
 }
 
 .preview pre {
+  height: 100%;
   padding: 10px 10px;
   overflow: auto;
   -moz-tab-size:    2;
   -o-tab-size:      2;
   tab-size:         2;
   white-space: pre;
+  -webkit-touch-callout: text;
+  -webkit-user-select: text;
+  -khtml-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
 }
 
 .process .process-rect {

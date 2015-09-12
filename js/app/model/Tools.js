@@ -11,16 +11,20 @@ var Tools = {
     },
     opus: {
       type: 'opus', title: 'OPUS', category: 'corpora',
-      params: { corpus: 'string', srcLang: 'language', trgLang: 'language' },
+      params: {
+        corpus: 'string',
+        srclang: { type: 'language', default: '$srclang' },
+        trglang: { type: 'language', default: '$trglang' }
+      },
       input: { },
       output: {
         src: {
           type: 'file<text>',
-          title: (p, params) => params.srcLang ? params.srcLang : 'src'
+          title: (p, params) => params.srclang ? params.srclang : 'src'
         },
         trg: {
           type: 'file<text>',
-          title: (p, params) => params.trgLang ? params.trgLang : 'trg'
+          title: (p, params) => params.trglang ? params.trglang : 'trg'
         },
       },
       toTitle: (p, params) => {
@@ -30,67 +34,89 @@ var Tools = {
       toBash: (params, input, output) => {
         return [
           'TEMP=$(shell mktemp) && \\',
-          `wget http://opus.lingfil.uu.se/${params.corpus}/${params.srcLang}-${params.trgLang}.txt.zip -O $$TEMP && \\`,
-          `unzip -p $$TEMP ${params.corpus}.${params.srcLang}-${params.trgLang}.${params.srcLang} > ${output.src} && \\`,
-          `unzip -p $$TEMP ${params.corpus}.${params.srcLang}-${params.trgLang}.${params.trgLang} > ${output.trg} && \\`,
+          `wget http://opus.lingfil.uu.se/${params.corpus}/${params.srclang}-${params.trglang}.txt.zip -O $$TEMP && \\`,
+          `unzip -p $$TEMP ${params.corpus}.${params.srclang}-${params.trglang}.${params.srclang} > ${output.src} && \\`,
+          `unzip -p $$TEMP ${params.corpus}.${params.srclang}-${params.trglang}.${params.trglang} > ${output.trg} && \\`,
           'rm $$TEMP'
         ];
       }
     },
     tokenizer: {
       type: 'tokenizer', title: 'Tokenizer (moses)', category: 'corpora',
-      params: { lang: 'string' },
+      params: { lang: { type: 'language', default: '$srclang' } },
       input: { in: 'file<text>' },
       output: { out: 'file<tok>' },
+      toTitle: (p, params) => params.lang ? `Tokenizer [${params.lang}] (moses)` : p.title,
       toBash: (params, input, output) => {
         return [`perl /tools/scripts/tokenizer/tokenizer.perl -l ${params.lang} < ${input.in} > ${output.out}`];
       }
     },
-    fastalign: {
-      type: 'fastalign', category: 'alignment',
-      params: { reverse: 'bool' },
-      input: { src: 'file<tok>', trg: 'file<tok>' },
-      output: { out: 'file<align>' },
-      toTitle: (p, params) => {
-        return 'fast align' + (params.reverse === true || params.reverse == 'true' ? ' (reverse)' : '');
-      },
-      toBash: (params, input, output) => {
-        return [
-          'TEMP=$(shell mktemp) && \\',
-          `/tools/prep_fast_align ${input.src} ${input.trg} > $$TEMP && \\`,
-          `/tools/fast_align ${params.reverse ? '-r' : ''} -i $$TEMP > ${output.out} && \\`,
-          'rm $$TEMP'
-        ]
-      }
-    },
     kenlm: {
-      type: 'kenlm', category: 'lm',
-      params: { order: 'integer' },
+      type: 'kenlm', title: 'KenLM', category: 'lm',
+      params: {
+        order: { type: 'uinteger', default: '$lm-order' },
+        memory: { type: 'size-unit', default: '$memory' },
+        toolsdir: { type: 'path', default: '$toolsdir' },
+        tempdir: { type: 'path', default: '$tempdir' }
+      },
       input: { in: 'file<tok>' },
       output: { out: 'file<arpa>' },
       toTitle: (p, params) => {
         return 'KenLM' + (params.order ? `, order = ${params.order}` : '');
       },
       toBash: (params, input, output) => {
-        return [`/tools/lmplz -o ${params.order} < ${input.in} > ${output.out}`];
+        var args = [];
+        if (params.tempdir) args.push(`-T ${params.tempdir}`);
+        if (params.memory) args.push(`-S ${params.memory}`);
+        return [`${params.toolsdir}/lmplz -o ${params.order} ${args.join(' ')} < ${input.in} > ${output.out}`];
       }
     },
-    binlm: {
-      type: 'binlm', category: 'lm',
-      params: { type: 'string' },
+    binarpa: {
+      type: 'binarpa', title: 'Binarize LM', category: 'lm',
+      params: {
+        type: { type: 'string', default: 'trie' },
+        memory: { type: 'size-unit', default: '$memory' },
+        toolsdir: { type: 'path', default: '$toolsdir' },
+        tempdir: { type: 'path', default: '$tempdir' }
+      },
       input: { in: 'file<arpa>' },
-      output: { out: 'file<binlm>' },
+      output: { out: 'file<lm-bin>' },
       toBash: (params, input, output) => {
-        return [`/tools/build_binary ${params.type} ${input.in} ${output.out}`];
+        var args = [];
+        if (params.tempdir) args.push(`-T ${params.tempdir}`);
+        if (params.memory) args.push(`-S ${params.memory}`);
+        return [`${params.toolsdir}/build_binary ${params.type} ${args.join(' ')} ${input.in} ${output.out}`];
       }
     },
-    sym: {
-      type: 'sym', category: 'alignment',
-      params: { method: 'string' },
+    fastalign: {
+      type: 'fastalign', title: 'Fast align', category: 'alignment',
+      params: {
+        reverse: { type: 'bool', default: false },
+        toolsdir: { type: 'path', default: '$toolsdir' },
+        tempdir: { type: 'path', default: '$tempdir' },
+      },
+      input: { src: 'file<tok>', trg: 'file<tok>' },
+      output: { out: 'file<align>' },
+      toTitle: (p, params) => 'fast align' + (params.reverse === true || params.reverse == 'true' ? ' (reverse)' : ''),
+      toBash: (params, input, output) => {
+        return [
+          `TEMP=$(shell mktemp --tmpdir=${params.tempdir}) && \\`,
+          `${params.toolsdir}/prep_fast_align ${input.src} ${input.trg} > $$TEMP && \\`,
+          `${params.toolsdir}/fast_align ${params.reverse ? '-r' : ''} -i $$TEMP > ${output.out} && \\`,
+          'rm $$TEMP'
+        ]
+      }
+    },
+    symalign: {
+      type: 'symalign', title: 'Sym alignments', category: 'alignment',
+      params: {
+        method: { type: 'string', default: 'grow-diag-final-and' },
+        toolsdir: { type: 'path', default: '$toolsdir' },
+      },
       input: { srctrg: 'file<align>', trgsrc: 'file<align>' },
       output: { out: 'file<align>' },
       toBash: (params, input, output) => {
-        return [`/tools/atools -c ${params.method} -i ${input.srctrg} -j ${input.trgsrc} > ${output.out}`];
+        return [`${params.toolsdir}/atools -c ${params.method} -i ${input.srctrg} -j ${input.trgsrc} > ${output.out}`];
       }
     },
     phrases: {
@@ -366,8 +392,8 @@ var Tools = {
       type: 'lm-kenlm', title: 'Language model', category: 'lm',
       ports: { in: ['trg'], out: ['lm'] },
       processes: [
-        { id: 2, type: 'kenlm', params: { order: 5 }, x: 20, y: 50, width: 150, height: 50 },
-        { id: 3, type: 'binlm', params: { type: 'trie' }, x: 20, y: 175, width: 150, height: 50 },
+        { id: 2, type: 'kenlm', params: { }, x: 20, y: 50, width: 150, height: 50 },
+        { id: 3, type: 'binarpa', params: { }, x: 20, y: 175, width: 150, height: 50 },
       ],
       links: [
         { from: { id: 2, port: 'out' }, to: { id: 3, port: 'in' } },
@@ -403,9 +429,9 @@ var Tools = {
       type: 'word-alignment', title: 'Word alignment', category: 'alignment',
       ports: { in: ['src', 'trg'], out: ['algn'] },
       processes: [
-        { id: 601, type: 'fastalign', x: 20, y: 50, width: 150, height: 50 },
+        { id: 601, type: 'fastalign', params: { reverse: false }, x: 20, y: 50, width: 150, height: 50 },
         { id: 602, type: 'fastalign', params: { reverse: true }, x: 200, y: 50, width: 150, height: 50 },
-        { id: 603, type: 'sym', params: { method: 'grow-diag-final-and' }, x: 120, y: 200, width: 150, height: 50 },
+        { id: 603, type: 'symalign', params: { }, x: 120, y: 200, width: 150, height: 50 },
       ],
       links: [
         { from: { id: undefined, port: 'src' }, to: { id: 601, port: 'src' } },

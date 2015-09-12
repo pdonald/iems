@@ -7,6 +7,12 @@ class ProcessModel {
     this.group  = group;
     this.params = this.params || {};
     this.template = Tools.processes[this.type];
+
+    for (var key in this.template.params) {
+      if (!this.params[key] && this.template.params[key].default) {
+        this.params[key] = this.template.params[key].default;
+      }
+    }
   }
 
   getTitle() {

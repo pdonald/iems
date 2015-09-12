@@ -23,7 +23,7 @@ var Connector = React.createClass({
           </g>
         );
 
-        if (Math.abs(this.props.source.y - this.props.target.y) < 50) msg = null;
+        if (Math.abs(this.props.source.y - this.props.target.y) < 50) msg = <g/>;
 
         return msg;
       }
