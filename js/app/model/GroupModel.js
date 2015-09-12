@@ -23,6 +23,12 @@ class GroupModel {
     return this.type;
   }
 
+  getMaxId() {
+    var gmax = Math.max.apply(null, this.groups.map(g => g.id));
+    var pmax = Math.max.apply(null, this.processes.map(p => p.id));
+    return Math.max.apply(null, [this.id, gmax, pmax]);
+  }
+
   addGroup(group) {
     group.links.forEach(l => {
       if (!l.from.id) l.from.id = group.id;
@@ -68,8 +74,8 @@ class GroupModel {
   }
 
   getSize() {
-    if (this.width && this.height) {
-      return { width: this.width, height: this.height };
+    if (this.collapsed) {
+      return { width: 150, height: 50 };
     } else {
       return this.getCalculatedSize();
     }
@@ -93,50 +99,5 @@ class GroupModel {
   getLinkTo(id) {
     if (this.id == id) return this;
     return this.processes.filter(p => p.id == id)[0] || this.groups.filter(g => g.id == id)[0];
-  }
-
-  getLinkToGroup(id, port) {
-    if (this.links) {
-      var link = this.links.filter(l => l.to.id == id && l.to.port == port)[0];
-      if (link) {
-        var process = this.processes.filter(p => p.id == link.from.id)[0];
-        if (process) {
-          return { p: process, g: this, port: link.from.port };
-        }
-        var group = this.groups.filter(g => g.id == link.from.id)[0];
-        if (group) {
-          return group.getLinkToGroup(group.id, link.to.port);
-        }
-      }
-    }
-    if (this.groups) {
-      for (var i in this.groups) {
-        var result = this.groups[i].getLinkToGroup(id, port);
-        if (result) {
-          return result;
-        }
-      }
-    }
-    return null;
-  }
-
-  getStatus(status) {
-    if (!status) return;
-
-    var procs = this.processes.map(p => p.name + '-g' + this.id + 'p' + p.id);
-    var pstatuses = procs.map(p => status[p]).filter(s => s);
-    var gstatuses = this.groups.map(g => g.getStatus(status));
-
-    if (pstatuses.indexOf('running') !== -1 || gstatuses.indexOf('running') !== -1) {
-      return 'running';
-    }
-
-    if (pstatuses.filter(s => s == 'done').length == procs.length && gstatuses.filter(s => s == 'done').length == this.groups.length) {
-      return 'done';
-    }
-
-    //console.log(this.id, this.name, pstatuses, gstatuses, gstatuses.length, this.groups.length);
-
-    return;
   }
 }

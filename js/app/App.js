@@ -11,16 +11,14 @@ var App = React.createClass({
       documents: [
         {
           name: 'Experiment #1',
-          last: 1400,
           stack: [
             new GroupModel(AppDefaultGraph)
           ]
         },
         {
           name: 'Experiment #2',
-          last: 1,
           stack: [
-            new GroupModel({ id: 0, title: 'Main', x:0, y:0 })
+            new GroupModel({ id: 0, title: 'Main', x: 0, y: 0 })
           ]
         }
       ]
@@ -84,25 +82,22 @@ var App = React.createClass({
   onAdd: function(template, x, y) {
     var offset = ReactDOM.findDOMNode(this.refs.graph).getBoundingClientRect();
     if (x >= offset.left && x <= offset.right && y >= offset.top && y <= offset.bottom) {
+      var nextid = this.currentGraph().getMaxId() + 1;
       if (!template.toBash) {
         var group = JSON.parse(JSON.stringify(template));
-        group.id = this.state.last;
+        group.id = nextid;
         group.x = x - offset.left;
         group.y = y - offset.top;
-        //var size = group.getCalculatedSize();
-        group.width = 150;
-        group.height = 50;
         group.collapsed = true;
         this.currentGraph().addGroup(group);
       } else {
         this.currentGraph().addProcess({
-          id: this.currentDoc().last,
+          id: nextid,
           x: x - offset.left, y: y - offset.top,
           width: template.width || 150, height: template.height || 50,
           type: template.type, params: {}
         });
       }
-      this.currentDoc().last++;
       this.setState(this.state);
     }
   },
@@ -248,7 +243,7 @@ var App = React.createClass({
                         <li className="run right" onClick={this.runExp}>Run</li>
                       </ul>
                     </nav>
-                    <div className="cell-scroll-outer" style={{'height': '80%'}}>
+                    <div className="cell-scroll-outer" style={{'height': '40%'}}>
                       <div className="cell-scroll-inner grid">
                         <Graph ref="graph" graph={this.currentGraph()}>
                           <Group group={this.currentGraph()} blank={true} main={true}/>
@@ -264,7 +259,7 @@ var App = React.createClass({
                             <label><input type="radio" readOnly name="outtype" checked={this.state.output=='json'?'checked':''} onClick={e => this.changeOutputType('json')}/> JSON</label>
                           </div>
                           <pre id="makefile">
-                            {(this.state.output == 'makefile' ? this.getMakefile() : JSON.stringify(this.currentGraph(), null, 2)) + '\n\n\n\n'}
+                            {Output[this.state.output](this.currentGraph())}
                           </pre>
                         </div>
                       </div>

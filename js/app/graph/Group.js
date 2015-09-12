@@ -5,7 +5,7 @@ var Group = React.createClass({
     var width = obj.width;
     var height = obj.height;
     if (obj.getSize) {
-      var size = obj.collapsed ? obj.getSize() : obj.getCalculatedSize();
+      var size = obj.collapsed ? { width: 150, height: 50 } : obj.getCalculatedSize();
       width = size.width;
       height = size.height;
     }
@@ -60,8 +60,9 @@ var Group = React.createClass({
         </Process>
       );
     } else {
+      var size = { width: 150, height: 50 };
       return (
-        <Process width={group.width} height={group.height} x={group.x} y={group.y}
+        <Process width={size.width} height={size.height} x={group.x} y={group.y}
                  title={group.getTitle()} graph={group} selected={group.selected}
                  ports={group.ports}>
         </Process>
