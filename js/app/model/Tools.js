@@ -243,7 +243,7 @@ var Tools = {
       output: { out: 'file<tok>' },
       toBash: (params, input, output) => {
         return [
-          `/tools/moses -f ${input.ini} < ${input.in} > ${output.out}`
+          `sudo docker run -a stdin -a stdout -a stderr -v /tools/train:/tools/train -i germann/moses-production.static /moses/bin/moses -f /tools/train/${input.ini} < ${input.in} > ${output.out}`
         ];
       }
     },
