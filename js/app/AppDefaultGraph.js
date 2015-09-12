@@ -2,8 +2,8 @@ var AppDefaultGraph = {
   id: 0, title: 'Main', type: 'main', category: 'undefined',
   x: 0, y: 0, collapsed: false,
   processes: [
-    { id: 1400, x: 131, y: 149, width: 150, height: 50, type: 'opus', params: {} },
-    { id: 1401, x: 262, y: 291, width: 150, height: 50, type: 'tokenizer', params: {} }
+    { id: 1400, x: 131, y: 149, width: 150, height: 50, type: 'opus', params: { srcLang: '$srclang', trgLang: '$trglang' } },
+    { id: 1401, x: 262, y: 291, width: 150, height: 50, type: 'tokenizer', params: { lang: '$srclang' } }
   ],
   links: [
     { from: { id: 1400, port: 'src' }, to: { id: 1401, port: 'in' } },

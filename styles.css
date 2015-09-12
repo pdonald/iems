@@ -105,6 +105,13 @@ body {
   padding: 0;
 }
 
+.properties th input {
+  width: 100%;
+}
+.properties td input {
+  width: 100%;
+}
+
 .sidebar h2 {
   font-size: 14px;
   color: #fff;
@@ -360,7 +367,6 @@ body {
 th{
 	color: lightgrey;
 	padding-right:3px;
-	text-transform: capitalize;
 }
 
 .modal {

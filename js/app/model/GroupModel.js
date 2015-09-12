@@ -1,15 +1,16 @@
 class GroupModel {
-  constructor(obj, parent) {
+  constructor(obj, parent, doc) {
     this.groups = [];
     this.processes = [];
     this.links = [];
     this.parent = parent;
+    this.doc = doc;
 
     for (var key in obj) {
       this[key] = obj[key];
     }
 
-    this.groups.forEach((g, index) => this.groups[index] = new GroupModel(g, this));
+    this.groups.forEach((g, index) => this.groups[index] = new GroupModel(g, this, doc));
     this.processes.forEach((p, index) => this.processes[index] = new ProcessModel(p, this));
   }
 
@@ -35,7 +36,7 @@ class GroupModel {
       if (!l.to.id) l.to.id = group.id;
     });
 
-    this.groups.push(new GroupModel(group, this));
+    this.groups.push(new GroupModel(group, this, this.doc));
   }
 
   addProcess(process) {

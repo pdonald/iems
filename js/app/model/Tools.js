@@ -16,15 +16,15 @@ var Tools = {
       output: {
         src: {
           type: 'file<text>',
-          title: (p) => p.params && p.params.srcLang ? p.params.srcLang : 'src'
+          title: (p, params) => params.srcLang ? params.srcLang : 'src'
         },
         trg: {
           type: 'file<text>',
-          title: (p) => p.params && p.params.trgLang ? p.params.trgLang : 'trg'
+          title: (p, params) => params.trgLang ? params.trgLang : 'trg'
         },
       },
-      toTitle: (p) => {
-        if (p.params.corpus) return `OPUS (${p.params.corpus})`;
+      toTitle: (p, params) => {
+        if (params.corpus) return `OPUS (${params.corpus})`;
         return `OPUS`;
       },
       toBash: (params, input, output) => {
@@ -51,8 +51,8 @@ var Tools = {
       params: { reverse: 'bool' },
       input: { src: 'file<tok>', trg: 'file<tok>' },
       output: { out: 'file<align>' },
-      toTitle: (p) => {
-        return 'fast align' + (p.params && (p.params.reverse === true || p.params.reverse == 'true') ? ' (reverse)' : '');
+      toTitle: (p, params) => {
+        return 'fast align' + (params.reverse === true || params.reverse == 'true' ? ' (reverse)' : '');
       },
       toBash: (params, input, output) => {
         return [
@@ -68,8 +68,8 @@ var Tools = {
       params: { order: 'integer' },
       input: { in: 'file<tok>' },
       output: { out: 'file<arpa>' },
-      toTitle: (p) => {
-        return 'KenLM' + (p.params && p.params.order ? `, order = ${p.params.order}` : '');
+      toTitle: (p, params) => {
+        return 'KenLM' + (params.order ? `, order = ${params.order}` : '');
       },
       toBash: (params, input, output) => {
         return [`/tools/lmplz -o ${params.order} < ${input.in} > ${output.out}`];

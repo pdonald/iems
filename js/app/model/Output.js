@@ -1,5 +1,17 @@
+function resolveParams(params, vars) {
+  var result = {};
+  for (var key in params) {
+    if (params[key][0] == '$' && params[key].substr(1) in vars) {
+      result[key] = vars[params[key].substr(1)];
+    } else {
+      result[key] = params[key];
+    }
+  }
+  return result;
+}
+
 var Output = {
-  nothing: graph => '',
+  nothing: () => '',
 
   json: (graph, depth) => {
     if (!depth) depth = 0;
@@ -81,7 +93,7 @@ var Output = {
       text += Object.keys(input).map(key => input[key]).join(' ')
       text += '\n'
       text += '\t' + `touch status.${processName(p, 'running')}` + '\n';
-      text += '\t' + p.template.toBash(p.params || {}, input, output).join('\n\t') + '\n';
+      text += '\t' + p.template.toBash(resolveParams(p.params, p.group.doc.vars), input, output).join('\n\t') + '\n';
       if (noOutput) text += '\ttouch ' + noOutput + '\n';
       text += '\t' + `mv status.${processName(p, 'running')} status.${processName(p, 'done')}` + '\n';
       text += '\n'

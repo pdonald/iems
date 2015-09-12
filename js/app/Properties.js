@@ -1,5 +1,5 @@
 var Properties = React.createClass({
-  mixins: [Reflux.ListenerMixin],
+  mixins: [Reflux.ListenerMixin, React.addons.PureRenderMixin],
 
   getInitialState: function() {
     return { selected: null };

@@ -11,7 +11,7 @@ class ProcessModel {
 
   getTitle() {
     if (this.title) return this.title;
-    if (this.template.toTitle) return this.template.toTitle(this);
+    if (this.template.toTitle) return this.template.toTitle(this, resolveParams(this.params, this.group.doc.vars));
     if (this.template.title) return this.template.title;
     return this.type;
   }

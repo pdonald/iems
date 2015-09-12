@@ -22,7 +22,9 @@ var Process = React.createClass({
   portName: function(process, type, port) {
     if (process.template) {
       var portinfo = process.template[type][port];
-      if (portinfo.title)  return portinfo.title(process);
+      if (portinfo.title) {
+        return portinfo.title(process, resolveParams(process.params, process.group.doc.vars));
+      }
     }
     return port;
   },

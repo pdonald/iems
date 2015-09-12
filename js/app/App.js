@@ -1,5 +1,11 @@
 var App = React.createClass({
   getInitialState: function() {
+    var doc = {
+      name: 'Experiment #1',
+      vars: { srclang: 'en', trglang: 'lv', 'lm-order': 5 },
+      stack: []
+    };
+    doc.stack.push(new GroupModel(AppDefaultGraph, null, doc));
     return {
       output: 'makefile',
       currentDocument: 0,
@@ -9,18 +15,7 @@ var App = React.createClass({
         content: ''
       },
       documents: [
-        {
-          name: 'Experiment #1',
-          stack: [
-            new GroupModel(AppDefaultGraph)
-          ]
-        },
-        {
-          name: 'Experiment #2',
-          stack: [
-            new GroupModel({ id: 0, title: 'Main', x: 0, y: 0 })
-          ]
-        }
+        doc
       ]
     }
   },
@@ -37,6 +32,7 @@ var App = React.createClass({
      this.listenTo(Actions.portSelected, p => this.selectedPort = p);
      this.listenTo(Actions.portDeselected, p => this.selectedPort = null);
      this.listenTo(Actions.paramChanged, this.onParamChanged);
+     this.listenTo(Actions.variableChanged, this.onVariableChanged);
      this.listenTo(Actions.viewFile, this.onViewFile);
 
      this.clipboard = new ZeroClipboard(this.refs.copyMakefileButton);
@@ -70,6 +66,11 @@ var App = React.createClass({
 
   onParamChanged: function(process, key, value) {
     process[key] = value;
+    this.setState(this.state);
+  },
+
+  onVariableChanged: function(key, value) {
+    this.currentDoc().vars[key] = value;
     this.setState(this.state);
   },
 
@@ -218,6 +219,11 @@ var App = React.createClass({
                           <div className="row">
                             <div className="cell properties">
                               <Properties/>
+                            </div>
+                          </div>
+                          <div className="row">
+                            <div className="cell properties">
+                              <Variables vars={this.currentDoc().vars}/>
                             </div>
                           </div>
                           <div className="row">
