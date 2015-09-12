@@ -96,8 +96,27 @@ class GroupModel {
     return size;
   }
 
-  getLinkTo(id) {
+  getChildById(id) {
     if (this.id == id) return this;
     return this.processes.filter(p => p.id == id)[0] || this.groups.filter(g => g.id == id)[0];
+  }
+
+  resolveLinkInput(link) {
+    if (link.from) {
+      if (link.from.id == this.id) {
+        return this.parent.resolveLinkInput({ to: link.from });
+      } else {
+        var child = this.processes.filter(p => p.id == link.from.id)[0];
+        if (child) {
+          return { process: child, port: link.from.port };
+        }
+      }
+    } else {
+      var linkTo = this.links.filter(l => l.to.id == link.to.id && l.to.port == link.to.port)[0];
+      if (linkTo) {
+        return this.resolveLinkInput(linkTo);
+      }
+    }
+    return;
   }
 }

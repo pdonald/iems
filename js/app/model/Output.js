@@ -70,7 +70,7 @@ var Output = {
       }
 
       graph.links.filter(l => l.to.id == p.id).forEach(l => {
-        var result = p.getLinkTo(l.from.id, l.from.port);
+        var result = graph.resolveLinkInput(l);
         if (result) {
           input[l.to.port] = processName(result.process, result.port);
         }

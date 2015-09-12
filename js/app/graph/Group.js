@@ -42,8 +42,8 @@ var Group = React.createClass({
     });
 
     var links = group.links.map(l => {
-      var source = this.getPortPosition(group.getLinkTo(l.from.id), l.from.port, 'out', l.from.id == group.id);
-      var target = this.getPortPosition(group.getLinkTo(l.to.id), l.to.port, 'in', l.to.id == group.id);
+      var source = this.getPortPosition(group.getChildById(l.from.id), l.from.port, 'out', l.from.id == group.id);
+      var target = this.getPortPosition(group.getChildById(l.to.id), l.to.port, 'in', l.to.id == group.id);
       return <Connector key={group.getKey()+'/'+l.from.id+'/'+l.from.port+'/'+l.to.id+'/'+l.to.port} source={source} target={target} graph={l}/>;
     });
 
