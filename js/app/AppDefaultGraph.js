@@ -55,7 +55,7 @@ AppDefaultGraph = {
   id: 0, title: 'Main', type: 'main', category: 'undefined',
   x: 0, y: 0, collapsed: false,
   processes: [
-    { id: 1, x: 214, y: 178, width: 150, height: 50, type: 'opus', params: {} },
-    { id: 6, x: 456, y: 183, width: 150, height: 50, type: 'opus', params: {} }
+    { id: 1, x: 214, y: 178, width: 150, height: 50, type: 'opus', params: { srclang: "$srclang", trglang: "$trglang" } },
+    { id: 6, x: 456, y: 183, width: 150, height: 50, type: 'opus', params: { srclang: "$srclang", trglang: "$trglang" } }
   ]
 }

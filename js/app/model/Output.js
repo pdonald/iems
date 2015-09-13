@@ -34,6 +34,14 @@ var Output = {
   Nothing: () => '',
 
   JSON: (graph, depth) => {
+    function params2str(params) {
+      var arr = [];
+      for (var key in params) {
+        arr.push(key + ': "' + params[key].replace('"', '\\"') + '"');
+      }
+      return arr.join(', ');
+    }
+
     if (!depth) depth = 0;
     var pad = ''; for (var i = 0; i < depth + (1*depth) + 1; i++) pad += '  ';
     var pad1 = ''; for (var i = 0; i < depth + (1*depth); i++) pad1 += '  ';
@@ -43,13 +51,13 @@ var Output = {
     var json = pad1 + '{' + '\n';
     json += pad + `id: ${graph.id}, title: '${graph.title.replace("'", "\\'")}', `
                 + `type: '${graph.type}', category: '${graph.category}',` + '\n';
-    json += pad + `x: ${graph.x}, y: ${graph.y}, collapsed: ${graph.collapsed?true:false},` + '\n';
+    json += pad + `x: ${graph.x}, y: ${graph.y}, collapsed: ${graph.collapsed ? true : false},` + '\n';
     if (graph.ports) json += pad + `ports: { in: ['${graph.ports.in.join("', '")}'], out: ['${graph.ports.out.join("', '")}'] },` + '\n';
 
     // processes data
     json += pad + 'processes: [' + '\n';
     json += graph.processes
-      .map(p => `{ id: ${p.id}, x: ${p.x}, y: ${p.y}, width: ${p.width}, height: ${p.height}, type: '${p.type}', params: {} }`)
+      .map(p => `{ id: ${p.id}, x: ${p.x}, y: ${p.y}, width: ${p.width}, height: ${p.height}, type: '${p.type}', params: { ${params2str(p.params)} } }`)
       .map(s => pad2 + s).join(',\n') + '\n';
     json += pad + ']';
 
