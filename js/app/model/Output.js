@@ -14,6 +14,22 @@ function resolveParams(params, vars) {
   return result;
 }
 
+function hashFnv32a(str, asString, seed) {
+    /*jshint bitwise:false */
+    var i, l,
+        hval = (seed === undefined) ? 0x811c9dc5 : seed;
+
+    for (i = 0, l = str.length; i < l; i++) {
+        hval ^= str.charCodeAt(i);
+        hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
+    }
+    if( asString ){
+        // Convert to 8 digit hex string
+        return ("0000000" + (hval >>> 0).toString(16)).substr(-8);
+    }
+    return hval >>> 0;
+}
+
 var Output = {
   Nothing: () => '',
 
@@ -62,9 +78,10 @@ var Output = {
     return json;
   },
 
-  Makefile: (graph, all) => {
+  Makefile: (graph, all, cache) => {
     function processName(p, port) {
-      return p.type + '-g' + p.group.id + 'p' + p.id + (port ? '.' + port : '');
+      var hash = hashFnv32a(p.getHashKey(), true);
+      return p.type + '-' + hash + (port ? '.' + port : '');
     }
 
     var text = '';
@@ -105,7 +122,7 @@ var Output = {
       text += '\n'
     });
 
-    graph.groups.forEach(g => text += Output.Makefile(g, all) + '\n');
+    graph.groups.forEach(g => text += Output.Makefile(g, all, cache) + '\n');
 
     if (root) {
       text =

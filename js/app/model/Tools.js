@@ -55,9 +55,9 @@ var Tools = {
       type: 'kenlm', title: 'KenLM', category: 'lm',
       params: {
         order: { type: 'uinteger', default: '$lm-order' },
-        memory: { type: 'size-unit', default: '$memory' },
+        memory: { type: 'size-unit', default: '$memory', nohash: true },
         toolsdir: { type: 'path', default: '$toolsdir' },
-        tempdir: { type: 'path', default: '$tempdir' }
+        tempdir: { type: 'path', default: '$tempdir', nohash: true }
       },
       input: { in: 'file<tok>' },
       output: { out: 'file<arpa>' },
@@ -75,9 +75,9 @@ var Tools = {
       type: 'binarpa', title: 'Binarize LM', category: 'lm',
       params: {
         type: { type: 'string', default: 'trie' },
-        memory: { type: 'size-unit', default: '$memory' },
+        memory: { type: 'size-unit', default: '$memory', nohash: true },
         toolsdir: { type: 'path', default: '$toolsdir' },
-        tempdir: { type: 'path', default: '$tempdir' }
+        tempdir: { type: 'path', default: '$tempdir', nohash: true }
       },
       input: { in: 'file<arpa>' },
       output: { out: 'file<lm-bin>' },
@@ -89,7 +89,7 @@ var Tools = {
       }
     },
     fastalign: {
-      type: 'fastalign', title: 'Fast align', category: 'alignment',
+      type: 'fastalign', title: 'Fast align', category: 'alignment', version: 1,
       params: {
         reverse: { type: 'bool', default: false },
         toolsdir: { type: 'path', default: '$toolsdir' },

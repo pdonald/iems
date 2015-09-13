@@ -126,6 +126,6 @@ class GroupModel {
       .filter(l => l.from.id == from.id && l.from.port == from.port)
       .map(l => this.getChildById(l.to.id));
 
-    return  [].concat.apply([], links);
+    return [].concat.apply([], links);
   }
 }

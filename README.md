@@ -57,8 +57,4 @@ node server.js
 
 ## TODO
 
-* validate connections
-* global parameters
-* reuse
 * load/save
-* refactor model
