@@ -24,7 +24,7 @@ class ProcessModel {
 
   getInput() {
     var link = this.group.links.filter(l => l.to.id == this.id)[0];
-    if (link) return this.group.resolveLinkInput(link).process;
+    if (link && link.process) return this.group.resolveLinkInput(link).process;
   }
 
   getKey() {
