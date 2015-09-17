@@ -1,16 +1,24 @@
 {
   "name": "iems",
   "version": "1.0.0",
-  "description": "An Interactive Experiment Management System for the [Moses Toolkit](https://github.com/moses-smt).",
+  "description": "Interactive Experiment Management System (iEMS) for machine translation",
+  "author": "Pēteris Ņikiforovs <p@mak.id.lv> (https://peteris.rocks)",
+  "contributors": ["Matīss Rikters"],
+  "license": "Apache-2.0",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "build": "node node_modules/babel/bin/babel.js --out-file dist/app.js js/app",
+    "dev": "node node_modules/babel/bin/babel.js --watch --source-maps inline --out-file dist/app.js js/app"
   },
-  "author": "",
-  "license": "ISC",
+  "engines": {
+    "node": ">=4.0.0"
+  },
   "dependencies": {
     "body-parser": "^1.13.3",
     "express": "^4.13.3"
+  },
+  "devDependencies": {
+    "babel": "^5.8.23"
   }
 }
