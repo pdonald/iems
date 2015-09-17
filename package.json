@@ -7,7 +7,7 @@
   "license": "Apache-2.0",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node app/server.js",
     "build": "node node_modules/babel/bin/babel.js --out-file app/app.js --ignore lib/ app/js",
     "dev": "node node_modules/babel/bin/babel.js --watch --source-maps inline --out-file app/app.js --ignore lib/ app/js"
   },

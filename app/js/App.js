@@ -34,19 +34,10 @@ var App = React.createClass({
      this.listenTo(Actions.paramChanged, this.onParamChanged);
      this.listenTo(Actions.variableChanged, this.onVariableChanged);
      this.listenTo(Actions.viewFile, this.onViewFile);
+     this.listenTo(Actions.updateStatus, this.onUpdateStatus);
 
      this.clipboard = new ZeroClipboard(this.refs.copyMakefileButton);
-
-     //setInterval(() => this.updateStatus(), 1000);
-   },
-
-   updateStatus: function() {
-     console.log('updating status')
-     $.get('/status', result => {
-       this.currentDoc().status = result;
-       this.setState(this.state);
-     });
-   },
+  },
 
   onViewFile: function(info) {
     if (info.type != 'out') return;
@@ -71,6 +62,11 @@ var App = React.createClass({
 
   onVariableChanged: function(key, value) {
     this.currentDoc().vars[key] = value;
+    this.setState(this.state);
+  },
+
+  onUpdateStatus: function(status) {
+    this.currentDoc().status = status;
     this.setState(this.state);
   },
 
@@ -183,16 +179,6 @@ var App = React.createClass({
     this.setState(this.state);
   },
 
-  runExp: function() {
-    $.ajax({ type: 'POST', url: '/run', data: this.getMakefile(), contentType: 'text/plain' }, res => {
-      console.log(res);
-    });
-  },
-
-  getMakefile: function() {
-    return genMakefile(this.currentGraph(), this.currentDoc().stack[0]);
-  },
-
   render: function() {
     return (
       <div className="container">
@@ -228,6 +214,11 @@ var App = React.createClass({
                             </div>
                           </div>
                           <div className="row">
+                            <div className="cell properties">
+                              <Server doc={this.currentDoc()}/>
+                            </div>
+                          </div>
+                          <div className="row">
                             <div className="cell toolbox">
                               <Toolbox/>
                             </div>
@@ -250,7 +241,7 @@ var App = React.createClass({
                           <nav className="depth">
                             <ul>
                               {this.currentDoc().stack.map((g, index) => <li key={index} onClick={() => this.goTo(index)}>{(g.title || g.name || '#'+g.id)}</li>)}
-                              <li className="run right" onClick={this.runExp}>Run</li>
+                              <li className="run right" onClick={() => Actions.runExperiment(this.currentDoc())}>Run</li>
                             </ul>
                           </nav>
                           <div className="cell-scroll-outer" style={{'height': '100%'}}>

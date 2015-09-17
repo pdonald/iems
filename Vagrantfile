@@ -19,4 +19,7 @@ Vagrant.configure("2") do |config|
   # enable logging in via ssh with a password
   config.ssh.username = "vagrant"
   config.ssh.password = "vagrant"
+
+  # network
+  config.vm.network "forwarded_port", guest: 8080, host: 8080
 end

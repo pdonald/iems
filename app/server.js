@@ -1,51 +1,69 @@
-var express = require('express');
-var bodyParser = require('body-parser')
-var app = express();
-var spawn = require('child_process').spawn;
-var execSync = require('child_process').execSync;
-var fs = require('fs');
+"use strict";
 
-var running = [];
+let express = require('express');
+let bodyParser = require('body-parser')
+let spawn = require('child_process').spawn;
+let exec = require('child_process').exec;
+let fs = require('fs');
+let path = require('path');
 
-app.use(express.static('.'));
-app.use(bodyParser.text());
+let app = express();
 
-app.get('/file', function(req, res) {
-  res.send(fs.readFileSync('/tools/train/' + req.query.name));
-});
+app.use(express.static(__dirname));
+app.use(bodyParser.json());
 
-app.get('/status', function(req, res) {
-  var status = {};
+app.post('/run', (req, res) => {
+  if (!req.body.workdir) return res.status(400).send('No workdir variable');
+  if (!req.body.makefile) return res.status(400).send('No Makefile');
 
-  var files = fs.readdirSync('/tools/train')
-    .filter(f => f.indexOf('status.') === 0)
-    .map(f => f.substr('status.'.length));
+  let workdir = req.body.workdir;
+  let makefile = `${workdir}/Makefile`;
 
-  files
-    .map(f => f.replace('.done', '').replace('.running', ''))
-    .filter((f, index, arr) => arr.lastIndexOf(f) === index)
-    .forEach(f => {
-      if (files.indexOf(f + '.running') !== -1) status[f] = 'running';
-      if (files.indexOf(f + '.done') !== -1) status[f] = 'done';
+  exec(`mkdir -p "${workdir}" && rm -rf "${workdir}"/*`, (err, stdout, stderr) => {
+    if (err) return res.status(500).send(`Could not create or delete files from workdir: ${err}`);
+
+    fs.writeFile(makefile, req.body.makefile, err => {
+      if (err) return res.status(500).send(`Could not create Makefile: ${err}`);
+
+      let p = spawn('make', [], { cwd: workdir });
+      p.on('close', code => { console.log('process exited with code ' + code) });
+      p.stdout.pipe(process.stdout);
+      p.stderr.pipe(process.stdout);
+
+      res.send('ok');
     });
-
-  res.send(status);
+  });
 });
 
-app.post('/run', function(req, res) {
-  execSync('rm -rf /tools/train/*');
-  fs.writeFileSync('/tools/train/Makefile', req.body);
+app.get('/file', (req, res) => {
+  if (!req.query.workdir) return res.status(400).send('No workdir');
+  if (!req.query.file) return res.status(400).send('No file');
 
-  var id = running.length;
-  console.log('launching ' + id);
+  let filename = path.join(req.query.workdir, req.query.file);
 
-  var p = spawn('make', [], { cwd: '/tools/train/' });
-  p.on('close', function(code) { console.log('process ' + id + ' ended with code ' + code) });
-  p.stdout.pipe(process.stdout);
-  p.stderr.pipe(process.stdout);
-  running.push(p);
-
-  res.send('got it: ' + id);
+  res.sendFile(filename, { headers: { 'Content-Type': 'text/plain'} });
 });
 
-app.listen(8081);
+app.get('/status', (req, res) => {
+  if (!req.query.workdir) return res.status(400).send('No workdir');
+
+  fs.readdir(req.query.workdir, (err, files) => {
+    if (err) return res.status(500).send(`Could not list workdir: ${err}`);
+
+    let status = {};
+
+    files
+      .filter(f => f.indexOf('status.') === 0)
+      .map(f => f.substr('status.'.length))
+      .forEach(f => {
+        let name = f.replace('.running', '').replace('.done', '');
+        if (f.indexOf('.running') !== -1) status[name] = 'running';
+        if (f.indexOf('.done') !== -1) status[name] = 'done';
+      });
+
+    res.send(status);
+  })
+});
+
+console.log('Started');
+app.listen(8080);

@@ -105,7 +105,7 @@ body {
   padding: 0;
 }
 
-.properties th input {
+.properties th input[type="text"] {
   width: 100%;
 }
 .properties td input {
