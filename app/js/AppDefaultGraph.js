@@ -64,9 +64,12 @@ AppDefaultGraph = {
   x: 0, y: 0, collapsed: false,
   processes: [
     { id: 2, x: 93, y: 103, width: 150, height: 50, type: 'cp', params: { source: "/vagrant/License.txt" } },
-    { id: 3, x: 69, y: 315, width: 150, height: 50, type: 'tokenizer', params: { lang: "$srclang" } }
+    { id: 3, x: 82, y: 239, width: 150, height: 50, type: 'tokenizer', params: { lang: "$srclang", toolsdir: "$toolsdir" } },
+    { id: 4, x: 333, y: 93, width: 150, height: 50, type: 'cp', params: { source: "/tmp/License.txt" } },
+    { id: 5, x: 336, y: 253, width: 150, height: 50, type: 'tokenizer', params: { lang: "$srclang", toolsdir: "$toolsdir" } }
   ],
   links: [
-    { from: { id: 2, port: 'out' }, to: { id: 3, port: 'in' } }
+    { from: { id: 2, port: 'out' }, to: { id: 3, port: 'in' } },
+    { from: { id: 4, port: 'out' }, to: { id: 5, port: 'in' } }
   ]
 }

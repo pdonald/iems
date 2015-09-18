@@ -24,7 +24,12 @@ class ProcessModel {
 
   getInput() {
     var link = this.group.links.filter(l => l.to.id == this.id)[0];
-    if (link && link.process) return this.group.resolveLinkInput(link).process;
+    if (link) {
+      var result = this.group.resolveLinkInput(link);
+      if (result) {
+        return result.process;
+      }
+    }
   }
 
   getKey() {
@@ -61,21 +66,17 @@ class ProcessModel {
   static isLinkValid(a, b) {
     var atype = a.type || a;
     var btype = b.type || b;
-    //console.log(atype, btype)
+    if (atype == 'file<any>' || btype == 'file<any>') return true;
     return atype == btype;
   }
 
   static hashFnv32a(str, asString, seed) {
-    /*jshint bitwise:false */
-    var i, l,
-        hval = (seed === undefined) ? 0x811c9dc5 : seed;
-
+    var i, l, hval = (seed === undefined) ? 0x811c9dc5 : seed;
     for (i = 0, l = str.length; i < l; i++) {
         hval ^= str.charCodeAt(i);
         hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
     }
-    if( asString ){
-        // Convert to 8 digit hex string
+    if (asString) {
         return ("0000000" + (hval >>> 0).toString(16)).substr(-8);
     }
     return hval >>> 0;
