@@ -11,10 +11,11 @@ var Server = React.createClass({
     this.setState({ url: document.location.href });
   },
 
-  launch: function(doc) {
+  launch: function(doc, resume) {
     var data = {
       workdir: doc.vars.workdir,
-      makefile: Output.Makefile(doc.stack[0])
+      makefile: Output.Makefile(doc.stack[0]),
+      resume: !!resume
     };
 
     var request = {

@@ -242,6 +242,7 @@ var App = React.createClass({
                             <ul>
                               {this.currentDoc().stack.map((g, index) => <li key={index} onClick={() => this.goTo(index)}>{(g.title || g.name || '#'+g.id)}</li>)}
                               <li className="run right" onClick={() => Actions.runExperiment(this.currentDoc())}>Run</li>
+                              <li className="run right" onClick={() => Actions.runExperiment(this.currentDoc(), true)}>Resume</li>
                             </ul>
                           </nav>
                           <div className="cell-scroll-outer" style={{'height': '100%'}}>

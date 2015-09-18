@@ -17,9 +17,14 @@ app.post('/run', (req, res) => {
   if (!req.body.makefile) return res.status(400).send('No Makefile');
 
   let workdir = req.body.workdir;
+  let resume = req.body.resume;
   let makefile = `${workdir}/Makefile`;
 
-  exec(`mkdir -p "${workdir}" && rm -rf "${workdir}"/*`, (err, stdout, stderr) => {
+  let cleancmd = resume
+    ? `true`
+    : `mkdir -p "${workdir}" && rm -rf "${workdir}"/*`;
+
+  exec(cleancmd, (err, stdout, stderr) => {
     if (err) return res.status(500).send(`Could not create or delete files from workdir: ${err}`);
 
     fs.writeFile(makefile, req.body.makefile, err => {
