@@ -14,22 +14,6 @@ function resolveParams(params, vars) {
   return result;
 }
 
-function hashFnv32a(str, asString, seed) {
-    /*jshint bitwise:false */
-    var i, l,
-        hval = (seed === undefined) ? 0x811c9dc5 : seed;
-
-    for (i = 0, l = str.length; i < l; i++) {
-        hval ^= str.charCodeAt(i);
-        hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
-    }
-    if( asString ){
-        // Convert to 8 digit hex string
-        return ("0000000" + (hval >>> 0).toString(16)).substr(-8);
-    }
-    return hval >>> 0;
-}
-
 var Output = {
   Nothing: () => '',
 
@@ -87,11 +71,6 @@ var Output = {
   },
 
   Makefile: (graph, all, cache) => {
-    function processName(p, port) {
-      var hash = hashFnv32a(p.getHashKey(), true);
-      return p.type + '-' + hash + (port ? '.' + port : '');
-    }
-
     var text = '';
 
     var root = !all;
@@ -103,19 +82,19 @@ var Output = {
       var noOutput = null;
 
       Object.keys(p.template.output).forEach(key => {
-        output[key] = processName(p, key);
+        output[key] = p.getMakefileKey(key);
         all.push(output[key]);
       });
 
       if (Object.keys(output).length == 0) {
-        noOutput = processName(p, 'done');
+        noOutput = p.getMakefileKey( 'done');
         all.push(noOutput);
       }
 
       graph.links.filter(l => l.to.id == p.id).forEach(l => {
         var result = graph.resolveLinkInput(l);
         if (result) {
-          input[l.to.port] = processName(result.process, result.port);
+          input[l.to.port] = result.process.getMakefileKey(result.port);
         }
       });
 
@@ -123,10 +102,10 @@ var Output = {
       text += ': '
       text += Object.keys(input).map(key => input[key]).join(' ')
       text += '\n'
-      text += '\t' + `touch status.${processName(p, 'running')}` + '\n';
+      text += '\t' + `touch status.${p.getMakefileKey('running')}` + '\n';
       text += '\t' + p.template.toBash(resolveParams(p.params, p.group.doc.vars), input, output).join('\n\t') + '\n';
       if (noOutput) text += '\ttouch ' + noOutput + '\n';
-      text += '\t' + `mv status.${processName(p, 'running')} status.${processName(p, 'done')}` + '\n';
+      text += '\t' + `mv status.${p.getMakefileKey('running')} status.${p.getMakefileKey('done')}` + '\n';
       text += '\n'
     });
 

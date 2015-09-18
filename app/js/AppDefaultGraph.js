@@ -58,3 +58,15 @@ AppDefaultGraph = {
     { id: 1, x: 214, y: 178, width: 150, height: 50, type: 'opus', params: { srclang: "$srclang", trglang: "$trglang", corpus: 'EUconst' } },
   ]
 }
+
+AppDefaultGraph = {
+  id: 0, title: 'Main', type: 'main', category: 'undefined',
+  x: 0, y: 0, collapsed: false,
+  processes: [
+    { id: 2, x: 93, y: 103, width: 150, height: 50, type: 'cp', params: { source: "/vagrant/License.txt" } },
+    { id: 3, x: 69, y: 315, width: 150, height: 50, type: 'tokenizer', params: { lang: "$srclang" } }
+  ],
+  links: [
+    { from: { id: 2, port: 'out' }, to: { id: 3, port: 'in' } }
+  ]
+}

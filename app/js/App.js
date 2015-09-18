@@ -65,7 +65,7 @@ var App = React.createClass({
     this.setState(this.state);
   },
 
-  onUpdateStatus: function(status) {
+  onUpdateStatus: function(doc, status) {
     this.currentDoc().status = status;
     this.setState(this.state);
   },

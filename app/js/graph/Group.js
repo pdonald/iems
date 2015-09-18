@@ -39,7 +39,7 @@ var Group = React.createClass({
         var ports = { in: Object.keys(p.template.input), out: Object.keys(p.template.output) }
         return <Process width={p.width} height={p.height} x={p.x} y={p.y}
                         graph={p} title={p.getTitle()} key={p.getKey()} selected={p.selected}
-                        ports={ports} />;
+                        ports={ports} status={p.getStatus()} />;
       });
 
       var links = group.links.map(l => {

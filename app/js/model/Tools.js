@@ -1,5 +1,14 @@
 var Tools = {
   processes: {
+    cp: {
+      type: 'cp', title: 'Copy local file', category: 'corpora',
+      params: { source: 'string' },
+      input: { },
+      output: { out: 'file<any>' },
+      toBash: (params, input, output) => {
+        return [`cp ${params.source} ${output.out}`];
+      }
+    },
     wget: {
       type: 'wget', category: 'corpora',
       params: { url: 'string' },
@@ -43,12 +52,15 @@ var Tools = {
     },
     tokenizer: {
       type: 'tokenizer', title: 'Tokenizer (moses)', category: 'corpora',
-      params: { lang: { type: 'language', default: '$srclang' } },
+      params: {
+        lang: { type: 'language', default: '$srclang' },
+        toolsdir: { type: 'path', default: '$toolsdir' }
+      },
       input: { in: 'file<text>' },
       output: { out: 'file<tok>' },
       toTitle: (p, params) => params.lang ? `Tokenizer [${params.lang}] (moses)` : p.title,
       toBash: (params, input, output) => {
-        return [`perl /tools/scripts/tokenizer/tokenizer.perl -l ${params.lang} < ${input.in} > ${output.out}`];
+        return [`perl ${params.toolsdir}/moses/scripts/tokenizer/tokenizer.perl -l ${params.lang} < ${input.in} > ${output.out}`];
       }
     },
     kenlm: {

@@ -30,6 +30,7 @@ class ProcessModel {
   getKey() {
     return this.type + '-g' + this.group.id + 'p' + this.id;
   }
+
   getHashKey() {
     var key = [];
     key.push('template='  + this.type);
@@ -46,10 +47,37 @@ class ProcessModel {
     return (prev ? prev.getHashKey() : '<root>') + ' -> ' + key.join(';');
   }
 
+  getMakefileKey(port) {
+    var hash = ProcessModel.hashFnv32a(this.getHashKey(), true);
+    return this.type + '-' + hash + (port ? '.' + port : '');
+  }
+
+  getStatus() {
+    if (this.group.doc.status) {
+      return this.group.doc.status[this.getMakefileKey()];
+    }
+  }
+
   static isLinkValid(a, b) {
     var atype = a.type || a;
     var btype = b.type || b;
     //console.log(atype, btype)
     return atype == btype;
+  }
+
+  static hashFnv32a(str, asString, seed) {
+    /*jshint bitwise:false */
+    var i, l,
+        hval = (seed === undefined) ? 0x811c9dc5 : seed;
+
+    for (i = 0, l = str.length; i < l; i++) {
+        hval ^= str.charCodeAt(i);
+        hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
+    }
+    if( asString ){
+        // Convert to 8 digit hex string
+        return ("0000000" + (hval >>> 0).toString(16)).substr(-8);
+    }
+    return hval >>> 0;
   }
 }

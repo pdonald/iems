@@ -128,4 +128,9 @@ class GroupModel {
 
     return [].concat.apply([], links);
   }
+
+  getStatus() {
+    if (this.processes.filter(p => p.getStatus() == 'running').length > 0) return 'running';
+    if (this.processes.filter(p => p.getStatus() == 'done').length == this.processes.length) return 'done';
+  }
 }
