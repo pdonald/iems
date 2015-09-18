@@ -86,7 +86,7 @@ var Group = React.createClass({
       return (
         <Process width={size.width} height={size.height} x={group.x} y={group.y}
                  title={group.getTitle()} graph={group} selected={group.selected}
-                 ports={group.ports}>
+                 ports={group.ports} status={group.getStatus()}>
         </Process>
       );
     }

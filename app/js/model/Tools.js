@@ -80,7 +80,7 @@ var Tools = {
         var args = [];
         if (params.tempdir) args.push(`-T ${params.tempdir}`);
         if (params.memory) args.push(`-S ${params.memory}`);
-        return [`${params.toolsdir}/lmplz -o ${params.order} ${args.join(' ')} < ${input.in} > ${output.out}`];
+        return [`${params.toolsdir}/kenlm/lmplz -o ${params.order} ${args.join(' ')} < ${input.in} > ${output.out}`];
       }
     },
     binarpa: {
@@ -97,7 +97,7 @@ var Tools = {
         var args = [];
         if (params.tempdir) args.push(`-T ${params.tempdir}`);
         if (params.memory) args.push(`-S ${params.memory}`);
-        return [`${params.toolsdir}/build_binary ${params.type} ${args.join(' ')} ${input.in} ${output.out}`];
+        return [`${params.toolsdir}/kenlm/build_binary ${params.type} ${args.join(' ')} ${input.in} ${output.out}`];
       }
     },
     fastalign: {
@@ -113,8 +113,8 @@ var Tools = {
       toBash: (params, input, output) => {
         return [
           `TEMP=$(shell mktemp --tmpdir=${params.tempdir}) && \\`,
-          `${params.toolsdir}/prep_fast_align ${input.src} ${input.trg} > $$TEMP && \\`,
-          `${params.toolsdir}/fast_align ${params.reverse ? '-r' : ''} -i $$TEMP > ${output.out} && \\`,
+          `paste -d" ||| " ${input.src} /dev/null /dev/null /dev/null /dev/null ${input.trg} > $$TEMP && \\`,
+          `${params.toolsdir}/fast_align/fast_align ${params.reverse ? '-r' : ''} -i $$TEMP > ${output.out} && \\`,
           'rm $$TEMP'
         ]
       }
@@ -128,7 +128,7 @@ var Tools = {
       input: { srctrg: 'file<align>', trgsrc: 'file<align>' },
       output: { out: 'file<align>' },
       toBash: (params, input, output) => {
-        return [`${params.toolsdir}/atools -c ${params.method} -i ${input.srctrg} -j ${input.trgsrc} > ${output.out}`];
+        return [`${params.toolsdir}/fast_align/atools -c ${params.method} -i ${input.srctrg} -j ${input.trgsrc} > ${output.out}`];
       }
     },
     phrases: {

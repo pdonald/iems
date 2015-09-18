@@ -25,10 +25,7 @@ class ProcessModel {
   getInput() {
     var link = this.group.links.filter(l => l.to.id == this.id)[0];
     if (link) {
-      var result = this.group.resolveLinkInput(link);
-      if (result) {
-        return result.process;
-      }
+      return this.group.resolveLinkInput(link);
     }
   }
 
@@ -49,7 +46,7 @@ class ProcessModel {
       }
     }
     var prev = this.getInput();
-    return (prev ? prev.getHashKey() : '<root>') + ' -> ' + key.join(';');
+    return (prev ? prev.process.getHashKey() + '/' + prev.port : '<root>') + ' -> ' + key.join(';');
   }
 
   getMakefileKey(port) {

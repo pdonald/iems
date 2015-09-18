@@ -2,9 +2,9 @@ var AppDefaultGraph = {
   id: 0, title: 'Main', type: 'main', category: 'undefined',
   x: 0, y: 0, collapsed: false,
   processes: [
-    { id: 1, x: 214, y: 178, width: 150, height: 50, type: 'opus', params: {} },
-    { id: 2, x: 150, y: 334, width: 150, height: 50, type: 'tokenizer', params: {} },
-    { id: 3, x: 451, y: 333, width: 150, height: 50, type: 'tokenizer', params: {} }
+    { id: 1, x: 43, y: 101, width: 150, height: 50, type: 'opus', params: { srclang: "$srclang", trglang: "$trglang", corpus: "EUconst" } },
+    { id: 2, x: 24, y: 268, width: 150, height: 50, type: 'tokenizer', params: { lang: "$srclang", toolsdir: "$toolsdir" } },
+    { id: 3, x: 199, y: 269, width: 150, height: 50, type: 'tokenizer', params: { lang: "$trglang", toolsdir: "$toolsdir" } }
   ],
   links: [
     { from: { id: 1, port: 'src' }, to: { id: 2, port: 'in' } },
@@ -16,12 +16,12 @@ var AppDefaultGraph = {
   groups: [
     {
       id: 4, title: 'Word alignment', type: 'word-alignment', category: 'alignment',
-      x: 194, y: 553, collapsed: true,
+      x: 45, y: 429, collapsed: true,
       ports: { in: ['src', 'trg'], out: ['algn'] },
       processes: [
-        { id: 601, x: 20, y: 50, width: 150, height: 50, type: 'fastalign', params: {} },
-        { id: 602, x: 200, y: 50, width: 150, height: 50, type: 'fastalign', params: {} },
-        { id: 603, x: 120, y: 200, width: 150, height: 50, type: 'symalign', params: {} }
+        { id: 601, x: 20, y: 50, width: 150, height: 50, type: 'fastalign', params: { toolsdir: "$toolsdir", tempdir: "$tempdir" } },
+        { id: 602, x: 200, y: 50, width: 150, height: 50, type: 'fastalign', params: { toolsdir: "$toolsdir", tempdir: "$tempdir" } },
+        { id: 603, x: 120, y: 200, width: 150, height: 50, type: 'symalign', params: { method: "grow-diag-final-and", toolsdir: "$toolsdir" } }
       ],
       links: [
         { from: { id: 4, port: 'src' }, to: { id: 601, port: 'src' } },
@@ -35,11 +35,11 @@ var AppDefaultGraph = {
     },
     {
       id: 5, title: 'Language model', type: 'lm-kenlm', category: 'lm',
-      x: 532, y: 535, collapsed: true,
+      x: 259, y: 457, collapsed: true,
       ports: { in: ['trg'], out: ['lm'] },
       processes: [
-        { id: 2, x: 20, y: 50, width: 150, height: 50, type: 'kenlm', params: {} },
-        { id: 3, x: 20, y: 175, width: 150, height: 50, type: 'binarpa', params: {} }
+        { id: 2, x: 20, y: 50, width: 150, height: 50, type: 'kenlm', params: { order: "$lm-order", memory: "$memory", toolsdir: "$toolsdir", tempdir: "$tempdir" } },
+        { id: 3, x: 20, y: 175, width: 150, height: 50, type: 'binarpa', params: { type: "trie", memory: "$memory", toolsdir: "$toolsdir", tempdir: "$tempdir" } }
       ],
       links: [
         { from: { id: 2, port: 'out' }, to: { id: 3, port: 'in' } },
@@ -47,29 +47,5 @@ var AppDefaultGraph = {
         { from: { id: 3, port: 'out' }, to: { id: 5, port: 'lm' } }
       ]
     }
-  ]
-}
-
-
-AppDefaultGraph = {
-  id: 0, title: 'Main', type: 'main', category: 'undefined',
-  x: 0, y: 0, collapsed: false,
-  processes: [
-    { id: 1, x: 214, y: 178, width: 150, height: 50, type: 'opus', params: { srclang: "$srclang", trglang: "$trglang", corpus: 'EUconst' } },
-  ]
-}
-
-AppDefaultGraph = {
-  id: 0, title: 'Main', type: 'main', category: 'undefined',
-  x: 0, y: 0, collapsed: false,
-  processes: [
-    { id: 2, x: 93, y: 103, width: 150, height: 50, type: 'cp', params: { source: "/vagrant/License.txt" } },
-    { id: 3, x: 82, y: 239, width: 150, height: 50, type: 'tokenizer', params: { lang: "$srclang", toolsdir: "$toolsdir" } },
-    { id: 4, x: 333, y: 93, width: 150, height: 50, type: 'cp', params: { source: "/tmp/License.txt" } },
-    { id: 5, x: 336, y: 253, width: 150, height: 50, type: 'tokenizer', params: { lang: "$srclang", toolsdir: "$toolsdir" } }
-  ],
-  links: [
-    { from: { id: 2, port: 'out' }, to: { id: 3, port: 'in' } },
-    { from: { id: 4, port: 'out' }, to: { id: 5, port: 'in' } }
   ]
 }

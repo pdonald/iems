@@ -4,7 +4,7 @@ export TOOLS=/tools
 export WORK=$HOME
 
 sudo apt-get -qq update
-sudo apt-get -qq -y install htop pigz
+sudo apt-get -qq -y install htop unzip pigz wget curl coreutils
 sudo apt-get -qq -y install build-essential cmake git automake libtool flex
 sudo apt-get -qq -y install zlib1g-dev libboost-all-dev libbz2-dev liblzma-dev python-dev
 sudo apt-get -qq -y install libboost-all-dev libgoogle-perftools-dev libsparsehash-dev libeigen3-dev gtest-dev google-mock
@@ -52,6 +52,7 @@ cd build
 cmake ..
 make -j`nproc`
 mkdir -p $TOOLS/cdec && find . -type f -executable | grep -v CMakeFiles | grep -v .so | xargs -i cp {} $TOOLS/cdec
+cp -r ../corpus $TOOLS/cdec
 
 # strip executables
 # before: 1.2G after: 279M

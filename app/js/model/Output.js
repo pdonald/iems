@@ -21,7 +21,9 @@ var Output = {
     function params2str(params) {
       var arr = [];
       for (var key in params) {
-        arr.push(key + ': "' + params[key].replace('"', '\\"') + '"');
+        if (params[key]) {
+          arr.push(key + ': "' + params[key].replace('"', '\\"') + '"');
+        }
       }
       return arr.join(', ');
     }
