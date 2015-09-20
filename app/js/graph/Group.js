@@ -43,8 +43,11 @@ var Group = React.createClass({
       });
 
       var links = group.links.map(l => {
-        var source = this.getPortPosition(group.getChildById(l.from.id), l.from.port, 'out', l.from.id == group.id);
-        var target = this.getPortPosition(group.getChildById(l.to.id), l.to.port, 'in', l.to.id == group.id);
+        var sourcep = group.getChildById(l.from.id);
+        var targetp = group.getChildById(l.to.id);
+        if (!sourcep || !targetp) return;
+        var source = this.getPortPosition(sourcep, l.from.port, 'out', l.from.id == group.id);
+        var target = this.getPortPosition(targetp, l.to.port, 'in', l.to.id == group.id);
         var from = group.resolveLinkInput(l);
         var to = group.getChildById(l.to.id);
 
