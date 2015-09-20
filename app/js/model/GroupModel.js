@@ -111,6 +111,10 @@ class GroupModel {
         if (child) {
           return { process: child, port: link.from.port };
         }
+        child = this.groups.filter(g => g.id == link.from.id)[0];
+        if (child) {
+          return child.resolveLinkInput({ to: link.from });
+        }
       }
     } else {
       var linkTo = this.links.filter(l => l.to.id == link.to.id && l.to.port == link.to.port)[0];
