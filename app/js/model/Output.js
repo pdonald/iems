@@ -22,7 +22,7 @@ var Output = {
       var arr = [];
       for (var key in params) {
         if (params[key]) {
-          arr.push(key + ': "' + params[key].replace('"', '\\"') + '"');
+          arr.push(key + ': "' + (params[key] + '').replace('"', '\\"') + '"');
         }
       }
       return arr.join(', ');
@@ -97,6 +97,8 @@ var Output = {
         var result = graph.resolveLinkInput(l);
         if (result) {
           input[l.to.port] = result.process.getMakefileKey(result.port);
+        } else {
+          console.error(`Missing link for ${p.type}`);
         }
       });
 
