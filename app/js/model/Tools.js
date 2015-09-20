@@ -9,6 +9,15 @@ var Tools = {
         return [`cp ${params.source} ${output.out}`];
       }
     },
+    echo: {
+      type: 'echo', category: 'corpora',
+      input: { },
+      output: { out: 'file<text>' },
+      params: { text: 'string' },
+      toBash: (params, input, output) => {
+        return [`echo "${params.text.replace('"', '\\"')}" > ${output.out}`];
+      }
+    },
     wget: {
       type: 'wget', category: 'corpora',
       params: { url: 'string' },
@@ -61,6 +70,18 @@ var Tools = {
       toTitle: (p, params) => params.lang ? `Tokenizer [${params.lang}] (moses)` : p.title,
       toBash: (params, input, output) => {
         return [`perl ${params.toolsdir}/moses/scripts/tokenizer/tokenizer.perl -l ${params.lang} < ${input.in} > ${output.out}`];
+      }
+    },
+    detokenizer: {
+      type: 'detokenizer', title: 'Detokenizer (moses)', category: 'corpora',
+      input: { in: 'file<tok>' },
+      output: { out: 'file<text>' },
+      params: {
+        lang: { type: 'language', default: '$trglang' },
+        toolsdir: { type: 'path', default: '$toolsdir' }
+      },
+      toBash: (params, input, output) => {
+        return [ `perl ${params.toolsdir}/moses/scripts/tokenizer/detokenizer.perl -l ${params.lang} < ${input.in} > ${output.out}` ];
       }
     },
     kenlm: {
@@ -215,15 +236,6 @@ var Tools = {
         ];
       }
     },
-    echo: {
-      type: 'echo', category: 'corpora',
-      input: { },
-      output: { out: 'file<text>' },
-      params: { text: 'string' },
-      toBash: (params, input, output) => {
-        return [`echo "${params.text}" > ${output.out}`];
-      }
-    },
     'moses-ini': {
       type: 'moses-ini', title: 'Moses INI', category: 'decoder',
       width: 300,
@@ -288,17 +300,6 @@ var Tools = {
         ];
       }
     },
-    detokenizer: {
-      type: 'detokenizer', title: 'Detokenizer (moses)', category: 'corpora',
-      input: { in: 'file<tok>' },
-      output: { out: 'file<text>' },
-      params: { lang: 'language' },
-      toBash: (params, input, output) => {
-        return [
-          `perl /tools/scripts/tokenizer/detokenizer.perl -l ${params.lang} < ${input.in} > ${output.out}`
-        ];
-      }
-    },
     compareval: {
       type: 'compareval', title: ' MT-ComparEval', category: 'evaluation',
       input: { src: 'file<tok>', ref: 'file<tok>', trans: 'file<tok>' },
@@ -315,31 +316,29 @@ var Tools = {
       type: 'bintext', title: 'Binarize text', category: 'phrases',
       input: { in: 'file<tok>' },
       output: { out: 'dir<bin>' },
-      params: { },
+      params: { toolsdir: { type: 'path', default: '$toolsdir' }, },
       toBash: (params, input, output) => {
         return [
           `rm -rf ${output.out}`,
           `mkdir ${output.out}`,
-          `/tools/mtt-build -i -o ${output.out}/corpus < ${input.in}`,
+          `${params.toolsdir}/moses/mtt-build -i -o ${output.out}/corpus < ${input.in}`,
         ];
       }
     },
     binalign: {
-      type: 'binalign', title: 'Binarize align', category: 'phrases',
+      type: 'binalign', title: 'Binarize alignments', category: 'phrases',
       input: { in: 'file<align>' },
       output: { out: 'file<bin>' },
-      params: { },
+      params: { toolsdir: { type: 'path', default: '$toolsdir' } },
       toBash: (params, input, output) => {
-        return [
-          `/tools/symal2mam ${output.out} < ${input.in}`,
-        ];
+        return [ `${params.toolsdir}/moses/symal2mam ${output.out} < ${input.in}`, ];
       }
     },
     binlex: {
       type: 'binlex', title: 'Binarize lex', category: 'phrases',
       input: { src: 'dir<bin>', trg: 'dir<bin>', algn: 'file<bin>' },
       output: { out: 'file<bin>' },
-      params: { },
+      params: { toolsdir: { type: 'path', default: '$toolsdir' } },
       toBash: (params, input, output) => {
         return [
           'TEMP=$(shell mktemp -d) && \\',
@@ -350,13 +349,13 @@ var Tools = {
           `ln -s \`readlink -f ${input.trg}/corpus.sfa\` $$TEMP/corpus.trg.sfa && \\`,
           `ln -s \`readlink -f ${input.trg}/corpus.tdx\` $$TEMP/corpus.trg.tdx && \\`,
           `ln -s \`readlink -f ${input.algn}\` $$TEMP/corpus.src-trg.mam && \\`,
-          `/tools/mmlex-build $$TEMP/corpus. src trg -o ${output.out} && \\`,
+          `${params.toolsdir}/moses/mmlex-build $$TEMP/corpus. src trg -o ${output.out} && \\`,
           'rm -rf $$TEMP'
         ];
       }
     },
-    psamplemodel: {
-      type: 'psamplemodel', title: 'Sampling model', category: 'phrases',
+    'phrases-sampling-model': {
+      type: 'phrases-sampling-model', title: 'Sampling model', category: 'phrases',
       input: { src: 'dir<bin>', trg: 'dir<bin>', algn: 'file<bin>', lex: 'file<bin>' },
       output: { out: 'dir' },
       params: { },
@@ -414,14 +413,14 @@ var Tools = {
       ]
     },
     'phrasesampling': {
-      type: 'phrasesampling', title: 'Sampling Phrases', category: 'phrases',
+      title: 'Sampling Phrases', type: 'phrasesampling', category: 'phrases',
       ports: { in: ['src', 'trg', 'algn'], out: ['model'] },
       processes: [
-        { id: 2, type: 'bintext', params: {}, x: 20, y: 50, width: 150, height: 50 },
-        { id: 3, type: 'bintext', params: {}, x: 20, y: 175, width: 150, height: 50 },
-        { id: 4, type: 'binalign', params: {}, x: 20, y: 375, width: 150, height: 50 },
-        { id: 5, type: 'binlex', params: {}, x: 20, y: 475, width: 150, height: 50 },
-        { id: 6, type: 'psamplemodel', params: {}, x: 20, y: 575, width: 150, height: 50 },
+        { id: 2, x: 20, y: 50, width: 150, height: 50, type: 'bintext' },
+        { id: 3, x: 214, y: 50, width: 150, height: 50, type: 'bintext' },
+        { id: 4, x: 397, y: 50, width: 150, height: 50, type: 'binalign' },
+        { id: 5, x: 387, y: 224, width: 150, height: 50, type: 'binlex' },
+        { id: 6, x: 135, y: 375, width: 150, height: 50, type: 'phrases-sampling-model' }
       ],
       links: [
         { from: { id: undefined, port: 'src' }, to: { id: 2, port: 'in' } },
@@ -434,7 +433,7 @@ var Tools = {
         { from: { id: 3, port: 'out' }, to: { id: 6, port: 'trg' } },
         { from: { id: 5, port: 'out' }, to: { id: 6, port: 'lex' } },
         { from: { id: 4, port: 'out' }, to: { id: 5, port: 'algn' } },
-        { from: { id: 6, port: 'out' }, to: { id: undefined, port: 'model' } },
+        { from: { id: 6, port: 'out' }, to: { id: undefined, port: 'model' } }
       ]
     },
     'word-alignment': {
