@@ -4,6 +4,9 @@ class ProcessModel {
       this[key] = obj[key];
     }
 
+    if (!(this.type in Tools.processes))
+      throw Error('No such tool: ' + this.type);
+
     this.group  = group;
     this.params = this.params || {};
     this.template = Tools.processes[this.type];
