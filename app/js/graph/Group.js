@@ -2,29 +2,17 @@ var Group = React.createClass({
   //mixins: [React.addons.PureRenderMixin],
 
   getPortPosition: function(obj, portName, dir, self) {
-    var width = obj.width;
-    var height = obj.height;
-    if (obj.getSize) {
-      var size = obj.collapsed ? { width: 150, height: 50 } : obj.getCalculatedSize();
-      width = size.width;
-      height = size.height;
-    }
+    var size = obj.getSize();
 
     var x = self ? 0 : obj.x;
     var y = self ? 0 : obj.y;
-    if (self) dir = dir == 'in' ? 'out' : 'in';
+    if (self) dir = dir == 'input' ? 'output' : 'input';
 
-    var ports = obj.ports;
-    if (!ports && obj.template) {
-      ports = {
-        in: Object.keys(obj.template.input),
-        out: Object.keys(obj.template.output)
-      }
-    }
+    var ports = obj.getPorts();
 
-    x += (ports[dir].indexOf(portName)+1) * (width / (ports[dir].length + 1));
-    y += dir == 'out' ? height : 0;
-    y += (dir == 'out' ? 10 : -10) * (self ? - 1 : 1);
+    x += (ports[dir].indexOf(portName)+1) * (size.width / (ports[dir].length + 1));
+    y += dir == 'output' ? size.height : 0;
+    y += (dir == 'output' ? 10 : -10) * (self ? - 1 : 1);
 
     return { x: x, y: y };
   },
@@ -36,18 +24,20 @@ var Group = React.createClass({
       var groups = group.groups.map(g => <Group key={g.getKey()} group={g} />);
 
       var processes = group.processes.map(p => {
-        var ports = { in: Object.keys(p.template.input), out: Object.keys(p.template.output) }
-        return <Process width={p.width} height={p.height} x={p.x} y={p.y}
+        var size = p.getSize();
+        return <Process width={size.width} height={size.height} x={p.x} y={p.y}
                         graph={p} title={p.getTitle()} key={p.getKey()} selected={p.selected}
-                        ports={ports} status={p.getStatus()} />;
+                        ports={p.getPorts()} status={p.getStatus()} />;
       });
 
       var links = group.links.map(l => {
         var sourcep = group.getChildById(l.from.id);
         var targetp = group.getChildById(l.to.id);
         if (!sourcep || !targetp) return;
-        var source = this.getPortPosition(sourcep, l.from.port, 'out', l.from.id == group.id);
-        var target = this.getPortPosition(targetp, l.to.port, 'in', l.to.id == group.id);
+        if (sourcep.id != group.id && sourcep.getPorts().output.indexOf(l.from.port) === -1) return;
+        if (targetp.id != group.id && targetp.getPorts().input.indexOf(l.to.port) === -1) return;
+        var source = this.getPortPosition(sourcep, l.from.port, 'output', l.from.id == group.id);
+        var target = this.getPortPosition(targetp, l.to.port, 'input', l.to.id == group.id);
         var from = group.resolveLinkInput(l);
         var to = group.getChildById(l.to.id);
 
@@ -85,7 +75,7 @@ var Group = React.createClass({
         </Process>
       );
     } else {
-      var size = { width: 150, height: 50 };
+      var size = group.getCollapsedSize();
       return (
         <Process width={size.width} height={size.height} x={group.x} y={group.y}
                  title={group.getTitle()} graph={group} selected={group.selected}

@@ -38,12 +38,12 @@ var Output = {
     json += pad + `id: ${graph.id}, title: '${graph.title.replace("'", "\\'")}', `
                 + `type: '${graph.type}', category: '${graph.category}',` + '\n';
     json += pad + `x: ${graph.x}, y: ${graph.y}, collapsed: ${graph.collapsed ? true : false},` + '\n';
-    if (graph.ports) json += pad + `ports: { in: ['${graph.ports.in.join("', '")}'], out: ['${graph.ports.out.join("', '")}'] },` + '\n';
+    if (graph.ports) json += pad + `ports: { input: ['${graph.ports.input.join("', '")}'], output: ['${graph.ports.output.join("', '")}'] },` + '\n';
 
     // processes data
     json += pad + 'processes: [' + '\n';
     json += graph.processes
-      .map(p => `{ id: ${p.id}, x: ${p.x}, y: ${p.y}, width: ${p.width}, height: ${p.height}, type: '${p.type}', params: { ${params2str(p.params)} } }`)
+      .map(p => `{ id: ${p.id}, x: ${p.x}, y: ${p.y}, type: '${p.type}', params: { ${params2str(p.params)} } }`)
       .map(s => pad2 + s).join(',\n') + '\n';
     json += pad + ']';
 
@@ -98,7 +98,7 @@ var Output = {
         if (result) {
           input[l.to.port] = result.process.getMakefileKey(result.port);
         } else {
-          console.error(`Missing link for ${p.type}`);
+          //console.error(`Missing link for ${p.type}`);
         }
       });
 

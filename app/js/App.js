@@ -2,7 +2,12 @@ var App = React.createClass({
   getInitialState: function() {
     var doc = {
       name: 'Experiment #1',
-      vars: { srclang: 'en', trglang: 'lv', 'lm-order': 5, toolsdir: '/tools', workdir: '/tools/train', tempdir: '/tmp' },
+      vars: {
+        srclang: 'en', trglang: 'lv',
+        'lm-order': 5,
+        'reordering-type': 'wbe', 'reordering-orientation': 'msd',
+        toolsdir: '/tools', workdir: '/tools/train', tempdir: '/tmp'
+      },
       stack: []
     };
     doc.stack.push(new GroupModel(AppDefaultGraph, null, doc));
@@ -91,8 +96,7 @@ var App = React.createClass({
         this.currentGraph().addProcess({
           id: nextid,
           x: x - offset.left, y: y - offset.top,
-          width: template.width || 150, height: template.height || 50,
-          type: template.type, params: {}
+          type: template.type
         });
       }
       this.setState(this.state);
@@ -109,7 +113,7 @@ var App = React.createClass({
     if (obj == this.currentDoc().stack[0]) return;
     if (obj == this.currentDoc().stack[this.currentDoc().stack.length-1]) return;
 
-    if (obj.getSize) {
+    if (!obj.template) {
       obj.collapsed = false;
       this.currentDoc().stack.push(obj);
       this.setState(this.state);

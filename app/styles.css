@@ -180,11 +180,11 @@ br{
 .process text {
   color: black;
 }
-.process .port-in circle {
+.process .port-input circle {
   fill: lightblue;
   stroke: #000;
 }
-.process .port-out circle {
+.process .port-output circle {
   fill: hotpink;
   stroke: #000;
 }

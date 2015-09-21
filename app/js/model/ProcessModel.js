@@ -18,11 +18,36 @@ class ProcessModel {
     }
   }
 
+  getParamValues() {
+    return resolveParams(this.params, this.group.doc.vars);
+  }
+
   getTitle() {
     if (this.title) return this.title;
-    if (this.template.toTitle) return this.template.toTitle(this, resolveParams(this.params, this.group.doc.vars));
+    if (this.template.toTitle) return this.template.toTitle(this, this.getParamValues());
     if (this.template.title) return this.template.title;
     return this.type;
+  }
+
+  getSize() {
+    return {
+      width: this.width || this.template.width || Math.max(150, Object.keys(this.template.input).length * 50),
+      height: this.height || this.template.height || 50
+    };
+  }
+
+  getPorts() {
+    return {
+      input: Object.keys(this.template.input.call ? this.template.input(this, this.getParamValues()) : this.template.input),
+      output: Object.keys(this.template.output.call ? this.template.output(this, this.getParamValues()) : this.template.output)
+    }
+  }
+
+  getPortsInfo() {
+    return {
+      input: this.template.input.call ? this.template.input(this, this.getParamValues()) : this.template.input,
+      output: this.template.output.call ? this.template.output(this, this.getParamValues()) : this.template.output
+    }
   }
 
   getInput() {

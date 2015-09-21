@@ -24,6 +24,10 @@ class GroupModel {
     return this.type;
   }
 
+  getPorts() {
+    return this.ports || [];
+  }
+
   getMaxId() {
     var gmax = Math.max.apply(null, this.groups.map(g => g.id));
     var pmax = Math.max.apply(null, this.processes.map(p => p.id));
@@ -78,10 +82,14 @@ class GroupModel {
 
   getSize() {
     if (this.collapsed) {
-      return { width: 150, height: 50 };
+      return this.getCollapsedSize();
     } else {
       return this.getCalculatedSize();
     }
+  }
+
+  getCollapsedSize() {
+    return { width: 150, height: 50 };
   }
 
   getCalculatedSize() {
@@ -93,8 +101,9 @@ class GroupModel {
       if (g.y + groupSize.height + padding > size.height) size.height = g.y + groupSize.height + padding;
     });
     this.processes.forEach(p => {
-      if (p.x + p.width + padding > size.width) size.width = p.x + p.width + padding;
-      if (p.y + p.height + padding > size.height) size.height = p.y + p.height + padding;
+      var pSize = p.getSize();
+      if (p.x + pSize.width + padding > size.width) size.width = p.x + pSize.width + padding;
+      if (p.y + pSize.height + padding > size.height) size.height = p.y + pSize.height + padding;
     });
     return size;
   }

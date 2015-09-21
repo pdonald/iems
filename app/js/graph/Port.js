@@ -74,7 +74,7 @@ var Port = React.createClass({
 
     return (
       <g className={`port port-${this.props.type} ${this.state.on ? 'port-on' : ''}`}>
-        <text x={+this.props.x-(this.props.label.length*2)} y={+this.props.y+(this.props.type == 'in' ? -20 : 30)}>{this.props.label}</text>
+        <text x={+this.props.x-(this.props.label.length*2)} y={+this.props.y+(this.props.type == 'input' ? -20 : 30)}>{this.props.label}</text>
         <circle cx={this.props.x} cy={this.props.y} r="10"
                 onMouseDown={this.onMouseDown}
                 onMouseOver={this.onMouseOver}

@@ -2,7 +2,7 @@ var Process = React.createClass({
   mixins: [React.addons.PureRenderMixin],
 
   getDefaultProps: function () {
-    return { ports: { in: [], out: [] }, draggable: true, x: 0, y: 0 };
+    return { ports: { input: [], output: [] }, draggable: true, x: 0, y: 0 };
   },
 
   onMove: function(pos) {
@@ -21,7 +21,7 @@ var Process = React.createClass({
 
   portName: function(process, type, port) {
     if (process.template) {
-      var portinfo = process.template[type][port];
+      var portinfo = process.getPortsInfo()[type][port];
       if (portinfo.title) {
         return portinfo.title(process, resolveParams(process.params, process.group.doc.vars));
       }
@@ -35,8 +35,8 @@ var Process = React.createClass({
 
     var ports = this.props.ports;
     var offset = {
-      x: width / (ports.in.length+1),
-      y: width / (ports.out.length+1)
+      x: width / (ports.input.length+1),
+      y: width / (ports.output.length+1)
     };
 
     var classes = ['process'];
@@ -55,8 +55,8 @@ var Process = React.createClass({
         <g>
           <rect className="process-rect" x="0" y="0" width={width} height={height} onDoubleClick={this.onClick}/>
           <g className={this.props.graph.collapsed?'zoom-in':''} onClick={this.goIntoGroup}><text x="10" y="30">{this.props.title}</text></g>
-          <g>{ports.in.map((port, index) => <Port process={this.props.graph} group={this.props.group} key={port} port={port} label={this.portName(this.props.graph, 'input', port)} type="in" x={(index+1)*offset.x} y={0}/>)}</g>
-          <g>{ports.out.map((port, index) => <Port process={this.props.graph} group={this.props.group} key={port} port={port} label={this.portName(this.props.graph, 'output', port)} type="out" x={(index+1)*offset.y} y={height}/>)}</g>
+          <g>{ports.input.map((port, index) => <Port process={this.props.graph} group={this.props.group} key={port} port={port} label={this.portName(this.props.graph, 'input', port)} type="input" x={(index+1)*offset.x} y={0}/>)}</g>
+          <g>{ports.output.map((port, index) => <Port process={this.props.graph} group={this.props.group} key={port} port={port} label={this.portName(this.props.graph, 'output', port)} type="output" x={(index+1)*offset.y} y={height}/>)}</g>
         </g>
         <g>
           {this.props.children}

@@ -15,7 +15,7 @@ var Tools = {
       output: { out: 'file<text>' },
       params: { text: 'string' },
       toBash: (params, input, output) => {
-        return [`echo "${params.text.replace('"', '\\"')}" > ${output.out}`];
+        return [`echo "${(params.text + '').replace('"', '\\"')}" > ${output.out}`];
       }
     },
     wget: {
@@ -52,7 +52,7 @@ var Tools = {
       },
       toBash: (params, input, output) => {
         return [
-          `TEMP=$(shell mktemp --tmpdir=${params.tempdir})) && \\`,
+          `TEMP=$(shell mktemp --tmpdir=${params.tempdir}) && \\`,
           `wget http://opus.lingfil.uu.se/${params.corpus}/${params.srclang}-${params.trglang}.txt.zip -O $$TEMP && \\`,
           `unzip -p $$TEMP ${params.corpus}.${params.srclang}-${params.trglang}.${params.srclang} > ${output.src} && \\`,
           `unzip -p $$TEMP ${params.corpus}.${params.srclang}-${params.trglang}.${params.trglang} > ${output.trg} && \\`,
@@ -62,6 +62,7 @@ var Tools = {
     },
     tokenizer: {
       type: 'tokenizer', title: 'Tokenizer (moses)', category: 'corpora',
+      width: 200,
       params: {
         lang: { type: 'language', default: '$srclang' },
         toolsdir: { type: 'path', default: '$toolsdir' }
@@ -88,7 +89,7 @@ var Tools = {
     kenlm: {
       type: 'kenlm', title: 'KenLM', category: 'lm',
       params: {
-        order: { type: 'uinteger', default: '$lm-order' },
+        order: { type: 'uint', default: '$lm-order' },
         memory: { type: 'size-unit', default: '$memory', nohash: true },
         toolsdir: { type: 'path', default: '$toolsdir' },
         tempdir: { type: 'path', default: '$tempdir', nohash: true }
@@ -156,35 +157,25 @@ var Tools = {
     extractphrases: {
       title: 'Extract phrases', type: 'extractphrases', category: 'phrases',
       params: {
-        maxLength: { type: 'int', default: 7 },
-        model: { type: 'string', default: 'xxx' },
+        maxLength: { type: 'uint', default: 7 },
+        type: { type: 'string', default: '$reordering-type' },
+        orientation: { type: 'string', default: '$reordering-orientation' },
         toolsdir: { type: 'path', default: '$toolsdir' },
         tempdir: { type: 'path', default: '$tempdir' }
       },
       input: { src: 'file<tok>', trg: 'file<tok>', algn: 'file<align>' },
-      output: { out: 'file<phrases>', inv: 'file<phrases>', o: 'file<any>' },
+      output: function(p, params) {
+        var output = { out: 'file<phrases>', inv: 'file<phrases>' };
+        if (params.model) output.o = 'file<any>';
+        return output;
+      },
       toBash: (params, input, output) => {
         return [
-          `TEMP=$(shell mktemp -d --tmpdir=${params.tempdir})) && \\`,
-          `${params.toolsdir}/moses/extract ${input.trg} ${input.src} ${input.algn} $$TEMP/extract ${params.maxLength} orientation --model ${params.model} && \\`,
+          `TEMP=$(shell mktemp -d --tmpdir=${params.tempdir}) && \\`,
+          `${params.toolsdir}/moses/extract ${input.trg} ${input.src} ${input.algn} $$TEMP/extract ${params.maxLength} orientation --model ${params.type}-${params.orientation} && \\`,
           `LC_ALL=C sort $$TEMP/extract -T $$TEMP > ${output.out} && \\`,
           `LC_ALL=C sort $$TEMP/extract.inv -T $$TEMP > ${output.inv} && \\`,
           `LC_ALL=C sort $$TEMP/extract.o -T $$TEMP > ${output.o} && \\`,
-          'rm -r $$TEMP'
-        ];
-      }
-    },
-    lexical: {
-      type: 'lexical', category: 'phrases',
-      params: { tempdir: { type: 'path', default: '$tempdir' } },
-      input: { src: 'file<tok>', trg: 'file<tok>', algn: 'file<align>' },
-      output: { srctrg: 'file<lex>', trgsrc: 'file<lex>' },
-      toBash: (params, input, output) => {
-        return [
-          `TEMP=$(shell mktemp -d --tmpdir=${params.tempdir})) && \\`,
-          `perl /tools/scripts/training/get-lexical.perl ${input.src} ${input.trg} ${input.algn} $$TEMP/lex && \\`,
-          `mv $$TEMP/lex.e2f ${output.srctrg} && \\`,
-          `mv $$TEMP/lex.f2e ${output.trgsrc} && \\`,
           'rm -r $$TEMP'
         ];
       }
@@ -200,7 +191,7 @@ var Tools = {
       output: { ptable: 'file<phrase-table>' },
       toBash: (params, input, output) => {
         return [
-          `TEMP=$(shell mktemp -d --tmpdir=${params.tempdir})) && \\`,
+          `TEMP=$(shell mktemp -d --tmpdir=${params.tempdir}) && \\`,
           `${params.toolsdir}/score ${input.phr} ${input.trgsrc} /dev/stdout > $$TEMP/trgsrc && \\`,
           `${params.toolsdir}/score ${input.phrinv} ${input.srctrg} /dev/stdout --Inverse > $$TEMP/srctrg && \\`,
           `LC_ALL=C sort $$TEMP/srctrg -T $$TEMP | gzip > $$TEMP/srctrg.sorted.gz && \\`,
@@ -211,37 +202,70 @@ var Tools = {
       }
     },
     phrasesbin: {
-      type: 'phrasesbin', category: 'phrases',
+      title: 'Binarize phrases', type: 'phrasesbin', category: 'phrases',
       input: { ptable: 'file<phrase-table>' },
       output: { minphr: 'file<phrase-table-bin>' },
+      params: {
+        toolsdir: { type: 'path', default: '$toolsdir' },
+        threads: { type: 'uint', default: '$threads' }
+      },
       toBash: (params, input, output) => {
         return [
-          `/tools/processPhraseTableMin -nscores 4 -threads 1 -in ${input.ptable} -out ${output.minphr}`,
+          `${params.toolsdir}/moses/processPhraseTableMin -nscores 4 -threads ${params.threads || 1} -in ${input.ptable} -out ${output.minphr}`,
           //`mv ${output.bin}.minphr ${output.bin}`
         ];
       }
     },
+    lexical: {
+      title: 'Lexical', type: 'lexical', category: 'phrases',
+      params: {
+        toolsdir: { type: 'path', default: '$toolsdir' },
+        tempdir: { type: 'path', default: '$tempdir' }
+      },
+      input: { src: 'file<tok>', trg: 'file<tok>', algn: 'file<align>' },
+      output: { srctrg: 'file<lex>', trgsrc: 'file<lex>' },
+      toBash: (params, input, output) => {
+        return [
+          `TEMP=$(shell mktemp -d --tmpdir=${params.tempdir}) && \\`,
+          `perl ${params.toolsdir}/moses/scripts/training/get-lexical.perl ${input.src} ${input.trg} ${input.algn} $$TEMP/lex && \\`,
+          `mv $$TEMP/lex.e2f ${output.srctrg} && \\`,
+          `mv $$TEMP/lex.f2e ${output.trgsrc} && \\`,
+          'rm -r $$TEMP'
+        ];
+      }
+    },
     reordering: {
-      type: 'reordering', category: 'phrases',
-      params: { model: 'string', type: 'string', orientation: 'string', smoothing: 'float' },
+      title: 'Reordering', type: 'reordering', category: 'phrases',
+      params: {
+        type: { type: 'string', default: '$reordering-type' },
+        orientation: { type: 'string', default: '$reordering-orientation' },
+        model: 'string',
+        smoothing: { type: 'float', default: 0.5 },
+        toolsdir: { type: 'path', default: '$toolsdir' },
+        tempdir: { type: 'path', default: '$tempdir' }
+      },
       input: { phr: 'file<any>' },
       output: { reord: 'file<reordering>' },
       toBash: (params, input, output) => {
         return [
-          `TEMP=$(shell mktemp -d) && \\`,
-          `/tools/lexical-reordering-score ${input.phr} ${params.smoothing} $$TEMP/output. --model "${params.type} ${params.orientation} ${params.model}" && \\`,
+          `TEMP=$(shell mktemp -d --tmpdir=${params.tempdir}) && \\`,
+          `${params.toolsdir}/moses/lexical-reordering-score ${input.phr} ${params.smoothing} $$TEMP/output. --model "${params.type} ${params.orientation} ${params.model}" && \\`,
           `zcat $$TEMP/output.${params.model}.gz > ${output.reord} && \\`,
           'rm -r $$TEMP'
         ];
       }
     },
-    reorderingbin: {
-      type: 'reorderingbin', category: 'phrases',
+    binreordering: {
+      title: 'Binarize reordering', type: 'binreordering', category: 'phrases',
       input: { reord: 'file<reordering>' },
       output: { minlexr: 'file<reordering-bin>' },
+      params: {
+        toolsdir: { type: 'path', default: '$toolsdir' },
+        threads: { type: 'uint', default: '$threads' }
+      },
       toBash: (params, input, output) => {
         return [
-          `/tools/processLexicalTableMin -threads 1 -in ${input.reord} -out ${output.minlexr}`,
+          `${params.toolsdir}/moses/processLexicalTableMin -threads ${params.threads || 1} -in ${input.reord} -out ${output.minlexr}`,
           //`mv ${output.reord}.minlexr ${output.reord}`
         ];
       }
@@ -411,10 +435,10 @@ var Tools = {
   groups: {
     'lm-kenlm': {
       type: 'lm-kenlm', title: 'Language model', category: 'lm',
-      ports: { in: ['trg'], out: ['lm'] },
+      ports: { input: ['trg'], output: ['lm'] },
       processes: [
-        { id: 2, type: 'kenlm', params: { }, x: 20, y: 50, width: 150, height: 50 },
-        { id: 3, type: 'binarpa', params: { }, x: 20, y: 175, width: 150, height: 50 },
+        { id: 2, type: 'kenlm', params: { }, x: 20, y: 50 },
+        { id: 3, type: 'binarpa', params: { }, x: 20, y: 175 },
       ],
       links: [
         { from: { id: 2, port: 'out' }, to: { id: 3, port: 'in' } },
@@ -424,17 +448,41 @@ var Tools = {
     },
     'phraseextraction': {
       title: 'Phrase Extraction', type: 'phraseextraction', category: 'phrases',
-      ports: { in: ['src', 'trg', 'algn'], out: ['model'] },
+      ports: { input: ['src', 'trg', 'algn'], output: ['model'] },
+      processes: [
+        { id: 1, x: 69, y: 80, type: 'extractphrases', params: { maxLength: "7", model: "xxx", toolsdir: "$toolsdir", tempdir: "$tempdir" } },
+        { id: 2, x: 66, y: 258, type: 'scorephrases', params: { toolsdir: "$toolsdir", tempdir: "$tempdir" } },
+        { id: 3, x: 376, y: 109, type: 'lexical', params: { toolsdir: "$toolsdir", tempdir: "$tempdir" } },
+        { id: 4, x: 75, y: 435, type: 'phrasesbin', params: { toolsdir: "$toolsdir", threads: "$threads" } },
+        { id: 5, x: 408, y: 274, type: 'reordering', params: { toolsdir: "$toolsdir", tempdir: "$tempdir" } },
+        { id: 6, x: 413, y: 462, type: 'binreordering', params: { toolsdir: "$toolsdir", threads: "$threads" } }
+      ],
+      links: [
+        { from: { id: 111, port: 'reord' }, to: { id: 6, port: 'reord' } },
+        { from: { id: undefined, port: 'src' }, to: { id: 1, port: 'src' } },
+        { from: { id: undefined, port: 'trg' }, to: { id: 1, port: 'trg' } },
+        { from: { id: undefined, port: 'algn' }, to: { id: 1, port: 'algn' } },
+        { from: { id: undefined, port: 'src' }, to: { id: 3, port: 'src' } },
+        { from: { id: undefined, port: 'trg' }, to: { id: 3, port: 'trg' } },
+        { from: { id: 2, port: 'ptable' }, to: { id: 4, port: 'ptable' } },
+        { from: { id: undefined, port: 'algn' }, to: { id: 3, port: 'algn' } },
+        { from: { id: 3, port: 'srctrg' }, to: { id: 2, port: 'srctrg' } },
+        { from: { id: 3, port: 'trgsrc' }, to: { id: 2, port: 'trgsrc' } },
+        { from: { id: 1, port: 'o' }, to: { id: 5, port: 'phr' } },
+        { from: { id: 1, port: 'out' }, to: { id: 2, port: 'phr' } },
+        { from: { id: 1, port: 'inv' }, to: { id: 2, port: 'phrinv' } },
+        { from: { id: 5, port: 'reord' }, to: { id: 6, port: 'reord' } }
+      ]
     },
     'phrasesampling': {
       title: 'Sampling Phrases', type: 'phrasesampling', category: 'phrases',
-      ports: { in: ['src', 'trg', 'algn'], out: ['model'] },
+      ports: { input: ['src', 'trg', 'algn'], output: ['model'] },
       processes: [
-        { id: 2, x: 20, y: 50, width: 150, height: 50, type: 'bintext' },
-        { id: 3, x: 214, y: 50, width: 150, height: 50, type: 'bintext' },
-        { id: 4, x: 397, y: 50, width: 150, height: 50, type: 'binalign' },
-        { id: 5, x: 387, y: 224, width: 150, height: 50, type: 'binlex' },
-        { id: 6, x: 135, y: 375, width: 150, height: 50, type: 'phrases-sampling-model' }
+        { id: 2, x: 20, y: 50, type: 'bintext' },
+        { id: 3, x: 214, y: 50, type: 'bintext' },
+        { id: 4, x: 397, y: 50, type: 'binalign' },
+        { id: 5, x: 387, y: 224, type: 'binlex' },
+        { id: 6, x: 135, y: 375, type: 'phrases-sampling-model' }
       ],
       links: [
         { from: { id: undefined, port: 'src' }, to: { id: 2, port: 'in' } },
@@ -452,11 +500,11 @@ var Tools = {
     },
     'word-alignment': {
       type: 'word-alignment', title: 'Word alignment', category: 'alignment',
-      ports: { in: ['src', 'trg'], out: ['algn'] },
+      ports: { input: ['src', 'trg'], output: ['algn'] },
       processes: [
-        { id: 601, type: 'fastalign', params: { reverse: false }, x: 20, y: 50, width: 150, height: 50 },
-        { id: 602, type: 'fastalign', params: { reverse: true }, x: 200, y: 50, width: 150, height: 50 },
-        { id: 603, type: 'symalign', params: { }, x: 120, y: 200, width: 150, height: 50 },
+        { id: 601, type: 'fastalign', params: { reverse: false }, x: 20, y: 50 },
+        { id: 602, type: 'fastalign', params: { reverse: true }, x: 200, y: 50 },
+        { id: 603, type: 'symalign', params: { }, x: 120, y: 200 },
       ],
       links: [
         { from: { id: undefined, port: 'src' }, to: { id: 601, port: 'src' } },
@@ -470,14 +518,14 @@ var Tools = {
     },
     evaluation: {
       title: 'Evaluation', type: 'evaluation', category: 'evaluation',
-      ports: { in: ['src', 'ref', 'ini'], out: ['trans', 'bleu'] },
+      ports: { input: ['src', 'ref', 'ini'], output: ['trans', 'bleu'] },
       processes: [
-        { id: 2, type: 'tokenizer', params: { lang: 'en' }, x: 20, y: 175, width: 150, height: 50 },
-        { id: 3, type: 'tokenizer', params: { lang: 'lv' }, x: 200, y: 175, width: 150, height: 50 },
-        { id: 4, type: 'moses', params: {}, x: 50, y: 500, width: 250, height: 50 },
-        { id: 5, type: 'detokenizer', params: { lang: 'en' }, x: 150, y: 650, width: 150, height: 50 },
-        { id: 6, type: 'bleu', params: { case: false }, x: 350, y: 750, width: 150, height: 50 },
-        { id: 7, type: 'compareval', params: {server:'http://localhost:8080',experiment:'testing'}, x: 550, y: 800, width: 150, height: 50 },
+        { id: 2, type: 'tokenizer', params: { lang: 'en' }, x: 20, y: 175 },
+        { id: 3, type: 'tokenizer', params: { lang: 'lv' }, x: 200, y: 175 },
+        { id: 4, type: 'moses', params: {}, x: 50, y: 500, width: 250 },
+        { id: 5, type: 'detokenizer', params: { lang: 'en' }, x: 150, y: 650 },
+        { id: 6, type: 'bleu', params: { case: false }, x: 350, y: 750 },
+        { id: 7, type: 'compareval', params: {server:'http://localhost:8080',experiment:'testing'}, x: 550, y: 800 },
       ],
       links: [
         { from: { id: undefined, port: 'src' }, to: { id: 2, port: 'in' } },
