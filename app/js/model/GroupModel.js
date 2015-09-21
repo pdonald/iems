@@ -31,12 +31,14 @@ class GroupModel {
   }
 
   addGroup(group) {
-    group.links.forEach(l => {
+    var g = new GroupModel(group, this, this.doc);
+
+    g.links.forEach(l => {
       if (!l.from.id) l.from.id = group.id;
       if (!l.to.id) l.to.id = group.id;
     });
 
-    this.groups.push(new GroupModel(group, this, this.doc));
+    this.groups.push(g);
   }
 
   addProcess(process) {
