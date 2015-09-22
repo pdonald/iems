@@ -15,6 +15,8 @@ Vagrant.configure("2") do |config|
   config.vm.provision :shell, inline: "sed -i 's/archive.ubuntu.com/lv.archive.ubuntu.com/g' /etc/apt/sources.list"
   # add swap
   config.vm.provision :shell, inline: "fallocate -l 4G /swapfile && chmod 0600 /swapfile && mkswap /swapfile && swapon /swapfile && echo '/swapfile none swap sw 0 0' >> /etc/fstab"
+  # install moses & friends
+  config.vm.provision :shell, path: "setup.sh", privileged: false
 
   # enable logging in via ssh with a password
   config.ssh.username = "vagrant"

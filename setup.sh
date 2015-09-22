@@ -4,19 +4,30 @@ export TOOLS=/tools
 export WORK=$HOME
 
 sudo apt-get -qq update
-sudo apt-get -qq -y install htop unzip pigz wget curl coreutils
-sudo apt-get -qq -y install build-essential cmake git automake libtool flex
-sudo apt-get -qq -y install zlib1g-dev libboost-all-dev libbz2-dev liblzma-dev python-dev
-sudo apt-get -qq -y install libboost-all-dev libgoogle-perftools-dev libsparsehash-dev libeigen3-dev gtest-dev google-mock
-sudo apt-get -qq -y install graphviz imagemagick
+sudo apt-get -qq install htop unzip pigz wget curl coreutils
+sudo apt-get -qq install build-essential cmake git automake libtool flex
+sudo apt-get -qq install zlib1g-dev libboost-all-dev libbz2-dev liblzma-dev python-dev
+sudo apt-get -qq install libboost-all-dev libgoogle-perftools-dev libsparsehash-dev libeigen3-dev gtest-dev google-mock
+sudo apt-get -qq install graphviz imagemagick
+
+curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
+sudo apt-get install -y nodejs
 
 sudo mkdir -p $TOOLS $WORK
 sudo chown -R $USER $TOOLS $WORK
 
 cd $WORK
+wget http://downloads.sourceforge.net/project/cmph/cmph/cmph-2.0.tar.gz
+tar xf cmph-*.tar.gz
+cd cmph-*
+./configure --prefix=$PWD/build
+make
+make install
+
+cd $WORK
 git clone --depth=1 https://github.com/moses-smt/mosesdecoder
 cd mosesdecoder
-./bjam -a --with-mm -j`nproc`
+./bjam -a -j`nproc` --with-mm --with-cmph=$WORK/cmph-2.0/build
 mkdir -p $TOOLS/moses && find bin -maxdepth 1 -type f -executable -exec cp {} $TOOLS/moses \;
 cp -r scripts $TOOLS/moses
 
@@ -56,4 +67,4 @@ cp -r ../corpus $TOOLS/cdec
 
 # strip executables
 # before: 1.2G after: 279M
-find $TOOLS -type f -executable | xargs strip -s &> /dev/null
+(find $TOOLS -type f -executable | xargs strip -s &> /dev/null) || true
