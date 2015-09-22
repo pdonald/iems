@@ -176,6 +176,15 @@ br{
   user-select: text;
 }
 
+rect.select {
+  fill: rgba(173,216,230,0.5);
+  stroke: navy;
+}
+rect.blank {
+  fill: rgba(0,0,0,0);
+  stroke: none;
+}
+
 .process .process-rect {
   cursor: move;
   fill: #2ECC71;
