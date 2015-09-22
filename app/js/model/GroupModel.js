@@ -105,6 +105,8 @@ class GroupModel {
       if (p.x + pSize.width + padding.x > size.width) size.width = p.x + pSize.width + padding.x;
       if (p.y + pSize.height + padding.y > size.height) size.height = p.y + pSize.height + padding.y;
     });
+    if (size.width <= 0) size.width = 150;
+    if (size.height <= 0) size.height = 50;
     return size;
   }
 

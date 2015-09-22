@@ -62,7 +62,7 @@ Make sure you have plenty of RAM for this or it will take forever.
 * error pane for missing connections, make output
 * view file
 * add tools in UI
-* select, resize
+* resize
 
 ## License
 

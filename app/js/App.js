@@ -33,6 +33,8 @@ var App = React.createClass({
      this.listenTo(Actions.add, this.onAdd);
      this.listenTo(Actions.delete, this.onDelete);
      this.listenTo(Actions.select, this.onSelect);
+     this.listenTo(Actions.selectArea, this.onSelectArea);
+     this.listenTo(Actions.deselectAll, this.onDeselectAll);
      this.listenTo(Actions.goIntoGroup, this.onGoIntoGroup);
      this.listenTo(Actions.connect, this.onConnect);
      this.listenTo(Actions.portSelected, p => this.selectedPort = p);
@@ -106,6 +108,24 @@ var App = React.createClass({
 
   onSelect: function(obj) {
     obj.selected = !obj.selected;
+    this.setState(this.state);
+  },
+
+  onSelectArea: function(area) {
+    function inArea(p) {
+      var size = p.getSize();
+      return ((area.end.x >= p.x && area.start.x <= p.x + size.width) || (p.x >= area.start.x && p.x + size.width <= area.end.x))
+          && ((area.end.y >= p.y && area.start.y <= p.y + size.height) || (p.y >= area.start.y && p.y + size.height <= area.end.y));
+    }
+    var graph = this.currentGraph();
+    graph.processes.forEach(p => p.selected = inArea(p));
+    graph.groups.forEach(g => g.selected = inArea(g));
+    this.setState(this.state);
+  },
+
+  onDeselectAll: function() {
+    var graph = this.currentGraph();
+    graph.processes.forEach(p => p.selected = false);
     this.setState(this.state);
   },
 

@@ -17,6 +17,7 @@ var Select = React.createClass({
 
   onMouseDown: function (e) {
     if (e.button !== 0) return; // only left mouse button
+    Actions.deselectAll();
     var parent = e.target.getBoundingClientRect();
     var rel = { x: parent.left, y: parent.top };
     var start = { x: e.pageX - rel.x, y: e.pageY - rel.y };
@@ -38,6 +39,7 @@ var Select = React.createClass({
         y: e.pageY - this.state.rel.y
       }
     });
+    Actions.selectArea({ start: this.state.start, end: this.state.end });
     e.stopPropagation();
     e.preventDefault();
   },

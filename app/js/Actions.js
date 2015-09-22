@@ -4,6 +4,8 @@ var Actions = {
   move: Reflux.createAction(),
   connect: Reflux.createAction(),
   select: Reflux.createAction(),
+  selectArea: Reflux.createAction(),
+  deselectAll: Reflux.createAction(),
   goIntoGroup: Reflux.createAction(),
   portSelected: Reflux.createAction(),
   portDeselected: Reflux.createAction(),
