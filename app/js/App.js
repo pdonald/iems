@@ -114,10 +114,13 @@ var App = React.createClass({
   onSelectArea: function(area) {
     function inArea(p) {
       var size = p.getSize();
-      return ((area.end.x >= p.x && area.start.x <= p.x + size.width) || (p.x >= area.start.x && p.x + size.width <= area.end.x))
-          && ((area.end.y >= p.y && area.start.y <= p.y + size.height) || (p.y >= area.start.y && p.y + size.height <= area.end.y));
+      return ((ex >= p.x && sx <= p.x + size.width) || (p.x >= sx && p.x + size.width <= ex))
+          && ((ey >= p.y && sy <= p.y + size.height) || (p.y >= sy && p.y + size.height <= ey));
     }
-    // todo: swap start end
+    var sx = Math.min(area.start.x, area.end.x);
+    var ex = Math.max(area.start.x, area.end.x);
+    var sy = Math.min(area.start.y, area.end.y);
+    var ey = Math.max(area.start.y, area.end.y);
     var graph = this.currentGraph();
     graph.processes.forEach(p => p.selected = inArea(p));
     graph.groups.forEach(g => g.selected = inArea(g));
@@ -132,6 +135,8 @@ var App = React.createClass({
   },
 
   onGoIntoGroup: function(obj) {
+    this.onDeselectAll();
+
     // prevents double click bugs
     if (obj == this.currentDoc().stack[0]) return;
     if (obj == this.currentDoc().stack[this.currentDoc().stack.length-1]) return;
