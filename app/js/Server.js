@@ -63,7 +63,11 @@ var Server = React.createClass({
             <td><input type="text" value={this.state.interval} onChange={e => this.setState({ interval: e.target.value })}/></td>
           </tr>
           <tr>
-            <td colSpan="2"><button onClick={this.startOrStop}>{!this.state.timer?'Start':'Stop'}</button></td>
+            <td colSpan="2">
+              <button onClick={this.startOrStop}>{!this.state.timer?'Start':'Stop'}</button>
+              <button onClick={() => Actions.runExperiment(this.props.doc)}>Run</button>
+              <button onClick={() => Actions.runExperiment(this.props.doc, true)}>Resume</button>
+            </td>
           </tr>
         </tbody>
         </table>

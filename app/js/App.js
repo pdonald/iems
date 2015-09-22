@@ -138,36 +138,8 @@ var App = React.createClass({
     this.setState({ output: type });
   },
 
-  addDoc: function() {
-    var doc = {
-      name: 'Experiment #' + (this.state.documents.length+1),
-      vars: { srclang: 'en', trglang: 'lv', 'lm-order': 5, toolsdir: '/tools', workdir: '/tools/train', tempdir: '/tmp' },
-      stack: []
-    };
-
-    doc.stack.push(new GroupModel({ id: 0, type: 'main', title: 'Main', x:0, y:0 }, null, doc));
-
-    this.state.documents.push(doc);
-    this.state.currentDocument = this.state.documents.length - 1;
-    this.setState(this.state);
-  },
-
-  cloneDoc: function(doc) {
-    var clone = JSON.parse(JSON.stringify(doc));
-    clone.name += ' (clone)';
-    clone.stack = [new GroupX(clone.stack[0])]
-    this.state.documents.push(clone);
-    this.state.currentDocument = this.state.documents.length - 1;
-    this.setState(this.state);
-  },
-
   currentDoc: function() {
     return this.state.documents[this.state.currentDocument];
-  },
-
-  goToDoc: function(index) {
-    this.state.currentDocument = index;
-    this.setState(this.state);
   },
 
   currentGraph: function() {
@@ -218,7 +190,7 @@ var App = React.createClass({
                             </div>
                           </div>
                           <div className="row">
-                            <div className="cell properties">
+                            <div className="cell properties server">
                               <Server doc={this.currentDoc()}/>
                             </div>
                           </div>
@@ -237,16 +209,7 @@ var App = React.createClass({
                         <div className="cell">
                           <nav className="depth">
                             <ul>
-                              {this.state.documents.map((doc, index) => <li className={index==this.state.currentDocument?'active':''} key={index} onClick={() => this.goToDoc(index)}>{doc.name}</li>)}
-                              <li className="right" onClick={() => this.cloneDoc(this.currentDoc())}>Clone</li>
-                              <li className="right" onClick={this.addDoc}>New</li>
-                            </ul>
-                          </nav>
-                          <nav className="depth">
-                            <ul>
                               {this.currentDoc().stack.map((g, index) => <li key={index} onClick={() => this.goTo(index)}>{(g.title || g.name || '#'+g.id)}</li>)}
-                              <li className="run right" onClick={() => Actions.runExperiment(this.currentDoc())}>Run</li>
-                              <li className="run right" onClick={() => Actions.runExperiment(this.currentDoc(), true)}>Resume</li>
                             </ul>
                           </nav>
                           <div className="cell-scroll-outer" style={{'height': '100%'}}>

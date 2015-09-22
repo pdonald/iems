@@ -111,6 +111,10 @@ body {
 .properties td input {
   width: 100%;
 }
+.server button {
+  margin-right: 5px;
+  padding: 5px;
+}
 
 .sidebar h2 {
   font-size: 14px;
