@@ -93,17 +93,17 @@ class GroupModel {
   }
 
   getCalculatedSize() {
-    var size = { width: this.x, height: this.y };
-    var padding = 50;
+    var size = { width: 0, height: 0 };
+    var padding = { x: 20, y: 50 };
     this.groups.forEach(g => {
       var groupSize = g.collapsed ? g.getSize() : g.getCalculatedSize();
-      if (g.x + groupSize.width + padding > size.width) size.width = g.x + groupSize.width + padding;
-      if (g.y + groupSize.height + padding > size.height) size.height = g.y + groupSize.height + padding;
+      if (g.x + groupSize.width + padding.x > size.width) size.width = g.x + groupSize.width + padding.x;
+      if (g.y + groupSize.height + padding.y > size.height) size.height = g.y + groupSize.height + padding.y;
     });
     this.processes.forEach(p => {
       var pSize = p.getSize();
-      if (p.x + pSize.width + padding > size.width) size.width = p.x + pSize.width + padding;
-      if (p.y + pSize.height + padding > size.height) size.height = p.y + pSize.height + padding;
+      if (p.x + pSize.width + padding.x > size.width) size.width = p.x + pSize.width + padding.x;
+      if (p.y + pSize.height + padding.y > size.height) size.height = p.y + pSize.height + padding.y;
     });
     return size;
   }
