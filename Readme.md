@@ -58,10 +58,10 @@ Make sure you have plenty of RAM for this or it will take forever.
 ## TODO
 
 * load/save
-* run error
-* error pane for missing connections
+* multiple experiments
+* error pane for missing connections, make output
 * view file
-* add tools
+* add tools in UI
 
 ## License
 
