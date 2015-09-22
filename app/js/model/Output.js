@@ -1,19 +1,3 @@
-function resolveParams(params, vars) {
-  var result = {};
-  for (var key in params) {
-    if (params[key][0] == '$') {
-      if (params[key].substr(1) in vars) {
-        result[key] = vars[params[key].substr(1)];
-      } else {
-        result[key] = undefined;
-      }
-    } else {
-      result[key] = params[key];
-    }
-  }
-  return result;
-}
-
 var Output = {
   Nothing: () => '',
 
@@ -83,12 +67,14 @@ var Output = {
       var output = {};
       var noOutput = null;
 
-      Object.keys(p.template.output).forEach(key => {
+      var ports = p.getPorts();
+
+      ports.output.forEach(key => {
         output[key] = p.getMakefileKey(key);
         all.push(output[key]);
       });
 
-      if (Object.keys(output).length == 0) {
+      if (ports.output.length == 0) {
         noOutput = p.getMakefileKey( 'done');
         all.push(noOutput);
       }
@@ -107,7 +93,7 @@ var Output = {
       text += Object.keys(input).map(key => input[key]).join(' ')
       text += '\n'
       text += '\t' + `touch status.${p.getMakefileKey('running')}` + '\n';
-      text += '\t' + p.template.toBash(resolveParams(p.params, p.group.doc.vars), input, output).join('\n\t') + '\n';
+      text += '\t' + p.template.toBash(p.getParamValues(), input, output).join('\n\t') + '\n';
       if (noOutput) text += '\ttouch ' + noOutput + '\n';
       text += '\t' + `mv status.${p.getMakefileKey('running')} status.${p.getMakefileKey('done')}` + '\n';
       text += '\n'

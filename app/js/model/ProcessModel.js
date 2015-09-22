@@ -19,6 +19,22 @@ class ProcessModel {
   }
 
   getParamValues() {
+    function resolveParams(params, vars) {
+      var result = {};
+      for (var key in params) {
+        if (params[key][0] == '$') {
+          if (params[key].substr(1) in vars) {
+            result[key] = vars[params[key].substr(1)];
+          } else {
+            result[key] = undefined;
+          }
+        } else {
+          result[key] = params[key];
+        }
+      }
+      return result;
+    }
+
     return resolveParams(this.params, this.group.doc.vars);
   }
 
@@ -65,7 +81,7 @@ class ProcessModel {
     var key = [];
     key.push('template='  + this.type);
     key.push('templateVer=' + this.template.version);
-    var params = resolveParams(this.params, this.group.doc.vars);
+    var params = this.getParamValues();
     for (var name in this.template.params) {
       if (this.template.params[name].nohash)
         continue;
