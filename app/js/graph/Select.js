@@ -5,6 +5,16 @@ var Select = React.createClass({
     return { dragging: false };
   },
 
+  componentDidMount: function() {
+    document.addEventListener('keydown', this.onKeyDown);
+  },
+
+  componentWillMount: function() {
+    document.removeEventListener('keydown', this.onKeyDown);
+    document.removeEventListener('mousemove', this.onMouseMove);
+    document.removeEventListener('mouseup', this.onMouseUp);
+  },
+
   componentDidUpdate: function (props, state) {
     if (this.state.dragging && !state.dragging) {
       document.addEventListener('mousemove', this.onMouseMove);
@@ -48,6 +58,12 @@ var Select = React.createClass({
     this.setState({ dragging: false });
     e.stopPropagation();
     e.preventDefault();
+  },
+
+  onKeyDown: function(e) {
+    if (e.keyCode == 46) { // delete
+      Actions.delete();
+    }
   },
 
   render: function() {
