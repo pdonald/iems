@@ -1,6 +1,7 @@
 {
   "name": "iems",
   "version": "1.0.0",
+  "private": true,
   "description": "Interactive Experiment Management System (iEMS) for machine translation",
   "author": "Pēteris Ņikiforovs <p@mak.id.lv> (https://peteris.rocks)",
   "contributors": ["Matīss Rikters"],
