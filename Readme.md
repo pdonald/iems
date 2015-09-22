@@ -6,7 +6,7 @@ An Interactive Experiment Management System for machine translation.
 
 A project at the [Machine Translation Marathon 2015](http://ufal.mff.cuni.cz/mtm15).
 
-<iframe src="//www.slideshare.net/slideshow/embed_code/key/FM3p5wbs4BX27" width="425" height="355" frameborder="0" marginwidth="0" marginheight="0" scrolling="no" style="border:1px solid #CCC; border-width:1px; margin-bottom:5px; max-width: 100%;" allowfullscreen> </iframe>
+[Project presentation](http://www.slideshare.net/matissrikters/interactive-experiment-management-system)
 
 ## Build
 
@@ -62,6 +62,7 @@ Make sure you have plenty of RAM for this or it will take forever.
 * error pane for missing connections, make output
 * view file
 * add tools in UI
+* select, resize
 
 ## License
 
