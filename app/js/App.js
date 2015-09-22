@@ -117,6 +117,7 @@ var App = React.createClass({
       return ((area.end.x >= p.x && area.start.x <= p.x + size.width) || (p.x >= area.start.x && p.x + size.width <= area.end.x))
           && ((area.end.y >= p.y && area.start.y <= p.y + size.height) || (p.y >= area.start.y && p.y + size.height <= area.end.y));
     }
+    // todo: swap start end
     var graph = this.currentGraph();
     graph.processes.forEach(p => p.selected = inArea(p));
     graph.groups.forEach(g => g.selected = inArea(g));
@@ -126,6 +127,7 @@ var App = React.createClass({
   onDeselectAll: function() {
     var graph = this.currentGraph();
     graph.processes.forEach(p => p.selected = false);
+    graph.groups.forEach(g => g.selected = false);
     this.setState(this.state);
   },
 
