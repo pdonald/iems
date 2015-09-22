@@ -192,11 +192,11 @@ var Tools = {
       toBash: (params, input, output) => {
         return [
           `TEMP=$(shell mktemp -d --tmpdir=${params.tempdir}) && \\`,
-          `${params.toolsdir}/score ${input.phr} ${input.trgsrc} /dev/stdout > $$TEMP/trgsrc && \\`,
-          `${params.toolsdir}/score ${input.phrinv} ${input.srctrg} /dev/stdout --Inverse > $$TEMP/srctrg && \\`,
+          `${params.toolsdir}/moses/score ${input.phr} ${input.trgsrc} /dev/stdout > $$TEMP/trgsrc && \\`,
+          `${params.toolsdir}/moses/score ${input.phrinv} ${input.srctrg} /dev/stdout --Inverse > $$TEMP/srctrg && \\`,
           `LC_ALL=C sort $$TEMP/srctrg -T $$TEMP | gzip > $$TEMP/srctrg.sorted.gz && \\`,
           `LC_ALL=C sort $$TEMP/trgsrc -T $$TEMP | gzip > $$TEMP/trgsrc.sorted.gz && \\`,
-          `${params.toolsdir}/consolidate $$TEMP/trgsrc.sorted.gz $$TEMP/srctrg.sorted.gz ${output.ptable} && \\`,
+          `${params.toolsdir}/moses/consolidate $$TEMP/trgsrc.sorted.gz $$TEMP/srctrg.sorted.gz ${output.ptable} && \\`,
           'rm -r $$TEMP'
         ];
       }
@@ -239,7 +239,7 @@ var Tools = {
       params: {
         type: { type: 'string', default: '$reordering-type' },
         orientation: { type: 'string', default: '$reordering-orientation' },
-        model: 'string',
+        model: { type: 'string', default: '$reordering-model' },
         smoothing: { type: 'float', default: 0.5 },
         toolsdir: { type: 'path', default: '$toolsdir' },
         tempdir: { type: 'path', default: '$tempdir' }

@@ -6,6 +6,7 @@ var App = React.createClass({
         srclang: 'en', trglang: 'lv',
         'lm-order': 5,
         'reordering-type': 'wbe', 'reordering-orientation': 'msd',
+        'reordering-model': 'wbe-msd-bidirectional-fe',
         toolsdir: '/tools', workdir: '/tools/train', tempdir: '/tmp'
       },
       stack: []
