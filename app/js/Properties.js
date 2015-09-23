@@ -7,10 +7,15 @@ var Properties = React.createClass({
 
   componentDidMount: function() {
     this.listenTo(Actions.select, this.onSelect);
+    this.listenTo(Actions.deselectAll, this.onDeselect);
   },
 
   onSelect: function(obj) {
     this.setState({ selected: obj });
+  },
+
+  onDeselect: function(obj) {
+    this.setState({ selected: null });
   },
 
   onChange: function(process, key, value) {

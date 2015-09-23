@@ -107,8 +107,8 @@ var App = React.createClass({
   },
 
   onSelect: function(obj) {
-    obj.selected = !obj.selected;
-    this.setState(this.state);
+    //obj.selected = true;
+    //this.setState(this.state);
   },
 
   onSelectArea: function(area) {
@@ -124,6 +124,12 @@ var App = React.createClass({
     var graph = this.currentGraph();
     graph.processes.forEach(p => p.selected = inArea(p));
     graph.groups.forEach(g => g.selected = inArea(g));
+    if (graph.groups.filter(g => g.selected).length == 0) {
+      var p = graph.processes.filter(p => p.selected);
+      if (p.length == 1) {
+        Actions.select(p[0]);
+      }
+    }
     this.setState(this.state);
   },
 
