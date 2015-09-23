@@ -46,14 +46,14 @@ var Process = React.createClass({
 
     var resize;
     if (!this.props.blank) {
-      resize = (
+      /* resize = (
         <g>
           <rect className="resize" style={{cursor: "nw-resize"}} x={0} y={0} width={10} height={10}/>
           <rect className="resize" style={{cursor: "ne-resize"}} x={width-10} y={0} width={10} height={10}/>
           <rect className="resize" style={{cursor: "sw-resize"}} x={0} y={height-10} width={10} height={10}/>
           <rect className="resize" style={{cursor: "se-resize"}} x={width-10} y={height-10} width={10} height={10}/>
         </g>
-      );
+      ); */
     }
 
     return (
