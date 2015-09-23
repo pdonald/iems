@@ -64,7 +64,6 @@ var App = React.createClass({
   },
 
   onParamChanged: function(process, key, value) {
-    process[key] = value;
     this.setState(this.state);
   },
 
