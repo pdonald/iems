@@ -166,13 +166,14 @@ var Tools = {
       input: { src: 'file<tok>', trg: 'file<tok>', algn: 'file<align>' },
       output: function(p, params) {
         var output = { out: 'file<phrases>', inv: 'file<phrases>' };
-        if (params.model) output.o = 'file<any>';
+        if (params.type && params.orientation) output.o = 'file<any>';
         return output;
       },
       toBash: (params, input, output) => {
+        var model = params.type && params.orientation ? `--model ${params.type}-${params.orientation}` : '';
         return [
           `TEMP=$(shell mktemp -d --tmpdir=${params.tempdir}) && \\`,
-          `${params.toolsdir}/moses/extract ${input.trg} ${input.src} ${input.algn} $$TEMP/extract ${params.maxLength} orientation --model ${params.type}-${params.orientation} && \\`,
+          `${params.toolsdir}/moses/extract ${input.trg} ${input.src} ${input.algn} $$TEMP/extract ${params.maxLength} orientation ${model} && \\`,
           `LC_ALL=C sort $$TEMP/extract -T $$TEMP > ${output.out} && \\`,
           `LC_ALL=C sort $$TEMP/extract.inv -T $$TEMP > ${output.inv} && \\`,
           `LC_ALL=C sort $$TEMP/extract.o -T $$TEMP > ${output.o} && \\`,
