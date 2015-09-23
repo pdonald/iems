@@ -2,11 +2,12 @@
 
 An Interactive Experiment Management System for machine translation.
 
+[Demo](http://pdonald.github.io/iems/) (for Google Chrome)
+
 **Warning: this is still very much work in progress, it is not stable yet**
 
 A project at the [Machine Translation Marathon 2015](http://ufal.mff.cuni.cz/mtm15).
-
-[Project presentation](http://www.slideshare.net/matissrikters/interactive-experiment-management-system)
+[Project presentation](http://www.slideshare.net/matissrikters/interactive-experiment-management-system).
 
 ## Build
 
