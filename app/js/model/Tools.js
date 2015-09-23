@@ -465,6 +465,76 @@ var Tools = {
           'rm -rf $$TEMP'
         ];
       }
+    },
+    sacompile: {
+      type: 'sacompile', title: 'Suffix array', category: 'cdec',
+      input: { src: 'file<tok>', trg: 'file<tok>', algn: 'file<align>' },
+      output: { out: 'dir<sa>' },
+      params: {
+        toolsdir: { type: 'path', default: '$toolsdir' },
+        tempdir: { type: 'path', default: '$tempdir' }
+      },
+      toBash: (params, input, output) => {
+        return [
+          `TEMP=$(shell mktemp --tmpdir=${params.tempdir}) && \\`,
+          `paste -d" ||| " ${input.src} /dev/null /dev/null /dev/null /dev/null ${input.trg} > $$TEMP && \\`,
+          `${params.toolsdir}/cdec/sacompile -b $$TEMP -a ${input.algn} -c ${output.out}/sa.ini -o ${output.out} && \\`,
+          'rm -f $$TEMP'
+        ];
+      }
+    },
+    'cdec-model': {
+      type: 'cdec-model', title: 'cdec ini', category: 'cdec',
+      input: { lm: 'file<lm-bin>' },
+      output: { ini: 'file<ini>'},
+      params: {
+        workdir: { type: 'path', default: '$workdir' }
+      },
+      toBash: (params, input, output) => {
+        var ini = [];
+        ini.push('formalism=scfg');
+        ini.push('add_pass_through_rules=true');
+        ini.push(`feature_function=WordPenalty`);
+        if (input.lm) ini.push(`feature_function=KLanguageModel ${params.workdir}/${input.lm}`);
+
+        var cmd = [];
+        cmd.push(`rm -f ${output.ini}`);
+        ini.forEach(l => cmd.push(`echo "${l}" >> ${output.ini}`));
+        return cmd;
+      }
+    },
+    cdec: {
+      type: 'cdec', title: 'cdec decoder', category: 'cdec',
+      input: { src: 'file<tok>', ini: 'file<ini>', sa: 'dir<sa>' },
+      output: { trans: 'file<tok>', gram: 'dir<grammars>' },
+      params: {
+        toolsdir: { type: 'path', default: '$toolsdir' },
+        tempdir: { type: 'path', default: '$tempdir' }
+      },
+      toBash: (params, input, output) => {
+        return [
+          `${params.toolsdir}/cdec/extract -c ${input.sa}/sa.ini -g ${output.gram} < ${input.src} | \\`,
+          `${params.toolsdir}/cdec/cdec -c ${input.ini} > ${output.trans}`
+        ];
+      }
+    },
+    extractgrammars: {
+      type: 'extractgrammars', title: 'Extract grammars', category: 'cdec',
+      input: { src: 'file<tok>', trg: 'file<tok>', ini: 'file<ini>' },
+      output: { gram: 'dir<grammars>', sgm: 'file<sgm>'},
+      params: {
+        threads: { type: 'uinteger', default: '$threads' },
+        toolsdir: { type: 'path', default: '$toolsdir' },
+        tempdir: { type: 'path', default: '$tempdir' }
+      },
+      toBash: (params, input, output) => {
+        return [
+          `TEMP=$(shell mktemp --tmpdir=${params.tempdir}) && \\`,
+          `paste -d" ||| " ${input.src} /dev/null /dev/null /dev/null /dev/null ${input.trg} > $$TEMP && \\`,
+          `${params.toolsdir}/cdec/extract -c ${input.ini} -g ${output.gram} -t ${params.threads || 1} < $$TEMP > ${output.sgm} && \\`,
+          'rm -f $$TEMP'
+        ];
+      }
     }
   },
   groups: {
