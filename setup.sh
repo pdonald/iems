@@ -12,6 +12,8 @@ sudo apt-get -qq install zlib1g-dev libboost-all-dev libbz2-dev liblzma-dev pyth
 sudo apt-get -qq install libboost-all-dev libgoogle-perftools-dev libsparsehash-dev libeigen3-dev
 sudo apt-get -qq install graphviz imagemagick
 
+sudo PERL_MM_USE_DEFAULT=1 cpan install XML::Twig > /dev/null
+
 curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
 sudo apt-get install -y nodejs
 

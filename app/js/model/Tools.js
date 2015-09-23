@@ -271,11 +271,39 @@ var Tools = {
         ];
       }
     },
+    'phrase-extraction-model': {
+      type: 'phrase-extraction-model', title: 'Phrases model', category: 'phrases',
+      input: { phr: 'file<phrase-table-bin>', reord: 'file<reordering-bin>' },
+      output: { ini: 'file<moses>' },
+      params: {
+        model: { type: 'string', default: '$reordering-model' },
+        workdir: { type: 'path', default: '$workdir' },
+      },
+      toBash: (params, input, output) => {
+        var ini = [];
+        ini.push('[feature]');
+        if (input.phr) ini.push(`PhraseDictionaryCompact name=TranslationModel0 num-features=4 path=${params.workdir}/${input.phr} input-factor=0 output-factor=0`);
+        if (input.reord) ini.push(`LexicalReordering name=LexicalReordering0 num-features=6 type=${params.model}-allff input-factor=0 output-factor=0 path=${params.workdir}/${input.reord.replace('.minlexr', '')}`);
+        ini.push('[weight]');
+        if (input.phr) ini.push('TranslationModel0= 0.2 0.2 0.2 0.2');
+        if (input.reord) ini.push('LexicalReordering0= 0.3 0.3 0.3 0.3 0.3 0.3');
+
+        var cmd = [];
+        cmd.push(`echo > ${output.ini}`);
+        ini.forEach(l => cmd.push(`echo "${l}" >> ${output.ini}`));
+        if (input.sample) cmd.push(`cat ${input.sample}/moses.ini >> ${output.ini}`);
+        return cmd;
+      }
+    },
     'moses-ini': {
       type: 'moses-ini', title: 'Moses INI', category: 'decoder',
       width: 300,
-      input: { phr: ['file<phrase-table>', 'file<phrase-table-bin'], lm: 'file<binlm>', reord: 'file<reord>', sample: 'sampling' },
+      input: { lm: 'file<lm-bin>', phrases: 'file<moses>', sample: 'sampling' },
       output: { ini: 'file<moses>' },
+      params: {
+        workdir: { type: 'path', default: '$workdir' },
+        lmorder: { type: 'uint', default: '$lm-order' },
+      },
       toBash: (params, input, output) => {
         var ini = [];
         ini.push('[input-factors]')
@@ -289,21 +317,18 @@ var Tools = {
         ini.push('WordPenalty');
         ini.push('PhrasePenalty');
         ini.push('Distortion');
-        if (input.phr) ini.push(`PhraseDictionaryCompact name=TranslationModel0 num-features=4 path=/tools/train/${input.phr} input-factor=0 output-factor=0`);
-        if (input.reord) ini.push(`LexicalReordering name=LexicalReordering0 num-features=6 type=wbe-msd-bidirectional-fe-allff input-factor=0 output-factor=0 path=/tools/train/${input.reord.replace('.minlexr', '')}`);
-        if (input.lm) ini.push(`KENLM lazyken=0 name=LM0 factor=0 path=/tools/train/${input.lm} order=3`);
+        if (input.lm) ini.push(`KENLM lazyken=0 name=LM0 factor=0 path=${params.workdir}/${input.lm} order=${params.lmorder}`);
         ini.push('[weight]');
         ini.push('UnknownWordPenalty0= 1');
         ini.push('WordPenalty0= -1');
         ini.push('PhrasePenalty0= 0.2');
-        if (input.phr) ini.push('TranslationModel0= 0.2 0.2 0.2 0.2');
         ini.push('Distortion0= 0.3');
-        if (input.reord) ini.push('LexicalReordering0= 0.3 0.3 0.3 0.3 0.3 0.3');
         if (input.lm) ini.push('LM0= 0.5');
 
         var cmd = [];
         cmd.push(`echo > ${output.ini}`);
         ini.forEach(l => cmd.push(`echo "${l}" >> ${output.ini}`));
+        if (input.phrases) cmd.push(`cat ${input.phrases} >> ${output.ini}`);
         if (input.sample) cmd.push(`cat ${input.sample}/moses.ini >> ${output.ini}`);
         return cmd;
       }
@@ -312,9 +337,12 @@ var Tools = {
       type: 'moses', title: 'moses decoder', category: 'decoder',
       input: { in: 'file<tok>', ini: 'file<moses>' },
       output: { out: 'file<tok>' },
+      params: {
+        toolsdir: { type: 'path', default: '$toolsdir' }
+      },
       toBash: (params, input, output) => {
         return [
-          `sudo docker run -a stdin -a stdout -a stderr -v /tools/train:/tools/train -i germann/moses-production.static /moses/bin/moses -f /tools/train/${input.ini} < ${input.in} > ${output.out}`
+          `${params.toolsdir}/moses/moses -f ${input.ini} < ${input.in} > ${output.out}`
         ];
       }
     },
@@ -322,14 +350,20 @@ var Tools = {
       type: 'bleu', title: 'BLEU', category: 'evaluation',
       input: { trans: 'file<text>', src: 'file<text>', ref: 'file<text>' },
       output: { out: 'file<bleu>' },
-      params: { case: 'bool' },
+      params: {
+        case: { type: 'bool', default: true },
+        srclang: { type: 'language', default: '$srclang' },
+        trglang: { type: 'language', default: '$trglang' },
+        toolsdir: { type: 'path', default: '$toolsdir' },
+        tempdir: { type: 'path', default: '$tempdir' }
+      },
       toBash: (params, input, output) => {
         return [
-          `TEMP=$(shell mktemp -d) && \\`,
-          `perl /tools/wrap-sgm.perl ref xx yy < ${input.ref} > $$TEMP/ref.sgm && \\`,
-          `perl /tools/wrap-sgm.perl src xx < ${input.src} > $$TEMP/src.sgm && \\`,
-          `perl /tools/scripts/ems/support/wrap-xml.perl yy $$TEMP/src.sgm < ${input.trans} > $$TEMP/trans.sgm && \\`,
-          `perl /tools/scripts/generic/mteval-v13a.pl -s $$TEMP/src.sgm -r $$TEMP/ref.sgm -t $$TEMP/trans.sgm -b -d 3 ${params.case ? '-c' : ''} > ${output.out} && \\`,
+          `TEMP=$(shell mktemp -d --tmpdir=${params.tempdir}) && \\`,
+          `perl ${params.toolsdir}/wrap-sgm.perl ref ${params.srclang} ${params.trglang} < ${input.ref} > $$TEMP/ref.sgm && \\`,
+          `perl ${params.toolsdir}/wrap-sgm.perl src ${params.srclang} < ${input.src} > $$TEMP/src.sgm && \\`,
+          `perl ${params.toolsdir}/moses/scripts/ems/support/wrap-xml.perl ${params.trglang} $$TEMP/src.sgm < ${input.trans} > $$TEMP/trans.sgm && \\`,
+          `perl ${params.toolsdir}/moses/scripts/generic/mteval-v13a.pl -s $$TEMP/src.sgm -r $$TEMP/ref.sgm -t $$TEMP/trans.sgm -b -d 3 ${params.case ? '-c' : ''} > ${output.out} && \\`,
           `cat ${output.out} && \\`,
           'rm -r $$TEMP'
         ];
@@ -521,12 +555,11 @@ var Tools = {
       title: 'Evaluation', type: 'evaluation', category: 'evaluation',
       ports: { input: ['src', 'ref', 'ini'], output: ['trans', 'bleu'] },
       processes: [
-        { id: 2, type: 'tokenizer', params: { lang: 'en' }, x: 20, y: 175 },
-        { id: 3, type: 'tokenizer', params: { lang: 'lv' }, x: 200, y: 175 },
-        { id: 4, type: 'moses', params: {}, x: 50, y: 500, width: 250 },
-        { id: 5, type: 'detokenizer', params: { lang: 'en' }, x: 150, y: 650 },
-        { id: 6, type: 'bleu', params: { case: false }, x: 350, y: 750 },
-        { id: 7, type: 'compareval', params: {server:'http://localhost:8080',experiment:'testing'}, x: 550, y: 800 },
+        { id: 2, x: 45, y: 95, type: 'tokenizer' },
+        { id: 3, x: 298, y: 99, type: 'tokenizer' },
+        { id: 4, x: 59, y: 255, type: 'moses' },
+        { id: 5, x: 65, y: 397, type: 'detokenizer' },
+        { id: 6, x: 291, y: 456, type: 'bleu' }
       ],
       links: [
         { from: { id: undefined, port: 'src' }, to: { id: 2, port: 'in' } },
@@ -534,14 +567,11 @@ var Tools = {
         { from: { id: undefined, port: 'ini' }, to: { id: 4, port: 'ini' } },
         { from: { id: 2, port: 'out' }, to: { id: 4, port: 'in' } },
         { from: { id: 4, port: 'out' }, to: { id: 5, port: 'in' } },
-        { from: { id: 4, port: 'out' }, to: { id: 6, port: 'trans' } },
+        { from: { id: 5, port: 'out' }, to: { id: 6, port: 'trans' } },
         { from: { id: undefined, port: 'src' }, to: { id: 6, port: 'src' } },
         { from: { id: undefined, port: 'ref' }, to: { id: 6, port: 'ref' } },
-        { from: { id: 2, port: 'out' }, to: { id: 7, port: 'src' } },
-        { from: { id: 3, port: 'out' }, to: { id: 7, port: 'ref' } },
-        { from: { id: 5, port: 'out' }, to: { id: 7, port: 'trans' } },
         { from: { id: 5, port: 'out' }, to: { id: undefined, port: 'trans' } },
-        { from: { id: 6, port: 'out' }, to: { id: undefined, port: 'bleu' } },
+        { from: { id: 6, port: 'out' }, to: { id: undefined, port: 'bleu' } }
       ]
     }
   }
