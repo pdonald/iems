@@ -2,10 +2,7 @@ var Toolbox = React.createClass({
   mixins: [React.addons.PureRenderMixin],
 
   getInitialState: function() {
-    return {
-      dragging: null,
-      x: 0, y: 0
-    };
+    return { dragging: null };
   },
 
   componentWillMount: function() {
