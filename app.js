@@ -93,7 +93,6 @@ var App = React.createClass({
   },
 
   onParamChanged: function onParamChanged(process, key, value) {
-    process[key] = value;
     this.setState(this.state);
   },
 
@@ -136,8 +135,8 @@ var App = React.createClass({
   },
 
   onSelect: function onSelect(obj) {
-    obj.selected = !obj.selected;
-    this.setState(this.state);
+    //obj.selected = true;
+    //this.setState(this.state);
   },
 
   onSelectArea: function onSelectArea(area) {
@@ -156,6 +155,16 @@ var App = React.createClass({
     graph.groups.forEach(function (g) {
       return g.selected = inArea(g);
     });
+    if (graph.groups.filter(function (g) {
+      return g.selected;
+    }).length == 0) {
+      var p = graph.processes.filter(function (p) {
+        return p.selected;
+      });
+      if (p.length == 1) {
+        Actions.select(p[0]);
+      }
+    }
     this.setState(this.state);
   },
 
@@ -338,7 +347,7 @@ var App = React.createClass({
                     { className: 'table' },
                     React.createElement(
                       'div',
-                      { className: 'row', style: { height: '80%' } },
+                      { className: 'row', style: { height: '100%' } },
                       React.createElement(
                         'div',
                         { className: 'cell' },
@@ -426,8 +435,8 @@ var App = React.createClass({
 var AppDefaultGraph = {
   id: 0, title: 'Main', type: 'main', category: 'undefined',
   x: 0, y: 0, collapsed: false,
-  processes: [{ id: 2, x: 24, y: 268, type: 'tokenizer', params: { lang: "$srclang", toolsdir: "$toolsdir" } }, { id: 3, x: 277, y: 274, type: 'tokenizer', params: { lang: "$trglang", toolsdir: "$toolsdir" } }, { id: 105, x: 256, y: 49, type: 'opus', params: { srclang: "$srclang", trglang: "$trglang", tempdir: "$tempdir", corpus: "EUconst" } }],
-  links: [{ from: { id: 2, port: 'out' }, to: { id: 103, port: 'src' } }, { from: { id: 3, port: 'out' }, to: { id: 103, port: 'trg' } }, { from: { id: 3, port: 'out' }, to: { id: 104, port: 'trg' } }, { from: { id: 103, port: 'algn' }, to: { id: 106, port: 'algn' } }, { from: { id: 2, port: 'out' }, to: { id: 106, port: 'src' } }, { from: { id: 3, port: 'out' }, to: { id: 106, port: 'trg' } }, { from: { id: 105, port: 'src' }, to: { id: 2, port: 'in' } }, { from: { id: 105, port: 'trg' }, to: { id: 3, port: 'in' } }],
+  processes: [{ id: 2, x: 24, y: 268, type: 'tokenizer', params: { lang: "$srclang", toolsdir: "$toolsdir" } }, { id: 3, x: 277, y: 274, type: 'tokenizer', params: { lang: "$trglang", toolsdir: "$toolsdir" } }, { id: 105, x: 256, y: 49, type: 'opus', params: { srclang: "$srclang", trglang: "$trglang", tempdir: "$tempdir", corpus: "EUconst" } }, { id: 106, x: 56, y: 638, type: 'sacompile', params: { toolsdir: "$toolsdir", tempdir: "$tempdir" } }, { id: 107, x: 290, y: 722, type: 'cdec-model', params: { workdir: "$workdir" } }, { id: 108, x: 116, y: 786, type: 'echo', params: { text: "Europe" } }, { id: 109, x: 271, y: 904, type: 'cdec', params: { toolsdir: "$toolsdir", tempdir: "$tempdir" } }],
+  links: [{ from: { id: 2, port: 'out' }, to: { id: 103, port: 'src' } }, { from: { id: 3, port: 'out' }, to: { id: 103, port: 'trg' } }, { from: { id: 3, port: 'out' }, to: { id: 104, port: 'trg' } }, { from: { id: 105, port: 'src' }, to: { id: 2, port: 'in' } }, { from: { id: 105, port: 'trg' }, to: { id: 3, port: 'in' } }, { from: { id: 2, port: 'out' }, to: { id: 106, port: 'src' } }, { from: { id: 3, port: 'out' }, to: { id: 106, port: 'trg' } }, { from: { id: 103, port: 'algn' }, to: { id: 106, port: 'algn' } }, { from: { id: 104, port: 'lm' }, to: { id: 107, port: 'lm' } }, { from: { id: 107, port: 'ini' }, to: { id: 109, port: 'ini' } }, { from: { id: 108, port: 'out' }, to: { id: 109, port: 'src' } }, { from: { id: 106, port: 'out' }, to: { id: 109, port: 'sa' } }],
   groups: [{
     id: 103, title: 'Word alignment', type: 'word-alignment', category: 'alignment',
     x: 86, y: 444, collapsed: true,
@@ -852,6 +861,18 @@ var Process = React.createClass({
     var padding = 10;
     var min = { x: padding, y: padding };
 
+    var resize;
+    if (!this.props.blank) {
+      /* resize = (
+        <g>
+          <rect className="resize" style={{cursor: "nw-resize"}} x={0} y={0} width={10} height={10}/>
+          <rect className="resize" style={{cursor: "ne-resize"}} x={width-10} y={0} width={10} height={10}/>
+          <rect className="resize" style={{cursor: "sw-resize"}} x={0} y={height-10} width={10} height={10}/>
+          <rect className="resize" style={{cursor: "se-resize"}} x={width-10} y={height-10} width={10} height={10}/>
+        </g>
+      ); */
+    }
+
     return React.createElement(
       Draggable,
       { className: classes.join(' '),
@@ -860,12 +881,13 @@ var Process = React.createClass({
       React.createElement(
         'g',
         { className: this.props.graph.collapsed ? 'zoom-in' : '' },
-        React.createElement('rect', { className: 'process-rect', x: '0', y: '0', width: width, height: height, onDoubleClick: this.goIntoGroup }),
+        React.createElement('rect', { className: 'process-rect', x: 0, y: 0, width: width, height: height, onDoubleClick: this.goIntoGroup }),
         React.createElement(
           'text',
           { x: '10', y: '30', onDoubleClick: this.goIntoGroup },
           this.props.title
         ),
+        resize,
         React.createElement(
           'g',
           null,
@@ -1672,11 +1694,12 @@ var Tools = {
       input: { src: 'file<tok>', trg: 'file<tok>', algn: 'file<align>' },
       output: function output(p, params) {
         var output = { out: 'file<phrases>', inv: 'file<phrases>' };
-        if (params.model) output.o = 'file<any>';
+        if (params.type && params.orientation) output.o = 'file<any>';
         return output;
       },
       toBash: function toBash(params, input, output) {
-        return ['TEMP=$(shell mktemp -d --tmpdir=' + params.tempdir + ') && \\', params.toolsdir + '/moses/extract ' + input.trg + ' ' + input.src + ' ' + input.algn + ' $$TEMP/extract ' + params.maxLength + ' orientation --model ' + params.type + '-' + params.orientation + ' && \\', 'LC_ALL=C sort $$TEMP/extract -T $$TEMP > ' + output.out + ' && \\', 'LC_ALL=C sort $$TEMP/extract.inv -T $$TEMP > ' + output.inv + ' && \\', 'LC_ALL=C sort $$TEMP/extract.o -T $$TEMP > ' + output.o + ' && \\', 'rm -r $$TEMP'];
+        var model = params.type && params.orientation ? '--model ' + params.type + '-' + params.orientation : '';
+        return ['TEMP=$(shell mktemp -d --tmpdir=' + params.tempdir + ') && \\', params.toolsdir + '/moses/extract ' + input.trg + ' ' + input.src + ' ' + input.algn + ' $$TEMP/extract ' + params.maxLength + ' orientation ' + model + ' && \\', 'LC_ALL=C sort $$TEMP/extract -T $$TEMP > ' + output.out + ' && \\', 'LC_ALL=C sort $$TEMP/extract.inv -T $$TEMP > ' + output.inv + ' && \\', 'LC_ALL=C sort $$TEMP/extract.o -T $$TEMP > ' + output.o + ' && \\', 'rm -r $$TEMP'];
       }
     },
     // todo: split into score+score+consolidate
@@ -1748,11 +1771,41 @@ var Tools = {
     },
 
     //`mv ${output.reord}.minlexr ${output.reord}`
+    'phrase-extraction-model': {
+      type: 'phrase-extraction-model', title: 'Phrases model', category: 'phrases',
+      input: { phr: 'file<phrase-table-bin>', reord: 'file<reordering-bin>' },
+      output: { ini: 'file<moses>' },
+      params: {
+        model: { type: 'string', 'default': '$reordering-model' },
+        workdir: { type: 'path', 'default': '$workdir' }
+      },
+      toBash: function toBash(params, input, output) {
+        var ini = [];
+        ini.push('[feature]');
+        if (input.phr) ini.push('PhraseDictionaryCompact name=TranslationModel0 num-features=4 path=' + params.workdir + '/' + input.phr + ' input-factor=0 output-factor=0');
+        if (input.reord) ini.push('LexicalReordering name=LexicalReordering0 num-features=6 type=' + params.model + '-allff input-factor=0 output-factor=0 path=' + params.workdir + '/' + input.reord.replace('.minlexr', ''));
+        ini.push('[weight]');
+        if (input.phr) ini.push('TranslationModel0= 0.2 0.2 0.2 0.2');
+        if (input.reord) ini.push('LexicalReordering0= 0.3 0.3 0.3 0.3 0.3 0.3');
+
+        var cmd = [];
+        cmd.push('echo > ' + output.ini);
+        ini.forEach(function (l) {
+          return cmd.push('echo "' + l + '" >> ' + output.ini);
+        });
+        if (input.sample) cmd.push('cat ' + input.sample + '/moses.ini >> ' + output.ini);
+        return cmd;
+      }
+    },
     'moses-ini': {
       type: 'moses-ini', title: 'Moses INI', category: 'decoder',
       width: 300,
-      input: { phr: ['file<phrase-table>', 'file<phrase-table-bin'], lm: 'file<binlm>', reord: 'file<reord>', sample: 'sampling' },
+      input: { lm: 'file<lm-bin>', phrases: 'file<moses>', sample: 'sampling' },
       output: { ini: 'file<moses>' },
+      params: {
+        workdir: { type: 'path', 'default': '$workdir' },
+        lmorder: { type: 'uint', 'default': '$lm-order' }
+      },
       toBash: function toBash(params, input, output) {
         var ini = [];
         ini.push('[input-factors]');
@@ -1766,16 +1819,12 @@ var Tools = {
         ini.push('WordPenalty');
         ini.push('PhrasePenalty');
         ini.push('Distortion');
-        if (input.phr) ini.push('PhraseDictionaryCompact name=TranslationModel0 num-features=4 path=/tools/train/' + input.phr + ' input-factor=0 output-factor=0');
-        if (input.reord) ini.push('LexicalReordering name=LexicalReordering0 num-features=6 type=wbe-msd-bidirectional-fe-allff input-factor=0 output-factor=0 path=/tools/train/' + input.reord.replace('.minlexr', ''));
-        if (input.lm) ini.push('KENLM lazyken=0 name=LM0 factor=0 path=/tools/train/' + input.lm + ' order=3');
+        if (input.lm) ini.push('KENLM lazyken=0 name=LM0 factor=0 path=' + params.workdir + '/' + input.lm + ' order=' + params.lmorder);
         ini.push('[weight]');
         ini.push('UnknownWordPenalty0= 1');
         ini.push('WordPenalty0= -1');
         ini.push('PhrasePenalty0= 0.2');
-        if (input.phr) ini.push('TranslationModel0= 0.2 0.2 0.2 0.2');
         ini.push('Distortion0= 0.3');
-        if (input.reord) ini.push('LexicalReordering0= 0.3 0.3 0.3 0.3 0.3 0.3');
         if (input.lm) ini.push('LM0= 0.5');
 
         var cmd = [];
@@ -1783,6 +1832,7 @@ var Tools = {
         ini.forEach(function (l) {
           return cmd.push('echo "' + l + '" >> ' + output.ini);
         });
+        if (input.phrases) cmd.push('cat ' + input.phrases + ' >> ' + output.ini);
         if (input.sample) cmd.push('cat ' + input.sample + '/moses.ini >> ' + output.ini);
         return cmd;
       }
@@ -1791,17 +1841,26 @@ var Tools = {
       type: 'moses', title: 'moses decoder', category: 'decoder',
       input: { 'in': 'file<tok>', ini: 'file<moses>' },
       output: { out: 'file<tok>' },
+      params: {
+        toolsdir: { type: 'path', 'default': '$toolsdir' }
+      },
       toBash: function toBash(params, input, output) {
-        return ['sudo docker run -a stdin -a stdout -a stderr -v /tools/train:/tools/train -i germann/moses-production.static /moses/bin/moses -f /tools/train/' + input.ini + ' < ' + input['in'] + ' > ' + output.out];
+        return [params.toolsdir + '/moses/moses -f ' + input.ini + ' < ' + input['in'] + ' > ' + output.out];
       }
     },
     bleu: {
       type: 'bleu', title: 'BLEU', category: 'evaluation',
       input: { trans: 'file<text>', src: 'file<text>', ref: 'file<text>' },
       output: { out: 'file<bleu>' },
-      params: { 'case': 'bool' },
+      params: {
+        'case': { type: 'bool', 'default': true },
+        srclang: { type: 'language', 'default': '$srclang' },
+        trglang: { type: 'language', 'default': '$trglang' },
+        toolsdir: { type: 'path', 'default': '$toolsdir' },
+        tempdir: { type: 'path', 'default': '$tempdir' }
+      },
       toBash: function toBash(params, input, output) {
-        return ['TEMP=$(shell mktemp -d) && \\', 'perl /tools/wrap-sgm.perl ref xx yy < ' + input.ref + ' > $$TEMP/ref.sgm && \\', 'perl /tools/wrap-sgm.perl src xx < ' + input.src + ' > $$TEMP/src.sgm && \\', 'perl /tools/scripts/ems/support/wrap-xml.perl yy $$TEMP/src.sgm < ' + input.trans + ' > $$TEMP/trans.sgm && \\', 'perl /tools/scripts/generic/mteval-v13a.pl -s $$TEMP/src.sgm -r $$TEMP/ref.sgm -t $$TEMP/trans.sgm -b -d 3 ' + (params['case'] ? '-c' : '') + ' > ' + output.out + ' && \\', 'cat ' + output.out + ' && \\', 'rm -r $$TEMP'];
+        return ['TEMP=$(shell mktemp -d --tmpdir=' + params.tempdir + ') && \\', 'perl ' + params.toolsdir + '/wrap-sgm.perl ref ' + params.srclang + ' ' + params.trglang + ' < ' + input.ref + ' > $$TEMP/ref.sgm && \\', 'perl ' + params.toolsdir + '/wrap-sgm.perl src ' + params.srclang + ' < ' + input.src + ' > $$TEMP/src.sgm && \\', 'perl ' + params.toolsdir + '/moses/scripts/ems/support/wrap-xml.perl ' + params.trglang + ' $$TEMP/src.sgm < ' + input.trans + ' > $$TEMP/trans.sgm && \\', 'perl ' + params.toolsdir + '/moses/scripts/generic/mteval-v13a.pl -s $$TEMP/src.sgm -r $$TEMP/ref.sgm -t $$TEMP/trans.sgm -b -d 3 ' + (params['case'] ? '-c' : '') + ' > ' + output.out + ' && \\', 'cat ' + output.out + ' && \\', 'rm -r $$TEMP'];
       }
     },
     compareval: {
@@ -1879,6 +1938,65 @@ var Tools = {
       toBash: function toBash(params, input, output) {
         return ['TEMP=$(shell mktemp -d) && \\', 'perl /tools/scripts/training/mert-moses.pl ' + input.src + ' ' + input.ref + ' /tools/moses ' + input.ini + ' --no-filter-phrase-table --mertdir /tools/ --working-dir $$TEMP && \\', 'cp $$TEMP/moses.ini ' + output.ini + ' && \\', 'rm -rf $$TEMP'];
       }
+    },
+    sacompile: {
+      type: 'sacompile', title: 'Suffix array', category: 'cdec',
+      input: { src: 'file<tok>', trg: 'file<tok>', algn: 'file<align>' },
+      output: { out: 'dir<sa>' },
+      params: {
+        toolsdir: { type: 'path', 'default': '$toolsdir' },
+        tempdir: { type: 'path', 'default': '$tempdir' }
+      },
+      toBash: function toBash(params, input, output) {
+        return ['TEMP=$(shell mktemp --tmpdir=' + params.tempdir + ') && \\', 'paste -d" ||| " ' + input.src + ' /dev/null /dev/null /dev/null /dev/null ' + input.trg + ' > $$TEMP && \\', params.toolsdir + '/cdec/sacompile -b $$TEMP -a ' + input.algn + ' -c ' + output.out + '/sa.ini -o ' + output.out + ' && \\', 'rm -f $$TEMP'];
+      }
+    },
+    'cdec-model': {
+      type: 'cdec-model', title: 'cdec ini', category: 'cdec',
+      input: { lm: 'file<lm-bin>' },
+      output: { ini: 'file<ini>' },
+      params: {
+        workdir: { type: 'path', 'default': '$workdir' }
+      },
+      toBash: function toBash(params, input, output) {
+        var ini = [];
+        ini.push('formalism=scfg');
+        ini.push('add_pass_through_rules=true');
+        ini.push('feature_function=WordPenalty');
+        if (input.lm) ini.push('feature_function=KLanguageModel ' + params.workdir + '/' + input.lm);
+
+        var cmd = [];
+        cmd.push('rm -f ' + output.ini);
+        ini.forEach(function (l) {
+          return cmd.push('echo "' + l + '" >> ' + output.ini);
+        });
+        return cmd;
+      }
+    },
+    cdec: {
+      type: 'cdec', title: 'cdec decoder', category: 'cdec',
+      input: { src: 'file<tok>', ini: 'file<ini>', sa: 'dir<sa>' },
+      output: { trans: 'file<tok>', gram: 'dir<grammars>' },
+      params: {
+        toolsdir: { type: 'path', 'default': '$toolsdir' },
+        tempdir: { type: 'path', 'default': '$tempdir' }
+      },
+      toBash: function toBash(params, input, output) {
+        return [params.toolsdir + '/cdec/extract -c ' + input.sa + '/sa.ini -g ' + output.gram + ' < ' + input.src + ' | \\', params.toolsdir + '/cdec/cdec -c ' + input.ini + ' > ' + output.trans];
+      }
+    },
+    extractgrammars: {
+      type: 'extractgrammars', title: 'Extract grammars', category: 'cdec',
+      input: { src: 'file<tok>', trg: 'file<tok>', ini: 'file<ini>' },
+      output: { gram: 'dir<grammars>', sgm: 'file<sgm>' },
+      params: {
+        threads: { type: 'uinteger', 'default': '$threads' },
+        toolsdir: { type: 'path', 'default': '$toolsdir' },
+        tempdir: { type: 'path', 'default': '$tempdir' }
+      },
+      toBash: function toBash(params, input, output) {
+        return ['TEMP=$(shell mktemp --tmpdir=' + params.tempdir + ') && \\', 'paste -d" ||| " ' + input.src + ' /dev/null /dev/null /dev/null /dev/null ' + input.trg + ' > $$TEMP && \\', params.toolsdir + '/cdec/extract -c ' + input.ini + ' -g ' + output.gram + ' -t ' + (params.threads || 1) + ' < $$TEMP > ' + output.sgm + ' && \\', 'rm -f $$TEMP'];
+      }
     }
   },
   groups: {
@@ -1909,8 +2027,8 @@ var Tools = {
     evaluation: {
       title: 'Evaluation', type: 'evaluation', category: 'evaluation',
       ports: { input: ['src', 'ref', 'ini'], output: ['trans', 'bleu'] },
-      processes: [{ id: 2, type: 'tokenizer', params: { lang: 'en' }, x: 20, y: 175 }, { id: 3, type: 'tokenizer', params: { lang: 'lv' }, x: 200, y: 175 }, { id: 4, type: 'moses', params: {}, x: 50, y: 500, width: 250 }, { id: 5, type: 'detokenizer', params: { lang: 'en' }, x: 150, y: 650 }, { id: 6, type: 'bleu', params: { 'case': false }, x: 350, y: 750 }, { id: 7, type: 'compareval', params: { server: 'http://localhost:8080', experiment: 'testing' }, x: 550, y: 800 }],
-      links: [{ from: { id: undefined, port: 'src' }, to: { id: 2, port: 'in' } }, { from: { id: undefined, port: 'ref' }, to: { id: 3, port: 'in' } }, { from: { id: undefined, port: 'ini' }, to: { id: 4, port: 'ini' } }, { from: { id: 2, port: 'out' }, to: { id: 4, port: 'in' } }, { from: { id: 4, port: 'out' }, to: { id: 5, port: 'in' } }, { from: { id: 4, port: 'out' }, to: { id: 6, port: 'trans' } }, { from: { id: undefined, port: 'src' }, to: { id: 6, port: 'src' } }, { from: { id: undefined, port: 'ref' }, to: { id: 6, port: 'ref' } }, { from: { id: 2, port: 'out' }, to: { id: 7, port: 'src' } }, { from: { id: 3, port: 'out' }, to: { id: 7, port: 'ref' } }, { from: { id: 5, port: 'out' }, to: { id: 7, port: 'trans' } }, { from: { id: 5, port: 'out' }, to: { id: undefined, port: 'trans' } }, { from: { id: 6, port: 'out' }, to: { id: undefined, port: 'bleu' } }]
+      processes: [{ id: 2, x: 45, y: 95, type: 'tokenizer' }, { id: 3, x: 298, y: 99, type: 'tokenizer' }, { id: 4, x: 59, y: 255, type: 'moses' }, { id: 5, x: 65, y: 397, type: 'detokenizer' }, { id: 6, x: 291, y: 456, type: 'bleu' }],
+      links: [{ from: { id: undefined, port: 'src' }, to: { id: 2, port: 'in' } }, { from: { id: undefined, port: 'ref' }, to: { id: 3, port: 'in' } }, { from: { id: undefined, port: 'ini' }, to: { id: 4, port: 'ini' } }, { from: { id: 2, port: 'out' }, to: { id: 4, port: 'in' } }, { from: { id: 4, port: 'out' }, to: { id: 5, port: 'in' } }, { from: { id: 5, port: 'out' }, to: { id: 6, port: 'trans' } }, { from: { id: undefined, port: 'src' }, to: { id: 6, port: 'src' } }, { from: { id: undefined, port: 'ref' }, to: { id: 6, port: 'ref' } }, { from: { id: 5, port: 'out' }, to: { id: undefined, port: 'trans' } }, { from: { id: 6, port: 'out' }, to: { id: undefined, port: 'bleu' } }]
     }
   }
 };
@@ -1937,10 +2055,15 @@ var Properties = React.createClass({
 
   componentDidMount: function componentDidMount() {
     this.listenTo(Actions.select, this.onSelect);
+    this.listenTo(Actions.deselectAll, this.onDeselect);
   },
 
   onSelect: function onSelect(obj) {
     this.setState({ selected: obj });
+  },
+
+  onDeselect: function onDeselect(obj) {
+    this.setState({ selected: null });
   },
 
   onChange: function onChange(process, key, value) {
@@ -2138,25 +2261,48 @@ var Server = React.createClass({
     );
   }
 });
-"use strict";
+'use strict';
 
 var Toolbox = React.createClass({
-  displayName: "Toolbox",
+  displayName: 'Toolbox',
 
   mixins: [React.addons.PureRenderMixin],
 
   getInitialState: function getInitialState() {
-    return { dragging: null };
+    return {
+      dragging: null,
+      x: 0, y: 0
+    };
+  },
+
+  componentWillMount: function componentWillMount() {
+    document.removeEventListener('mousemove', this.drag);
+    document.removeEventListener('mouseup', this.dragEnd);
   },
 
   dragStart: function dragStart(e, obj) {
-    // todo: set image
-    this.setState({ dragging: obj });
+    var $dragdiv = $('<div class="dragobj">' + (obj.title || obj.type) + '</div>').appendTo('body');
+
+    this.setState({
+      dragging: obj,
+      $dragdiv: $dragdiv
+    });
+
+    document.addEventListener('mousemove', this.drag);
+    document.addEventListener('mouseup', this.dragEnd);
+  },
+
+  drag: function drag(e) {
+    this.state.$dragdiv.offset({ left: e.pageX - 20, top: e.pageY - 20 });
   },
 
   dragEnd: function dragEnd(e) {
+    document.removeEventListener('mousemove', this.drag);
+    document.removeEventListener('mouseup', this.dragEnd);
+
     if (this.state.dragging) {
-      Actions.add(this.state.dragging, e.pageX, e.pageY);
+      this.state.$dragdiv.remove();
+      Actions.add(this.state.dragging, e.pageX - 20, e.pageY - 20);
       this.setState({ dragging: null });
     }
   },
@@ -2174,27 +2320,24 @@ var Toolbox = React.createClass({
       return arr.lastIndexOf(g) === i;
     }).map(function (cat) {
       return React.createElement(
-        "div",
-        { key: cat, className: "toolbox-group" },
+        'div',
+        { key: cat, className: 'toolbox-group' },
         React.createElement(
-          "h3",
+          'h3',
           null,
           CategoryTitles[cat] || cat
         ),
         React.createElement(
-          "ul",
+          'ul',
           null,
           all.filter(function (p) {
             return p.category == cat;
           }).map(function (p) {
             return React.createElement(
-              "li",
-              { key: cat + '/' + p.type,
-                draggable: "true",
-                onDragStart: function (e) {
+              'li',
+              { key: cat + '/' + p.type, onMouseDown: function (e) {
                   return _this.dragStart(e, p);
-                },
-                onDragEnd: _this.dragEnd },
+                } },
               p.title || p.type
             );
           })
@@ -2203,12 +2346,12 @@ var Toolbox = React.createClass({
     });
 
     return React.createElement(
-      "div",
+      'div',
       null,
       React.createElement(
-        "h2",
+        'h2',
         null,
-        "Toolbox"
+        'Toolbox'
       ),
       children
     );
