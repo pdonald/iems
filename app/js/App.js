@@ -34,6 +34,7 @@ var App = React.createClass({
      this.listenTo(Actions.delete, this.onDelete);
      this.listenTo(Actions.selectManual, this.onSelectManual);
      this.listenTo(Actions.selectArea, this.onSelectArea);
+     this.listenTo(Actions.deselectManual, this.onDeselectManual);
      this.listenTo(Actions.deselectAll, this.onDeselectAll);
      this.listenTo(Actions.goIntoGroup, this.onGoIntoGroup);
      this.listenTo(Actions.connect, this.onConnect);
@@ -127,6 +128,13 @@ var App = React.createClass({
     graph.processes.forEach(p => p.selected = inArea(p));
     graph.groups.forEach(g => g.selected = inArea(g));
     this.setState(this.state);
+  },
+
+  onDeselectManual: function(obj) {
+    if (obj.selected) {
+      obj.selected = false;
+      this.setState(this.state);
+    }
   },
 
   onDeselectAll: function() {

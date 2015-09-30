@@ -5,6 +5,7 @@ var Actions = {
   connect: Reflux.createAction(),
   selectManual: Reflux.createAction(),
   selectArea: Reflux.createAction(),
+  deselectManual: Reflux.createAction(),
   deselectAll: Reflux.createAction(),
   goIntoGroup: Reflux.createAction(),
   portSelected: Reflux.createAction(),

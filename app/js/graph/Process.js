@@ -11,7 +11,11 @@ var Process = React.createClass({
 
   onDoubleClick: function(e) {
     if (this.props.graph.template) {
-      Actions.selectManual(this.props.graph);
+      if (!this.props.graph.selected) {
+        Actions.selectManual(this.props.graph);
+      } else {
+        Actions.deselectManual(this.props.graph);
+      }
     } else {
       Actions.goIntoGroup(this.props.graph);
     }
