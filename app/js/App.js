@@ -32,7 +32,7 @@ var App = React.createClass({
      this.listenTo(Actions.move, this.onMove);
      this.listenTo(Actions.add, this.onAdd);
      this.listenTo(Actions.delete, this.onDelete);
-     this.listenTo(Actions.select, this.onSelect);
+     this.listenTo(Actions.selectManual, this.onSelectManual);
      this.listenTo(Actions.selectArea, this.onSelectArea);
      this.listenTo(Actions.deselectAll, this.onDeselectAll);
      this.listenTo(Actions.goIntoGroup, this.onGoIntoGroup);
@@ -105,9 +105,12 @@ var App = React.createClass({
     }
   },
 
-  onSelect: function(obj) {
-    //obj.selected = true;
-    //this.setState(this.state);
+  onSelectManual: function(obj) {
+    if (obj.selected !== true) {
+      obj.selected = true;
+      this.setState(this.state);
+      Actions.select(obj);
+    }
   },
 
   onSelectArea: function(area) {
