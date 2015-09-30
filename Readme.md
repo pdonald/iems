@@ -2,7 +2,7 @@
 
 An Interactive Experiment Management System for machine translation.
 
-[Demo](http://pdonald.github.io/iems/) (for Google Chrome)
+[Demo](http://pdonald.github.io/iems/) (Google Chrome recommended, should also work in Firefox, IE11 and Edge)
 
 **Warning: this is still very much work in progress, it is not stable yet**
 
@@ -52,7 +52,7 @@ npm run build
 npm start
 ```
 
-and navigate to http://localhost:8080/ in Google Chrome.
+and navigate to [http://localhost:8080/](http://localhost:8080/) in your browser.
 
 Make sure you have plenty of RAM for this or it will take forever.
 
