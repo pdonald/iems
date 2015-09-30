@@ -238,7 +238,7 @@ var App = React.createClass({
                   </div>
                   <div className="cell">
                     <div className="table">
-                      <div className="row" style={{height: '80%'}}>
+                      <div className="row" style={{height: '100%'}}>
                         <div className="cell">
                           <nav className="depth">
                             <ul>
