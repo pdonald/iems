@@ -203,7 +203,7 @@ rect.blank {
 }
 .connector:hover line {
   stroke: yellow;
-  stroke-width: 3px;
+  stroke-width: 6px;
 }
 .connector line, .port-line {
   stroke: #000;

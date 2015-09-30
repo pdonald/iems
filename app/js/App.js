@@ -64,6 +64,7 @@ var App = React.createClass({
   },
 
   onParamChanged: function(process, key, value) {
+    process.params[key] = value;
     this.setState(this.state);
   },
 
@@ -109,7 +110,6 @@ var App = React.createClass({
     if (obj.selected !== true) {
       obj.selected = true;
       this.setState(this.state);
-      Actions.select(obj);
     }
   },
 
@@ -126,12 +126,6 @@ var App = React.createClass({
     var graph = this.currentGraph();
     graph.processes.forEach(p => p.selected = inArea(p));
     graph.groups.forEach(g => g.selected = inArea(g));
-    if (graph.groups.filter(g => g.selected).length == 0) {
-      var p = graph.processes.filter(p => p.selected);
-      if (p.length == 1) {
-        Actions.select(p[0]);
-      }
-    }
     this.setState(this.state);
   },
 
@@ -217,7 +211,7 @@ var App = React.createClass({
                         <div className="table sidebar">
                           <div className="row">
                             <div className="cell properties">
-                              <Properties/>
+                              <Properties graph={this.currentGraph()}/>
                             </div>
                           </div>
                           <div className="row">

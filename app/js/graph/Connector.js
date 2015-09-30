@@ -2,7 +2,7 @@ var Connector = React.createClass({
   mixins: [React.addons.PureRenderMixin],
 
   onClick: function() {
-    Actions.select(this.props.graph);
+    Actions.selectManual(this.props.graph);
   },
 
   checkTypes: function() {

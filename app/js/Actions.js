@@ -3,7 +3,6 @@ var Actions = {
   delete: Reflux.createAction(),
   move: Reflux.createAction(),
   connect: Reflux.createAction(),
-  select: Reflux.createAction(),
   selectManual: Reflux.createAction(),
   selectArea: Reflux.createAction(),
   deselectAll: Reflux.createAction(),
