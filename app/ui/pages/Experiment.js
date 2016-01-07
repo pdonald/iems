@@ -2,21 +2,22 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import Reflux from 'reflux'
 
-import GroupModel from './model/GroupModel'
-import ProcessModel from './model/ProcessModel'
-import Output from './model/Output'
+import GroupModel from './Experiment/model/GroupModel'
+import ProcessModel from './Experiment/model/ProcessModel'
+import Output from './Experiment/model/Output'
 
-import Graph from './graph/Graph'
-import Group from './graph/Group'
+import Graph from './Experiment/graph/Graph'
+import Group from './Experiment/graph/Group'
 
-import AppDefaultGraph from './AppDefaultGraph'
-import Properties from './Properties'
-import Variables from './Variables'
-import Server from './Server'
-import Toolbox from './Toolbox'
-import Actions from './Actions'
+import Properties from './Experiment/Properties'
+import Variables from './Experiment/Variables'
+import Server from './Experiment/Server'
+import Toolbox from './Experiment/Toolbox'
+import Actions from './Experiment/Actions'
 
-export var App = React.createClass({
+import data from '../data'
+
+export default React.createClass({
   getInitialState: function() {
     var doc = {
       name: 'Experiment #1',
@@ -29,7 +30,7 @@ export var App = React.createClass({
       },
       stack: []
     };
-    doc.stack.push(new GroupModel(AppDefaultGraph, null, doc));
+    doc.stack.push(new GroupModel(data.experiments[this.props.routeParams.id], null, doc));
     return {
       output: 'Makefile',
       currentDocument: 0,
@@ -213,7 +214,7 @@ export var App = React.createClass({
 
   render: function() {
     return (
-      <div className="container">
+      <div className="container" id="editor">
         <div className={'modal ' + (this.state.modal.open ? 'open' : 'closed')}>
           <div className="modal-header">
             <button onClick={() => this.setState({ modal: { open: false } })}>Close</button>

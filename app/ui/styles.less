@@ -1,432 +1,459 @@
-/* Resets */
-*, *:after, *:before {
-    margin: 0; /* Margin zero is used to prevent unnecessary white space. */
-    padding: 0; /* Padding zero is used to prevent unnecessary white space. */
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
-    box-sizing: border-box; /* Border boxing is used, so the padding, margin and borders are within de width and height of de element. */
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-
-html, body {
-    height: 100%;
-    max-height: 100%;
-}
-
 body {
-    padding: 0px;
-}
-
-.table, .row, .cell {
-    outline: none;
-    border: none;
-    outline-style: none;
-    vertical-align: top;
-    text-align: left;
-}
-
-.table {
-    border-collapse: collapse;
-    display: table;
-    table-layout: fixed; /* This will ensure the cells within the table will keep there width. */
-    width: 100%;
-    height: 100%;
-}
-
-.row {
-    display: table-row;
-    width: 100%;
-}
-
-.cell {
-    display: table-cell;
-    white-space: nowrap; /* This property is used to show ellipses, when the content within de cell is overflown. */
-    overflow: hidden; /* This property is used to show ellipses, when the content within de cell is overflown. */
-    -ms-text-overflow: ellipsis; /* This property is used to show ellipses, when the content within de cell is overflown. */
-    -o-text-overflow: ellipsis; /* This property is used to show ellipses, when the content within de cell is overflown. */
-    text-overflow: ellipsis; /* This property is used to show ellipses, when the content within de cell is overflown. */
-}
-
-#app {
-  width: 100%;
-  height: 100%;
-}
-
-.container {
-  display: block;
-  height: 100%;
-  font-family: Verdana;
-  font-size: 12px;
-}
-
-.header-row {
-  height: 50px;
-}
-.header-cell {
-  background: #101010;
-  color: white;
-  vertical-align: middle;
-  padding: 10px;
-  padding-left: 20px;
-  height: 50px;
-}
-.header-cell h1 {
-  font-size: 14px;
-}
-.cell-scroll-outer {
-  position: relative;
-}
-.cell-scroll-inner {
-  overflow-y: scroll;
-  position: absolute;
-  top: 0;
-  right:0;
-  bottom: 0;
-  left: 0;
-}
-
-.sidebar {
-  background: rgb(81,81,81);
-}
-
-.toolbox, .properties {
-  padding: 20px;
-}
-.toolbox-group {
-  clear: both;
-}
-.toolbox .toolbox-group h3 {
-  margin: 0px 0;
-  padding: 0;
-}
-
-.properties th input[type="text"] {
-  width: 100%;
-}
-.properties td input {
-  width: 100%;
-}
-.server button {
-  margin-right: 5px;
-  padding: 5px;
-}
-
-.sidebar h2 {
-  font-size: 14px;
-  color: #fff;
-  margin-bottom: 15px;
-}
-.sidebar h3 {
-  font-size: 11px;
-  color: #fff;
-  margin-bottom: 15px;
-}
-br{
-	clear:both;
-}
-.toolbox ul {
   margin: 0;
   padding: 0;
-  list-style-type: none;
-}
-.toolbox li {
-  border: 2px solid black;
-  background: rgb(90,90,90);
-  color: white;
-  cursor: pointer;
-  padding: 10px 10px;
-  background: #2ECC71;
-  color: black;
-  border: 1px solid black;
-  font-size: 10px;
-  width: 45%;
-  float: left;
-  margin: 5px 5px;
+
+  display: flex;
+  flex-flow: row wrap;
 }
 
-.grid {
-  background-size: 10px 10px;
-  background-image: repeating-linear-gradient(0deg, #eee, #eee 1px, transparent 1px, transparent 40px),
-  repeating-linear-gradient(-90deg, #eee, #eee 1px, transparent 1px, transparent 40px);
+#header {
+  background: #000;
+
+  &, a, a:visited {
+    color: #fff;
+    text-decoration: none;
+  }
+
+  h1 {
+    margin: 0;
+  }
 }
 
-.preview {
-  background: #fff;
-  padding: 0px 0px;
+#main {
+  background: yellow;
 }
 
-.preview pre {
-  height: 150px;
-  padding: 10px 10px;
-  overflow: auto;
-  -moz-tab-size:    2;
-  -o-tab-size:      2;
-  tab-size:         2;
-  white-space: pre;
-  -webkit-touch-callout: text;
-  -webkit-user-select: text;
-  -khtml-user-select: text;
-  -moz-user-select: text;
-  -ms-user-select: text;
-  user-select: text;
-}
+#editor {
+  /* Resets */
+  *, *:after, *:before {
+      margin: 0; /* Margin zero is used to prevent unnecessary white space. */
+      padding: 0; /* Padding zero is used to prevent unnecessary white space. */
+      -moz-box-sizing: border-box;
+      -webkit-box-sizing: border-box;
+      box-sizing: border-box; /* Border boxing is used, so the padding, margin and borders are within de width and height of de element. */
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+  }
 
-rect.select {
-  fill: rgba(173,216,230,0.5);
-  stroke: navy;
-}
-rect.blank {
-  fill: rgba(0,0,0,0);
-  stroke: none;
-}
+  html, body {
+      height: 100%;
+      max-height: 100%;
+  }
 
-.process .process-rect {
-  cursor: move;
-  fill: #2ECC71;
-  stroke: #000;
-}
-.process text {
-  color: black;
-}
-.process .port-input circle {
-  fill: lightblue;
-  stroke: #000;
-}
-.process .port-output circle {
-  fill: hotpink;
-  stroke: #000;
-}
-.connector:hover line {
-  stroke: yellow;
-  stroke-width: 6px;
-}
-.connector line, .port-line {
-  stroke: #000;
-  stroke-width: 1px;
-  cursor: pointer;
-}
-.connector.incompatible-types line {
-  stroke: red;
-}
-.connector.incompatible-types rect {
-  fill: yellow;
-  stroke: red;
-}
-.connector.incompatible-types text {
-  fill: red;
-}
-.connector.selected line {
-  stroke: red;
-}
-.process .port-on circle {
-  fill: yellow;
-}
+  body {
+      padding: 0px;
+  }
 
-.process.error .process-rect {
-  stroke: red;
-}
-.process.selected .process-rect {
-  stroke: red !important;
-  fill: yellow !important;
-}
-.process.blank > g > .process-rect {
-  fill: none !important;
-}
-.process.main.blank > g > .process-rect {
-  stroke: none;
-}
-.process.running > g > .process-rect {
-  stroke: black;
-  fill: purple;
-}
-.process.done > g > .process-rect {
-  stroke: black;
-  fill: lime;
-}
+  .table, .row, .cell {
+      outline: none;
+      border: none;
+      outline-style: none;
+      vertical-align: top;
+      text-align: left;
+  }
 
-*:focus {
-  outline: none;
-}
+  .table {
+      border-collapse: collapse;
+      display: table;
+      table-layout: fixed; /* This will ensure the cells within the table will keep there width. */
+      width: 100%;
+      height: 100%;
+  }
 
-button.copy {
-  padding: 10px 20px;
-  position: fixed;
-  bottom: 20px;
-  right: 50px;
-  -moz-box-shadow:inset 0px 1px 0px 0px #ffffff;
-  -webkit-box-shadow:inset 0px 1px 0px 0px #ffffff;
-  box-shadow:inset 0px 1px 0px 0px #ffffff;
-  background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #ededed), color-stop(1, #dfdfdf));
-  background:-moz-linear-gradient(top, #ededed 5%, #dfdfdf 100%);
-  background:-webkit-linear-gradient(top, #ededed 5%, #dfdfdf 100%);
-  background:-o-linear-gradient(top, #ededed 5%, #dfdfdf 100%);
-  background:-ms-linear-gradient(top, #ededed 5%, #dfdfdf 100%);
-  background:linear-gradient(to bottom, #ededed 5%, #dfdfdf 100%);
-  filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ededed', endColorstr='#dfdfdf',GradientType=0);
-  background-color:#ededed;
-  border:1px solid #aaa;
-  display:inline-block;
-  cursor:pointer;
-  color:#777777;
-  font-size:15px;
-  font-weight:bold;
-  padding:6px 24px;
-  text-decoration:none;
-  text-shadow:0px 1px 0px #ffffff;
-}
+  .row {
+      display: table-row;
+      width: 100%;
+  }
 
-.options {
-  margin: 10px 0;
-}
-.options label {
-  margin: 10px;
-}
+  .cell {
+      display: table-cell;
+      white-space: nowrap; /* This property is used to show ellipses, when the content within de cell is overflown. */
+      overflow: hidden; /* This property is used to show ellipses, when the content within de cell is overflown. */
+      -ms-text-overflow: ellipsis; /* This property is used to show ellipses, when the content within de cell is overflown. */
+      -o-text-overflow: ellipsis; /* This property is used to show ellipses, when the content within de cell is overflown. */
+      text-overflow: ellipsis; /* This property is used to show ellipses, when the content within de cell is overflown. */
+  }
 
-nav.depth {
-  margin-left: 5px;
-}
-nav.depth li {
-  margin: 5px 3px;
-  border: 1px solid black;
-  padding: 5px 15px;
-  display: inline-block;
-  cursor: pointer;
-}
-nav.depth li.active {
-  background: #ccc;
-}
-nav.depth li.run {
-  background: lime;
-}
-nav.depth li.right {
-  float: right;
-}
+  #app {
+    width: 100%;
+    height: 100%;
+  }
 
-.zoom-in {
-  cursor: zoom-in;
-}
+  .container {
+    display: block;
+    height: 100%;
+    font-family: Verdana;
+    font-size: 12px;
+  }
 
-.resize {
-}
+  .header-row {
+    height: 50px;
+  }
+  .header-cell {
+    background: #101010;
+    color: white;
+    vertical-align: middle;
+    padding: 10px;
+    padding-left: 20px;
+    height: 50px;
+  }
+  .header-cell h1 {
+    font-size: 14px;
+  }
+  .cell-scroll-outer {
+    position: relative;
+  }
+  .cell-scroll-inner {
+    overflow-y: scroll;
+    position: absolute;
+    top: 0;
+    right:0;
+    bottom: 0;
+    left: 0;
+  }
 
-.copy.zeroclipboard-is-hover {
-  background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #dfdfdf), color-stop(1, #ededed));
-  background:-moz-linear-gradient(top, #dfdfdf 5%, #ededed 100%);
-  background:-webkit-linear-gradient(top, #dfdfdf 5%, #ededed 100%);
-  background:-o-linear-gradient(top, #dfdfdf 5%, #ededed 100%);
-  background:-ms-linear-gradient(top, #dfdfdf 5%, #ededed 100%);
-  background:linear-gradient(to bottom, #dfdfdf 5%, #ededed 100%);
-  filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#dfdfdf', endColorstr='#ededed',GradientType=0);
-  background-color:#dfdfdf;
-}
-.copy.zeroclipboard-is-active {
-  padding: 10px 20px;
-  position: fixed;
-  -moz-box-shadow:inset 0px 1px 0px 0px #ffffff;
-  -webkit-box-shadow:inset 0px 1px 0px 0px #ffffff;
-  box-shadow:inset 0px 1px 0px 0px #ffffff;
-  background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #ededed), color-stop(1, #dfdfdf));
-  background:-moz-linear-gradient(top, #ededed 5%, #dfdfdf 100%);
-  background:-webkit-linear-gradient(top, #ededed 5%, #dfdfdf 100%);
-  background:-o-linear-gradient(top, #ededed 5%, #dfdfdf 100%);
-  background:-ms-linear-gradient(top, #ededed 5%, #dfdfdf 100%);
-  background:linear-gradient(to bottom, #ededed 5%, #dfdfdf 100%);
-  filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ededed', endColorstr='#dfdfdf',GradientType=0);
-  background-color:#ededed;
-  -moz-border-radius:6px;
-  -webkit-border-radius:6px;
-  border-radius:6px;
-  border:1px solid #dcdcdc;
-  display:inline-block;
-  cursor:pointer;
-  color:#777777;
-  font-family:Arial;
-  font-size:15px;
-  font-weight:bold;
-  padding:6px 24px;
-  text-decoration:none;
-  text-shadow:0px 1px 0px #ffffff;
-}
+  .sidebar {
+    background: rgb(81,81,81);
+  }
 
-::-webkit-scrollbar {
-  width: 0.5em;
-  height: 0.5em;
-}
+  .toolbox, .properties {
+    padding: 20px;
+  }
+  .toolbox-group {
+    clear: both;
+  }
+  .toolbox .toolbox-group h3 {
+    margin: 0px 0;
+    padding: 0;
+  }
 
-::-webkit-scrollbar-thumb {
-  background: slategray;
-}
+  .properties th input[type="text"] {
+    width: 100%;
+  }
+  .properties td input {
+    width: 100%;
+  }
+  .server button {
+    margin-right: 5px;
+    padding: 5px;
+  }
 
-::-webkit-scrollbar-track {
-  background: #b7bfc7;
-}
+  .sidebar h2 {
+    font-size: 14px;
+    color: #fff;
+    margin-bottom: 15px;
+  }
+  .sidebar h3 {
+    font-size: 11px;
+    color: #fff;
+    margin-bottom: 15px;
+  }
+  br{
+  	clear:both;
+  }
+  .toolbox ul {
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+  }
+  .toolbox li {
+    border: 2px solid black;
+    background: rgb(90,90,90);
+    color: white;
+    cursor: pointer;
+    padding: 10px 10px;
+    background: #2ECC71;
+    color: black;
+    border: 1px solid black;
+    font-size: 10px;
+    width: 45%;
+    float: left;
+    margin: 5px 5px;
+  }
 
-.cell-scroll-inner.grid::-webkit-scrollbar-thumb {
-  background: #E6E6E6;
-}
+  .grid {
+    background-size: 10px 10px;
+    background-image: repeating-linear-gradient(0deg, #eee, #eee 1px, transparent 1px, transparent 40px),
+    repeating-linear-gradient(-90deg, #eee, #eee 1px, transparent 1px, transparent 40px);
+  }
 
-.cell-scroll-inner.grid::-webkit-scrollbar-track {
-  background: #F2F2F2;
-}
+  .preview {
+    background: #fff;
+    padding: 0px 0px;
+  }
 
-#makefile::-webkit-scrollbar-thumb {
-  background: #E6E6E6;
-}
+  .preview pre {
+    height: 150px;
+    padding: 10px 10px;
+    overflow: auto;
+    -moz-tab-size:    2;
+    -o-tab-size:      2;
+    tab-size:         2;
+    white-space: pre;
+    -webkit-touch-callout: text;
+    -webkit-user-select: text;
+    -khtml-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+  }
 
-#makefile::-webkit-scrollbar-track {
-  background: #F2F2F2;
-}
+  rect.select {
+    fill: rgba(173,216,230,0.5);
+    stroke: navy;
+  }
+  rect.blank {
+    fill: rgba(0,0,0,0);
+    stroke: none;
+  }
 
-body {
-  scrollbar-face-color: slategray;
-  scrollbar-track-color: #b7bfc7;
-}
+  .process .process-rect {
+    cursor: move;
+    fill: #2ECC71;
+    stroke: #000;
+  }
+  .process text {
+    color: black;
+  }
+  .process .port-input circle {
+    fill: lightblue;
+    stroke: #000;
+  }
+  .process .port-output circle {
+    fill: hotpink;
+    stroke: #000;
+  }
+  .connector:hover line {
+    stroke: yellow;
+    stroke-width: 6px;
+  }
+  .connector line, .port-line {
+    stroke: #000;
+    stroke-width: 1px;
+    cursor: pointer;
+  }
+  .connector.incompatible-types line {
+    stroke: red;
+  }
+  .connector.incompatible-types rect {
+    fill: yellow;
+    stroke: red;
+  }
+  .connector.incompatible-types text {
+    fill: red;
+  }
+  .connector.selected line {
+    stroke: red;
+  }
+  .process .port-on circle {
+    fill: yellow;
+  }
 
-th{
-	color: lightgrey;
-	padding-right:3px;
-}
+  .process.error .process-rect {
+    stroke: red;
+  }
+  .process.selected .process-rect {
+    stroke: red !important;
+    fill: yellow !important;
+  }
+  .process.blank > g > .process-rect {
+    fill: none !important;
+  }
+  .process.main.blank > g > .process-rect {
+    stroke: none;
+  }
+  .process.running > g > .process-rect {
+    stroke: black;
+    fill: purple;
+  }
+  .process.done > g > .process-rect {
+    stroke: black;
+    fill: lime;
+  }
 
-.modal {
-  position: absolute;
-  border: 1px solid black;
-  background: white;
-  z-index: 1000;
-  left: 20%;
-  top: 20%;
-  width: 70%;
-  height: 50%;
-  padding: 20px;
-  overflow: auto;
-}
-.modal.closed {
-  display: none;
-}
-.modal pre {
-  clear: both;
-}
-.modal-header {
-  margin-bottom: 10px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid black;
-}
-.modal-header button {
-  float: right;
-  padding: 10px;
-}
+  *:focus {
+    outline: none;
+  }
 
-.dragobj {
-  position: absolute;
-  width: 150px;
-  height: 50px;
-  border: 1px solid black;
-  background: teal;
-  opacity: 0.5;
-  z-index: 9999;
-  cursor: pointer;
+  button.copy {
+    padding: 10px 20px;
+    position: fixed;
+    bottom: 20px;
+    right: 50px;
+    -moz-box-shadow:inset 0px 1px 0px 0px #ffffff;
+    -webkit-box-shadow:inset 0px 1px 0px 0px #ffffff;
+    box-shadow:inset 0px 1px 0px 0px #ffffff;
+    background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #ededed), color-stop(1, #dfdfdf));
+    background:-moz-linear-gradient(top, #ededed 5%, #dfdfdf 100%);
+    background:-webkit-linear-gradient(top, #ededed 5%, #dfdfdf 100%);
+    background:-o-linear-gradient(top, #ededed 5%, #dfdfdf 100%);
+    background:-ms-linear-gradient(top, #ededed 5%, #dfdfdf 100%);
+    background:linear-gradient(to bottom, #ededed 5%, #dfdfdf 100%);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ededed', endColorstr='#dfdfdf',GradientType=0);
+    background-color:#ededed;
+    border:1px solid #aaa;
+    display:inline-block;
+    cursor:pointer;
+    color:#777777;
+    font-size:15px;
+    font-weight:bold;
+    padding:6px 24px;
+    text-decoration:none;
+    text-shadow:0px 1px 0px #ffffff;
+  }
+
+  .options {
+    margin: 10px 0;
+  }
+  .options label {
+    margin: 10px;
+  }
+
+  nav.depth {
+    margin-left: 5px;
+  }
+  nav.depth li {
+    margin: 5px 3px;
+    border: 1px solid black;
+    padding: 5px 15px;
+    display: inline-block;
+    cursor: pointer;
+  }
+  nav.depth li.active {
+    background: #ccc;
+  }
+  nav.depth li.run {
+    background: lime;
+  }
+  nav.depth li.right {
+    float: right;
+  }
+
+  .zoom-in {
+    cursor: zoom-in;
+  }
+
+  .resize {
+  }
+
+  .copy.zeroclipboard-is-hover {
+    background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #dfdfdf), color-stop(1, #ededed));
+    background:-moz-linear-gradient(top, #dfdfdf 5%, #ededed 100%);
+    background:-webkit-linear-gradient(top, #dfdfdf 5%, #ededed 100%);
+    background:-o-linear-gradient(top, #dfdfdf 5%, #ededed 100%);
+    background:-ms-linear-gradient(top, #dfdfdf 5%, #ededed 100%);
+    background:linear-gradient(to bottom, #dfdfdf 5%, #ededed 100%);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#dfdfdf', endColorstr='#ededed',GradientType=0);
+    background-color:#dfdfdf;
+  }
+  .copy.zeroclipboard-is-active {
+    padding: 10px 20px;
+    position: fixed;
+    -moz-box-shadow:inset 0px 1px 0px 0px #ffffff;
+    -webkit-box-shadow:inset 0px 1px 0px 0px #ffffff;
+    box-shadow:inset 0px 1px 0px 0px #ffffff;
+    background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #ededed), color-stop(1, #dfdfdf));
+    background:-moz-linear-gradient(top, #ededed 5%, #dfdfdf 100%);
+    background:-webkit-linear-gradient(top, #ededed 5%, #dfdfdf 100%);
+    background:-o-linear-gradient(top, #ededed 5%, #dfdfdf 100%);
+    background:-ms-linear-gradient(top, #ededed 5%, #dfdfdf 100%);
+    background:linear-gradient(to bottom, #ededed 5%, #dfdfdf 100%);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#ededed', endColorstr='#dfdfdf',GradientType=0);
+    background-color:#ededed;
+    -moz-border-radius:6px;
+    -webkit-border-radius:6px;
+    border-radius:6px;
+    border:1px solid #dcdcdc;
+    display:inline-block;
+    cursor:pointer;
+    color:#777777;
+    font-family:Arial;
+    font-size:15px;
+    font-weight:bold;
+    padding:6px 24px;
+    text-decoration:none;
+    text-shadow:0px 1px 0px #ffffff;
+  }
+
+  ::-webkit-scrollbar {
+    width: 0.5em;
+    height: 0.5em;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: slategray;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #b7bfc7;
+  }
+
+  .cell-scroll-inner.grid::-webkit-scrollbar-thumb {
+    background: #E6E6E6;
+  }
+
+  .cell-scroll-inner.grid::-webkit-scrollbar-track {
+    background: #F2F2F2;
+  }
+
+  #makefile::-webkit-scrollbar-thumb {
+    background: #E6E6E6;
+  }
+
+  #makefile::-webkit-scrollbar-track {
+    background: #F2F2F2;
+  }
+
+  body {
+    scrollbar-face-color: slategray;
+    scrollbar-track-color: #b7bfc7;
+  }
+
+  th{
+  	color: lightgrey;
+  	padding-right:3px;
+  }
+
+  .modal {
+    position: absolute;
+    border: 1px solid black;
+    background: white;
+    z-index: 1000;
+    left: 20%;
+    top: 20%;
+    width: 70%;
+    height: 50%;
+    padding: 20px;
+    overflow: auto;
+  }
+  .modal.closed {
+    display: none;
+  }
+  .modal pre {
+    clear: both;
+  }
+  .modal-header {
+    margin-bottom: 10px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid black;
+  }
+  .modal-header button {
+    float: right;
+    padding: 10px;
+  }
+
+  .dragobj {
+    position: absolute;
+    width: 150px;
+    height: 50px;
+    border: 1px solid black;
+    background: teal;
+    opacity: 0.5;
+    z-index: 9999;
+    cursor: pointer;
+  }
 }

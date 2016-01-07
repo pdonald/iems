@@ -1,4 +1,4 @@
-export default {
+let graph = {
   id: 0, title: 'Main', type: 'main', category: 'undefined',
   x: 0, y: 0, collapsed: false,
   processes: [
@@ -59,4 +59,24 @@ export default {
       ]
     }
   ]
+}
+
+export default {
+  experiments: {
+    'exp1': {
+      id: 'exp1',
+      title: 'Hello world',
+      graph: graph
+    },
+    'exp2': {
+      id: 'exp2',
+      title: 'Hello world 2',
+      graph: graph
+    },
+    'exp3': {
+      id: 'exp3',
+      title: 'Hello world 3',
+      graph: graph
+    }
+  }
 }
