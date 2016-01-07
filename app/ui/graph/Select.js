@@ -1,5 +1,10 @@
-var Select = React.createClass({
-  mixins: [React.addons.PureRenderMixin],
+import React from 'react'
+import PureRenderMixin from 'react-addons-pure-render-mixin'
+
+import Actions from '../Actions'
+
+export default React.createClass({
+  mixins: [PureRenderMixin],
 
   getInitialState: function () {
     return { dragging: false };

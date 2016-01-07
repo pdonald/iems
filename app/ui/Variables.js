@@ -1,4 +1,8 @@
-var Variables = React.createClass({
+import React from 'react'
+
+import Actions from './Actions'
+
+export default React.createClass({
   //mixins: [React.addons.PureRenderMixin],
 
   onChange: (key, value) => {

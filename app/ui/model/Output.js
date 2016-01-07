@@ -112,3 +112,5 @@ var Output = {
     return text;
   }
 };
+
+export default Output;

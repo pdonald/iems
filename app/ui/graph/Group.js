@@ -1,3 +1,9 @@
+import React from 'react'
+
+import GroupModel from '../model/GroupModel'
+import Process from './Process'
+import Connector from './Connector'
+
 var Group = React.createClass({
   //mixins: [React.addons.PureRenderMixin],
 
@@ -85,3 +91,5 @@ var Group = React.createClass({
     }
   }
 });
+
+export default Group;

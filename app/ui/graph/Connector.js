@@ -1,5 +1,10 @@
-var Connector = React.createClass({
-  mixins: [React.addons.PureRenderMixin],
+import React from 'react'
+import PureRenderMixin from 'react-addons-pure-render-mixin'
+
+import ProcessModel from '../model/ProcessModel'
+
+export default React.createClass({
+  mixins: [PureRenderMixin],
 
   onClick: function() {
     Actions.selectManual(this.props.graph);

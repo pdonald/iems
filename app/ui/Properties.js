@@ -1,4 +1,6 @@
-var Properties = React.createClass({
+import React from 'react'
+
+export default React.createClass({
   onChange: function(process, key, value) {
     Actions.paramChanged(process, key, value);
   },

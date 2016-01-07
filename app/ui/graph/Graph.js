@@ -1,5 +1,10 @@
-var Graph = React.createClass({
-  mixins: [React.addons.PureRenderMixin],
+import React from 'react'
+import PureRenderMixin from 'react-addons-pure-render-mixin'
+
+import Select from './Select'
+
+export default React.createClass({
+  mixins: [PureRenderMixin],
 
   render: function() {
     var size = this.props.graph.getCalculatedSize();

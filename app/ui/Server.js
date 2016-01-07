@@ -1,5 +1,11 @@
-var Server = React.createClass({
-  mixins: [React.addons.PureRenderMixin, Reflux.ListenerMixin],
+import React from 'react'
+import PureRenderMixin from 'react-addons-pure-render-mixin'
+import Reflux from 'reflux'
+
+import Actions from './Actions'
+
+export default React.createClass({
+  mixins: [PureRenderMixin, Reflux.ListenerMixin],
 
   getInitialState: function () {
     return { url: null, interval: 1000, timer: null }

@@ -4,13 +4,15 @@
   "private": true,
   "description": "Interactive Experiment Management System (iEMS) for machine translation",
   "author": "Pēteris Ņikiforovs <p@mak.id.lv> (https://peteris.rocks)",
-  "contributors": ["Matīss Rikters"],
+  "contributors": [
+    "Matīss Rikters"
+  ],
   "license": "Apache-2.0",
   "main": "server.js",
   "scripts": {
     "start": "node app/server.js",
-    "build": "node node_modules/babel/bin/babel.js --out-file app/app.js --ignore lib/ app/js",
-    "dev": "node node_modules/babel/bin/babel.js --watch --source-maps inline --out-file app/app.js --ignore lib/ app/js"
+    "build": "webpack --progress --colors",
+    "dev": "webpack-dev-server --hot --inline --progress --colors --content-base build/"
   },
   "engines": {
     "node": ">=4.0.0"
@@ -20,6 +22,22 @@
     "express": "^4.13.3"
   },
   "devDependencies": {
-    "babel": "^5.8.23"
+    "babel-core": "^6.3.26",
+    "babel-loader": "^6.2.1",
+    "babel-preset-es2015": "^6.3.13",
+    "babel-preset-react": "^6.3.13",
+    "css-loader": "^0.23.1",
+    "history": "^1.17.0",
+    "jquery": "^2.1.4",
+    "less": "^2.5.3",
+    "less-loader": "^2.2.2",
+    "react": "^0.14.6",
+    "react-addons-pure-render-mixin": "^0.14.6",
+    "react-dom": "^0.14.6",
+    "react-router": "^1.0.3",
+    "reflux": "^0.3.0",
+    "style-loader": "^0.13.0",
+    "webpack": "^1.12.10",
+    "webpack-dev-server": "^1.14.0"
   }
 }

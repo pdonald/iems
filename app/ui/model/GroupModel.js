@@ -1,4 +1,6 @@
-class GroupModel {
+import ProcessModel from './ProcessModel'
+
+export default class GroupModel {
   constructor(obj, parent, doc) {
     this.groups = [];
     this.processes = [];

@@ -1,5 +1,22 @@
-var Toolbox = React.createClass({
-  mixins: [React.addons.PureRenderMixin],
+import React from 'react'
+import PureRenderMixin from 'react-addons-pure-render-mixin'
+import jQuery from 'jquery'
+
+import Tools from './model/Tools'
+import Actions from './Actions'
+
+var CategoryTitles = {
+  'lm': 'Language models',
+  'alignment': 'Word alignment',
+  'decoder': 'Decoding',
+  'corpora': 'Corpora tools',
+  'evaluation': 'Evaluation',
+  'phrases': 'Phrase based tools',
+  'tuning': 'Tuning'
+};
+
+export default React.createClass({
+  mixins: [PureRenderMixin],
 
   getInitialState: function() {
     return { dragging: null };
@@ -11,7 +28,7 @@ var Toolbox = React.createClass({
   },
 
   dragStart: function(e, obj) {
-    var $dragdiv = $(`<div class="dragobj">${obj.title || obj.type}</div>`).appendTo('body');
+    var $dragdiv = jQuery(`<div class="dragobj">${obj.title || obj.type}</div>`).appendTo('body');
 
     this.setState({
       dragging: obj,

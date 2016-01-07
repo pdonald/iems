@@ -1,4 +1,22 @@
-var App = React.createClass({
+import React from 'react'
+import ReactDOM from 'react-dom'
+import Reflux from 'reflux'
+
+import GroupModel from './model/GroupModel'
+import ProcessModel from './model/ProcessModel'
+import Output from './model/Output'
+
+import Graph from './graph/Graph'
+import Group from './graph/Group'
+
+import AppDefaultGraph from './AppDefaultGraph'
+import Properties from './Properties'
+import Variables from './Variables'
+import Server from './Server'
+import Toolbox from './Toolbox'
+import Actions from './Actions'
+
+export var App = React.createClass({
   getInitialState: function() {
     var doc = {
       name: 'Experiment #1',
@@ -45,7 +63,7 @@ var App = React.createClass({
      this.listenTo(Actions.viewFile, this.onViewFile);
      this.listenTo(Actions.updateStatus, this.onUpdateStatus);
 
-     this.clipboard = new ZeroClipboard(this.refs.copyMakefileButton);
+     //this.clipboard = new ZeroClipboard(this.refs.copyMakefileButton);
   },
 
   onViewFile: function(info) {

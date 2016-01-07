@@ -1,4 +1,4 @@
-var AppDefaultGraph = {
+export default {
   id: 0, title: 'Main', type: 'main', category: 'undefined',
   x: 0, y: 0, collapsed: false,
   processes: [

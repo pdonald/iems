@@ -1,3 +1,3 @@
-app/app.js
+build/bundle.js
 node_modules/
 .vagrant

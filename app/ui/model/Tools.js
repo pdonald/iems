@@ -1,4 +1,4 @@
-var Tools = {
+export default {
   processes: {
     cp: {
       type: 'cp', title: 'Copy local file', category: 'corpora',
@@ -645,14 +645,4 @@ var Tools = {
       ]
     }
   }
-};
-
-var CategoryTitles = {
-  'lm': 'Language models',
-  'alignment': 'Word alignment',
-  'decoder': 'Decoding',
-  'corpora': 'Corpora tools',
-  'evaluation': 'Evaluation',
-  'phrases': 'Phrase based tools',
-  'tuning': 'Tuning'
 };

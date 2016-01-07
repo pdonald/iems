@@ -1,4 +1,6 @@
-var Actions = {
+import Reflux from 'reflux'
+
+export default {
   add: Reflux.createAction(),
   delete: Reflux.createAction(),
   move: Reflux.createAction(),

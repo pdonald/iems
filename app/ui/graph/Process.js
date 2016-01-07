@@ -1,5 +1,13 @@
-var Process = React.createClass({
-  mixins: [React.addons.PureRenderMixin],
+import React from 'react'
+import PureRenderMixin from 'react-addons-pure-render-mixin'
+
+import Draggable from './Draggable'
+import Port from './Port'
+
+import Actions from '../Actions'
+
+export default React.createClass({
+  mixins: [PureRenderMixin],
 
   getDefaultProps: function () {
     return { ports: { input: [], output: [] }, draggable: true, x: 0, y: 0 };

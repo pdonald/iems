@@ -1,4 +1,6 @@
-class ProcessModel {
+import Tools from './Tools'
+
+export default class ProcessModel {
   constructor(obj, group) {
     for (var key in obj) {
       this[key] = obj[key];
