@@ -4,7 +4,7 @@ import { Link } from 'react-router'
 export default class Shell extends React.Component {
   render() {
     return (
-      <div className="container">
+      <div id="container">
         <header id="header">
           <h1><Link to="/">iEMS</Link></h1>
 
@@ -17,9 +17,9 @@ export default class Shell extends React.Component {
           </nav>
         </header>
 
-        <div id="main">
+        <main>
           {this.props.children}
-        </div>
+        </main>
       </div>
     )
   }

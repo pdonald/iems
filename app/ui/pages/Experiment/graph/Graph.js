@@ -9,8 +9,8 @@ export default React.createClass({
   render: function() {
     var size = this.props.graph.getCalculatedSize();
     var style = {
-      width: '100%', minWidth: (size.width+25)+'px',
-      height: '100%', minHeight: (size.height+100)+'px'
+      minWidth: (size.width+25)+'px',
+      minHeight: (size.height+100)+'px'
     };
     return (
       <svg style={style}>

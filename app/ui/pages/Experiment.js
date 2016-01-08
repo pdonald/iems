@@ -30,7 +30,7 @@ export default React.createClass({
       },
       stack: []
     };
-    doc.stack.push(new GroupModel(data.experiments[this.props.routeParams.id], null, doc));
+    doc.stack.push(new GroupModel(data.experiments[this.props.routeParams.id].graph, null, doc));
     return {
       output: 'Makefile',
       currentDocument: 0,
@@ -214,90 +214,36 @@ export default React.createClass({
 
   render: function() {
     return (
-      <div className="container" id="editor">
-        <div className={'modal ' + (this.state.modal.open ? 'open' : 'closed')}>
-          <div className="modal-header">
-            <button onClick={() => this.setState({ modal: { open: false } })}>Close</button>
-            <h1>{this.state.modal.title}</h1>
-          </div>
-          <pre>{this.state.modal.content}</pre>
+      <div id="editorx">
+        <div id="sidebar">
+          <div className="block properties"><Properties graph={this.currentGraph()}/></div>
+          <div className="block variables"><Variables vars={this.currentDoc().vars}/></div>
+          <div className="block server"><Server doc={this.currentDoc()}/></div>
+          <div className="block toolbox"><Toolbox/></div>
         </div>
-        <div className="table">
-          <div className="row header-row">
-            <div className="cell header-cell">
-              <h1>Interactive Experiment Management System</h1>
-            </div>
+
+        <div id="content">
+          <nav className="depth">
+            <ul>
+              {this.currentDoc().stack.map((g, index) => <li key={index} onClick={() => this.goTo(index)}>{(g.title || g.name || '#'+g.id)}</li>)}
+            </ul>
+          </nav>
+          <div className="grid">
+            <Graph ref="graph" graph={this.currentGraph()}>
+              <Group group={this.currentGraph()} blank={true} main={true}/>
+            </Graph>
           </div>
-          <div className="row">
-            <div className="cell">
-              <div className="table">
-                <div className="row">
-                  <div className="cell" style={{'borderRight': '1px solid #000000', 'width': '300px', 'height': '100%'}}>
-                    <div className="cell-scroll-outer" style={{'height': '100%'}}>
-                      <div className="cell-scroll-inner">
-                        <div className="table sidebar">
-                          <div className="row">
-                            <div className="cell properties">
-                              <Properties graph={this.currentGraph()}/>
-                            </div>
-                          </div>
-                          <div className="row">
-                            <div className="cell properties">
-                              <Variables vars={this.currentDoc().vars}/>
-                            </div>
-                          </div>
-                          <div className="row">
-                            <div className="cell properties server">
-                              <Server doc={this.currentDoc()}/>
-                            </div>
-                          </div>
-                          <div className="row">
-                            <div className="cell toolbox">
-                              <Toolbox/>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="cell">
-                    <div className="table">
-                      <div className="row" style={{height: '100%'}}>
-                        <div className="cell">
-                          <nav className="depth">
-                            <ul>
-                              {this.currentDoc().stack.map((g, index) => <li key={index} onClick={() => this.goTo(index)}>{(g.title || g.name || '#'+g.id)}</li>)}
-                            </ul>
-                          </nav>
-                          <div className="cell-scroll-outer" style={{'height': '100%'}}>
-                            <div className="cell-scroll-inner grid"  style={{'borderTop': '1px solid #000'}}>
-                              <Graph ref="graph" graph={this.currentGraph()}>
-                                <Group group={this.currentGraph()} blank={true} main={true}/>
-                              </Graph>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="row" style={{'borderTop': '1px solid #000'}}>
-                        <div className="cell preview">
-                          <button className="copy" ref="copyMakefileButton" data-clipboard-target="makefile">Copy to clipboard</button>
-                          <div className="options">
-                            {Object.keys(Output).map(key => (
-                              <span key={key}>
-                                <label><input type="radio" readOnly name="outtype" checked={this.state.output == key ? 'checked' : ''} onClick={e => this.changeOutputType(key)}/> {key}</label>
-                              </span>
-                            ))}
-                          </div>
-                          <pre id="makefile">
-                            {Output[this.state.output](this.currentGraph())}
-                          </pre>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+          <div className="preview">
+            <div className="options">
+              {Object.keys(Output).map(key => (
+                <span key={key}>
+                  <label><input type="radio" readOnly name="outtype" checked={this.state.output == key ? 'checked' : ''} onClick={e => this.changeOutputType(key)}/> {key}</label>
+                </span>
+              ))}
             </div>
+            <pre id="makefile">
+              {Output[this.state.output](this.currentGraph())}
+            </pre>
           </div>
         </div>
       </div>
