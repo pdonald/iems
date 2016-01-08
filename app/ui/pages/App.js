@@ -10,9 +10,9 @@ export default class Shell extends React.Component {
 
           <nav>
             <ul>
-              <li><Link to="/experiments">Experiments</Link></li>
-              <li><Link to="/hosts">Hosts</Link></li>
-              <li><Link to="/about">About</Link></li>
+              <li><Link to="/experiments" activeClassName="active">Experiments</Link></li>
+              <li><Link to="/hosts" activeClassName="active">Hosts</Link></li>
+              <li><Link to="/about" activeClassName="active">About</Link></li>
             </ul>
           </nav>
         </header>

@@ -11,8 +11,8 @@ export default class Experiments extends React.Component {
 
   render() {
     return (
-      <div>
-        <h2>Experiments</h2>
+      <div className="page">
+        <h1>Experiments</h1>
 
         <table>
         <thead>

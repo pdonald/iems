@@ -17,28 +17,64 @@ html, body {
   overflow: hidden;
 }
 
-#header {
-  background: #101010;
-  height: 100px;
+@header-height: 50px;
 
-  &, a, a:visited {
-    color: #fff;
+#header {
+  @color: #fff;
+
+  background: #101010;
+  height: @header-height;
+  display: flex;
+  padding: 0 20px;
+  align-items: center;
+
+  a, a:visited {
+    color: @color;
     text-decoration: none;
+
+    &:hover {
+      color: #ccc;
+    }
   }
 
   h1 {
+    color: @color;
     margin: 0;
-    font-size: 14px;
+    font-size: 24px;
+  }
+
+  ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+
+    li {
+      display: inline-block;
+      margin-left: 15px;
+      font-size: 16px;
+
+      a {
+        padding: 5px 15px;
+      }
+
+      .active {
+        background: #666;
+      }
+    }
   }
 }
 
 main {
   height: 100%;
+
+  .page {
+    padding: 10px 20px;
+  }
 }
 
-#editorx {
+#editor {
   display: flex;
-  height: ~"calc(100% - 100px)";
+  height: ~"calc(100% - "@header-height~")";
 
   .dragobj {
     position: absolute;

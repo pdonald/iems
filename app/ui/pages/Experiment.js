@@ -214,7 +214,7 @@ export default React.createClass({
 
   render: function() {
     return (
-      <div id="editorx">
+      <div id="editor">
         <div id="sidebar">
           <div className="block properties"><Properties graph={this.currentGraph()}/></div>
           <div className="block variables"><Variables vars={this.currentDoc().vars}/></div>
