@@ -4,9 +4,11 @@ import { Link } from 'react-router'
 import data from '../data'
 
 export default class Experiments extends React.Component {
-  constructor() {
-    super()
-    this.state = Object.keys(data.experiments).map(key => data.experiments[key])
+  constructor(props) {
+    super(props)
+    this.state = {
+      experiments: Object.keys(data.experiments).map(key => data.experiments[key])
+    }
   }
 
   render() {
@@ -23,7 +25,7 @@ export default class Experiments extends React.Component {
           </tr>
         </thead>
         <tbody>
-          {this.state.map(e => (
+          {this.state.experiments.map(e => (
             <tr key={e.id}>
               <td><Link to={`/experiments/${e.id}`}>{e.title}</Link></td>
               <td>Running</td>
