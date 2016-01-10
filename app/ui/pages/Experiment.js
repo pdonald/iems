@@ -216,10 +216,12 @@ export default React.createClass({
     return (
       <div id="editor">
         <div id="sidebar">
-          <div className="block properties"><Properties graph={this.currentGraph()}/></div>
-          <div className="block variables"><Variables vars={this.currentDoc().vars}/></div>
-          <div className="block server"><Server doc={this.currentDoc()}/></div>
-          <div className="block toolbox"><Toolbox/></div>
+          <div className="container">
+            <div className="block properties"><Properties graph={this.currentGraph()}/></div>
+            <div className="block variables"><Variables vars={this.currentDoc().vars}/></div>
+            <div className="block server"><Server doc={this.currentDoc()}/></div>
+            <div className="block toolbox"><Toolbox/></div>
+          </div>
         </div>
 
         <div id="content">
@@ -242,7 +244,9 @@ export default React.createClass({
               ))}
             </div>
             <pre id="makefile">
-              {Output[this.state.output](this.currentGraph())}
+              <div className="inner">
+                {Output[this.state.output](this.currentGraph())}
+              </div>
             </pre>
           </div>
         </div>

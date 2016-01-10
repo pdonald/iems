@@ -87,12 +87,19 @@ main {
     cursor: pointer;
   }
 
+  #sidebar, #content {
+    flex: 1;
+  }
+
   #sidebar {
     background: rgb(81,81,81);
-    width: 30%;
+    max-width: 300px;
     height: 100%;
-    //padding: 20px;
     overflow-y: auto;
+
+    .container {
+      padding: 10px 15px;
+    }
 
     h2 {
       font-size: 14px;
@@ -132,16 +139,18 @@ main {
         color: black;
         border: 1px solid black;
         font-size: 10px;
-        width: 45%;
+        //width: 45%;
         float: left;
         margin: 5px 5px;
+        margin-left: 0;
       }
 
       .toolbox-group {
         clear: both;
         h3 {
-          margin: 0 0;
+          margin: 0;
           padding: 0;
+          margin-bottom: 5px;
         }
       }
     }
@@ -155,16 +164,32 @@ main {
       }
     }
 
+    .variables {
+      th {
+        text-align: left;
+      }
+      th input[type="text"] {
+        width: 100%;
+      }
+      td input {
+        width: 100%;
+      }
+    }
+
     .server {
       button {
         margin-right: 5px;
         padding: 5px;
       }
+
+      input {
+        width: 100%;
+      }
     }
   }
 
   #content {
-    width: 70%;
+    //width: 70%;
     height: 100%;
     //overflow-y: hidden;
 
@@ -179,23 +204,31 @@ main {
     }
 
     nav.depth {
-      margin-left: 5px;
-    }
-    nav.depth li {
-      margin: 5px 3px;
-      border: 1px solid black;
-      padding: 5px 15px;
-      display: inline-block;
-      cursor: pointer;
-    }
-    nav.depth li.active {
-      background: #ccc;
-    }
-    nav.depth li.run {
-      background: lime;
-    }
-    nav.depth li.right {
-      float: right;
+      padding-left: 5px;
+      border-bottom: 1px solid #ccc;
+
+      ul {
+        margin: 0;
+        padding: 0;
+      }
+
+      li {
+        margin: 5px 3px;
+        border: 1px solid black;
+        padding: 5px 15px;
+        display: inline-block;
+        cursor: pointer;
+      }
+
+      li.active {
+        background: #ccc;
+      }
+      li.run {
+        background: lime;
+      }
+      li.right {
+        float: right;
+      }
     }
 
     svg {
@@ -284,18 +317,20 @@ main {
     }
 
     .preview {
+      border-top: 1px solid #ccc;
       background: #fff;
       //padding: 0px 0px;
       height: 30%;
 
       .options {
-        display: none;
+        //display: none;
+        padding: 10px 5px;
       }
 
       pre {
+        margin-top: -5px;
         width: 100%;
-        height: ~"calc(100% - 12px)";
-        //padding: 10px 10px;
+        height: ~"calc(100% - 73px)";
         overflow: auto;
         -moz-tab-size:    2;
         -o-tab-size:      2;
@@ -307,6 +342,10 @@ main {
         -moz-user-select: text;
         -ms-user-select: text;
         user-select: text;
+
+        .inner {
+          padding: 10px;
+        }
       }
     }
   }
