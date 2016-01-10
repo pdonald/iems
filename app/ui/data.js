@@ -65,18 +65,31 @@ export default {
   experiments: {
     'exp1': {
       id: 'exp1',
+      graph: graph,
       title: 'Hello world',
-      graph: graph
+      created: '2016-01-09T21:00:00',
+      updated: '2016-01-09T21:01:00',
+      status: 'running',
+      tags: {
+        'Source Language': 'EN',
+        'Target Language': 'LV',
+        'BLEU': '41.5',
+        'TER': '0.64'
+      }
     },
     'exp2': {
       id: 'exp2',
-      title: 'Hello world 2',
-      graph: graph
-    },
-    'exp3': {
-      id: 'exp3',
-      title: 'Hello world 3',
-      graph: graph
+      graph: graph,
+      title: 'Hello world',
+      created: '2016-01-09T21:00:00',
+      updated: '2016-01-09T21:01:00',
+      status: 'running',
+      tags: {
+        'Source Language': 'EN',
+        'Target Language': 'FR',
+        'BLEU': '45.5',
+        'TER': '0.53'
+      }
     }
   }
 }
