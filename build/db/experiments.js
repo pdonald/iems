@@ -1,6 +1,26 @@
 module.exports = {
   "exp1": {
     id: "exp1",
+
+    name: 'Experiment #1',
+
+    vars: {
+      srclang: 'en', trglang: 'lv',
+      'lm-order': 5,
+      'reordering-type': 'wbe', 'reordering-orientation': 'msd',
+      'reordering-model': 'wbe-msd-bidirectional-fe',
+      toolsdir: '/tools', workdir: '/tools/train', tempdir: '/tmp'
+    },
+
+    created: "2016-01-09T21:00:00",
+    updated: "2016-01-09T21:01:00",
+    tags: {
+      "Source Language": "EN",
+      "Target Language": "LV",
+      "BLEU": "41.5",
+      "TER": "0.64"
+    },
+
     graph: {
       id: 0, title: "Main", type: "main", category: "undefined",
       x: 0, y: 0, collapsed: false,
@@ -62,16 +82,6 @@ module.exports = {
           ]
         }
       ]
-    },
-    title: "Hello world",
-    created: "2016-01-09T21:00:00",
-    updated: "2016-01-09T21:01:00",
-    status: "running",
-    tags: {
-      "Source Language": "EN",
-      "Target Language": "LV",
-      "BLEU": "41.5",
-      "TER": "0.64"
     }
   }
 }

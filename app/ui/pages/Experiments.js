@@ -92,7 +92,7 @@ export default class Experiments extends React.Component {
                 <tbody>
                   {groups[key].map(e => (
                     <tr key={e.id}>
-                      <td><Link to={`/experiments/${e.id}`}>{e.title}</Link></td>
+                      <td><Link to={`/experiments/${e.id}`}>{e.name}</Link></td>
                       <td>Clone Delete</td>
                     </tr>
                   ))}

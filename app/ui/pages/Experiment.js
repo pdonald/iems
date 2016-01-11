@@ -18,29 +18,9 @@ import Actions from './Experiment/Actions'
 
 export default React.createClass({
   getInitialState: function() {
-    var doc = {
-      name: 'Experiment #1',
-      vars: {
-        srclang: 'en', trglang: 'lv',
-        'lm-order': 5,
-        'reordering-type': 'wbe', 'reordering-orientation': 'msd',
-        'reordering-model': 'wbe-msd-bidirectional-fe',
-        toolsdir: '/tools', workdir: '/tools/train', tempdir: '/tmp'
-      },
-      stack: []
-    };
-    //doc.stack.push(new GroupModel(data.experiments[this.props.routeParams.id].graph, null, doc));
     return {
       output: 'Makefile',
-      currentDocument: 0,
-      modal: {
-        open: false,
-        title: '',
-        content: ''
-      },
-      documents: [
-        doc
-      ]
+      document: null
     }
   },
 
@@ -60,31 +40,16 @@ export default React.createClass({
      this.listenTo(Actions.portDeselected, p => this.selectedPort = null);
      this.listenTo(Actions.paramChanged, this.onParamChanged);
      this.listenTo(Actions.variableChanged, this.onVariableChanged);
-     this.listenTo(Actions.viewFile, this.onViewFile);
      this.listenTo(Actions.updateStatus, this.onUpdateStatus);
 
      //this.clipboard = new ZeroClipboard(this.refs.copyMakefileButton);
 
-     jQuery.get('http://localhost:8081/api/experiments/' + this.props.routeParams.id, (res) => {
-       this.state.documents[0].stack.push(new GroupModel(res.graph, null, this.state.documents[0]))
-       this.setState(this.state)
+     jQuery.get('http://localhost:8081/api/experiments/' + this.props.routeParams.id, (document) => {
+       let graph = document.graph
+       delete document.graph
+       document.stack = [new GroupModel(graph, null, document)]
+       this.setState({ document: document })
      })
-  },
-
-  onViewFile: function(info) {
-    if (info.type != 'out') return;
-    if (info.group.id == info.process.id) return;
-
-    var filename = info.process.name + '-g' + info.group.id + 'p' + info.process.id + '.' + info.label;
-
-    this.state.modal.title = filename;
-    this.state.modal.open = true;
-    this.setState({ modal: this.state.modal });
-
-    $.get('/file?name=' + filename, result => {
-      this.state.modal.content = result;
-      this.setState({ modal: this.state.modal });
-    });
   },
 
   onParamChanged: function(process, key, value) {
@@ -93,12 +58,12 @@ export default React.createClass({
   },
 
   onVariableChanged: function(key, value) {
-    this.currentDoc().vars[key] = value;
+    this.state.document.vars[key] = value;
     this.setState(this.state);
   },
 
   onUpdateStatus: function(doc, status) {
-    this.currentDoc().status = status;
+    this.state.document.status = status;
     this.setState(this.state);
   },
 
@@ -171,12 +136,12 @@ export default React.createClass({
     this.onDeselectAll();
 
     // prevents double click bugs
-    if (obj == this.currentDoc().stack[0]) return;
-    if (obj == this.currentDoc().stack[this.currentDoc().stack.length-1]) return;
+    if (obj == this.state.document.stack[0]) return;
+    if (obj == this.state.document.stack[this.state.document.stack.length-1]) return;
 
     if (!obj.template) {
       obj.collapsed = false;
-      this.currentDoc().stack.push(obj);
+      this.state.document.stack.push(obj);
       this.setState(this.state);
     }
   },
@@ -199,17 +164,13 @@ export default React.createClass({
     this.setState({ output: type });
   },
 
-  currentDoc: function() {
-    return this.state.documents[this.state.currentDocument];
-  },
-
   currentGraph: function() {
-    return this.currentDoc().stack[this.currentDoc().stack.length-1];
+    return this.state.document.stack[this.state.document.stack.length-1];
   },
 
   goTo: function(index) {
-    while (this.currentDoc().stack.length-1 != index) {
-      var graph = this.currentDoc().stack.pop();
+    while (this.state.document.stack.length-1 != index) {
+      var graph = this.state.document.stack.pop();
       graph.collapsed = true;
     }
     this.currentGraph().collapsed = false;
@@ -217,15 +178,15 @@ export default React.createClass({
   },
 
   render: function() {
-    if (!this.currentGraph()) return <p>Loading</p>
+    if (!this.state.document) return <p>Loading</p>
 
     return (
       <div id="editor">
         <div id="sidebar">
           <div className="container">
             <div className="block properties"><Properties graph={this.currentGraph()}/></div>
-            <div className="block variables"><Variables vars={this.currentDoc().vars}/></div>
-            <div className="block server"><Server doc={this.currentDoc()}/></div>
+            <div className="block variables"><Variables vars={this.state.document.vars}/></div>
+            <div className="block server"><Server doc={this.state.document}/></div>
             <div className="block toolbox"><Toolbox/></div>
           </div>
         </div>
@@ -233,7 +194,7 @@ export default React.createClass({
         <div id="content">
           <nav className="depth">
             <ul>
-              {this.currentDoc().stack.map((g, index) => <li key={index} onClick={() => this.goTo(index)}>{(g.title || g.name || '#'+g.id)}</li>)}
+              {this.state.document.stack.map((g, index) => <li key={index} onClick={() => this.goTo(index)}>{(g.title || g.name || '#'+g.id)}</li>)}
             </ul>
           </nav>
           <div className="grid">
