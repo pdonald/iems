@@ -12,7 +12,6 @@ import Group from './Experiment/graph/Group'
 
 import Properties from './Experiment/Properties'
 import Variables from './Experiment/Variables'
-import Server from './Experiment/Server'
 import Toolbox from './Experiment/Toolbox'
 import Actions from './Experiment/Actions'
 
@@ -208,7 +207,6 @@ export default React.createClass({
           <div className="container">
             <div className="block properties"><Properties graph={this.currentGraph()}/></div>
             <div className="block variables"><Variables vars={this.state.document.vars}/></div>
-            <div className="block server"><Server doc={this.state.document}/></div>
             <div className="block toolbox"><Toolbox/></div>
           </div>
         </div>
