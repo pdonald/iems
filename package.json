@@ -11,7 +11,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node app/server.js",
-    "build": "webpack --progress --colors",
+    "build": "webpack --progress --colors -p",
     "dev": "webpack-dev-server --hot --inline --progress --colors --content-base build/"
   },
   "engines": {
@@ -34,7 +34,7 @@
     "react": "^0.14.6",
     "react-addons-pure-render-mixin": "^0.14.6",
     "react-dom": "^0.14.6",
-    "react-router": "^1.0.3",
+    "react-router": "^2.0.0-rc4",
     "reflux": "^0.3.0",
     "style-loader": "^0.13.0",
     "webpack": "^1.12.10",

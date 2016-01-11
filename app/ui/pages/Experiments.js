@@ -1,19 +1,27 @@
 import React from 'react'
 import { Link } from 'react-router'
-
-import data from '../data'
+import jQuery from 'jquery'
 
 export default class Experiments extends React.Component {
   constructor(props) {
     super(props)
 
-    let exps = Object.keys(data.experiments).map(key => data.experiments[key])
-
+    // todo: loading, error, redux, preloading
     this.state = {
-      experiments: exps,
-      filters: this.makeFilters(exps),
+      experiments: [],
+      filters: {},
       groupby: null
     }
+  }
+
+  componentDidMount() {
+    jQuery.get('http://localhost:8081/api/experiments', (res) => {
+      let exps = Object.keys(res).map(key => res[key])
+      this.setState({
+        experiments: exps,
+        filters: this.makeFilters(exps)
+      })
+    })
   }
 
   makeFilters(experiments) {

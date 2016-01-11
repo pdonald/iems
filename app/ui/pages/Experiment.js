@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import Reflux from 'reflux'
+import jQuery from 'jquery'
 
 import GroupModel from './Experiment/model/GroupModel'
 import ProcessModel from './Experiment/model/ProcessModel'
@@ -15,8 +16,6 @@ import Server from './Experiment/Server'
 import Toolbox from './Experiment/Toolbox'
 import Actions from './Experiment/Actions'
 
-import data from '../data'
-
 export default React.createClass({
   getInitialState: function() {
     var doc = {
@@ -30,7 +29,7 @@ export default React.createClass({
       },
       stack: []
     };
-    doc.stack.push(new GroupModel(data.experiments[this.props.routeParams.id].graph, null, doc));
+    //doc.stack.push(new GroupModel(data.experiments[this.props.routeParams.id].graph, null, doc));
     return {
       output: 'Makefile',
       currentDocument: 0,
@@ -65,6 +64,11 @@ export default React.createClass({
      this.listenTo(Actions.updateStatus, this.onUpdateStatus);
 
      //this.clipboard = new ZeroClipboard(this.refs.copyMakefileButton);
+
+     jQuery.get('http://localhost:8081/api/experiments/' + this.props.routeParams.id, (res) => {
+       this.state.documents[0].stack.push(new GroupModel(res.graph, null, this.state.documents[0]))
+       this.setState(this.state)
+     })
   },
 
   onViewFile: function(info) {
@@ -213,6 +217,8 @@ export default React.createClass({
   },
 
   render: function() {
+    if (!this.currentGraph()) return <p>Loading</p>
+
     return (
       <div id="editor">
         <div id="sidebar">
