@@ -52,6 +52,28 @@ export default React.createClass({
      })
   },
 
+  save: function() {
+    let stack = this.state.document.stack
+    delete this.state.document.stack
+
+    let data = JSON.parse(JSON.stringify(this.state.document))
+    let graphjson = Output.JSON(stack[0])
+    eval("data.graph = " + graphjson) // hahaha
+    //console.log(data)
+
+    this.state.document.stack = stack
+
+    jQuery.ajax({
+      type: 'POST',
+      url: 'http://localhost:8081/api/experiments/' + this.props.routeParams.id,
+      data: JSON.stringify(data),
+      contentType: 'application/json',
+      success: (res) => {
+        console.log(res)
+      },
+    })
+  },
+
   onParamChanged: function(process, key, value) {
     process.params[key] = value;
     this.setState(this.state);
@@ -195,6 +217,7 @@ export default React.createClass({
           <nav className="depth">
             <ul>
               {this.state.document.stack.map((g, index) => <li key={index} onClick={() => this.goTo(index)}>{(g.title || g.name || '#'+g.id)}</li>)}
+              <li className="right" onClick={() => this.save()}>Save</li>
             </ul>
           </nav>
           <div className="grid">

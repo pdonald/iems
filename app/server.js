@@ -19,7 +19,7 @@ app.use((req, res, next) => {
 })
 
 let db = {
-  experiments: require('../build/db/experiments.js')
+  experiments: require('../build/db/experiments.json')
 }
 
 app.get('/api/experiments', (req, res) => {
@@ -37,14 +37,14 @@ app.get('/api/experiments/:id', (req, res) => {
 
 app.post('/api/experiments/:id', (req, res) => {
   db.experiments[req.params.id] = req.body
-  fs.writeFileSync('../build/db/experiments.js', 'module.exports = ' + JSON.stringify(db.experiments, null, 2))
+  fs.writeFileSync('../build/db/experiments.json', JSON.stringify(db.experiments, null, 2))
   res.send('ok')
 })
 
 app.delete('/api/experiments/:id', (req, res) => {
   if (db.experiments[req.params.id]) {
     delete db.experiments[req.params.id]
-    fs.writeFileSync('../build/db/experiments.js', 'module.exports = ' + JSON.stringify(db.experiments, null, 2))
+    fs.writeFileSync('../build/db/experiments.json', JSON.stringify(db.experiments, null, 2))
     res.send('ok')
   } else {
     res.send(404, 'Not found')
