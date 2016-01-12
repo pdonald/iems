@@ -2,29 +2,33 @@ import React from 'react'
 import { Link } from 'react-router'
 import jQuery from 'jquery'
 
+function toArray(obj) {
+  return Object.keys(obj).map(key => obj[key])
+}
+
 export default class Experiments extends React.Component {
   constructor(props) {
     super(props)
 
     // todo: loading, error, redux, preloading
     this.state = {
-      experiments: [],
+      experiments: {},
       filters: {},
       groupby: null
     }
   }
 
   componentDidMount() {
-    jQuery.get('http://localhost:8081/api/experiments', (res) => {
-      let exps = Object.keys(res).map(key => res[key])
+    jQuery.get('http://localhost:8081/api/experiments', (exps) => {
       this.setState({
         experiments: exps,
-        filters: this.makeFilters(exps)
+        filters: this.makeFilters(toArray(exps))
       })
     })
   }
 
   makeFilters(experiments) {
+    // todo: preserve old values when ovrriding
     let filters = {}
     for (let exp of experiments) {
       for (let tag in exp.tags) {
@@ -58,8 +62,72 @@ export default class Experiments extends React.Component {
     this.setState({ groupby: groupby })
   }
 
+  createExperiment() {
+    let exp = {
+      id: 'exp-' + Math.round(Math.random() * 1000),
+      name: 'New Experiment',
+      vars: {},
+      "created": new Date().toString(),
+      "updated": new Date().toString(),
+      tags: {},
+      "graph": {
+        "id": 0, "title": "Main", "type": "main", "category": "undefined",
+        "x": 0, "y": 0, "collapsed": false,
+        "processes": [], "groups": [], "links": []
+      }
+    }
+
+    jQuery.ajax({
+      type: 'POST',
+      url: 'http://localhost:8081/api/experiments/' + exp.id,
+      data: JSON.stringify(exp),
+      contentType: 'application/json',
+      success: (res) => {
+        console.log(res)
+        this.state.experiments[exp.id] = exp
+        this.setState(this.state)
+      },
+    })
+  }
+
+  cloneExperiment(exp) {
+    let clone = JSON.parse(JSON.stringify(exp))
+    clone.id = exp.id + '-clone'
+
+    let i;
+    for (i = 0; this.state.experiments[clone.id]; i++) {
+      clone.id = exp.id + '-clone' + (i ? i : '')
+    }
+
+    clone.name = clone.name + ' (Clone' + (i ? ` #${i}` : '') + ')'
+
+    jQuery.ajax({
+      type: 'POST',
+      url: 'http://localhost:8081/api/experiments/' + clone.id,
+      data: JSON.stringify(clone),
+      contentType: 'application/json',
+      success: (res) => {
+        console.log(res)
+        this.state.experiments[clone.id] = clone
+        this.setState(this.state)
+      },
+    })
+  }
+
+  deleteExperiment(exp) {
+    jQuery.ajax({
+      type: 'DELETE',
+      url: 'http://localhost:8081/api/experiments/' + exp.id,
+      success: (res) => {
+        console.log(res)
+        delete this.state.experiments[exp.id]
+        this.setState(this.state)
+      },
+    })
+  }
+
   render() {
-    let experiments = this.state.experiments.filter(this.isExprimentFiltered.bind(this))
+    let experiments = toArray(this.state.experiments).filter(this.isExprimentFiltered.bind(this))
     let groupby = this.state.groupby
 
     let groups = {}
@@ -77,6 +145,8 @@ export default class Experiments extends React.Component {
       <div className="page">
         <h1>Experiments</h1>
 
+        <button onClick={() => this.createExperiment()}>Create</button>
+
         <div style={{'display': 'flex'}}>
           <div className="experiments-container">
             {Object.keys(groups).map(key => (
@@ -93,7 +163,11 @@ export default class Experiments extends React.Component {
                   {groups[key].map(e => (
                     <tr key={e.id}>
                       <td><Link to={`/experiments/${e.id}`}>{e.name}</Link></td>
-                      <td>Clone Delete</td>
+                      <td>
+                        <button onClick={() => this.cloneExperiment(e)}>Clone</button>
+                        {' '}
+                        <button onClick={() => this.deleteExperiment(e)}>Delete</button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
