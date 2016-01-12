@@ -2,9 +2,7 @@ import React from 'react'
 import { Link } from 'react-router'
 import jQuery from 'jquery'
 
-function toArray(obj) {
-  return Object.keys(obj).map(key => obj[key])
-}
+import { toArray, groupBy, clone, map } from '../utils'
 
 export default class Experiments extends React.Component {
   constructor(props) {
@@ -91,24 +89,24 @@ export default class Experiments extends React.Component {
   }
 
   cloneExperiment(exp) {
-    let clone = JSON.parse(JSON.stringify(exp))
-    clone.id = exp.id + '-clone'
+    let clonedexp = clone(exp)
+    clonedexp.id = exp.id + '-clone'
 
     let i;
-    for (i = 0; this.state.experiments[clone.id]; i++) {
-      clone.id = exp.id + '-clone' + (i ? i : '')
+    for (i = 0; this.state.experiments[clonedexp.id]; i++) {
+      clonedexp.id = exp.id + '-clone' + (i ? i : '')
     }
 
-    clone.name = clone.name + ' (Clone' + (i ? ` #${i}` : '') + ')'
+    clonedexp.name = clonedexp.name + ' (Clone' + (i ? ` #${i}` : '') + ')'
 
     jQuery.ajax({
       type: 'POST',
-      url: 'http://localhost:8081/api/experiments/' + clone.id,
-      data: JSON.stringify(clone),
+      url: 'http://localhost:8081/api/experiments/' + clonedexp.id,
+      data: JSON.stringify(clonedexp),
       contentType: 'application/json',
       success: (res) => {
         console.log(res)
-        this.state.experiments[clone.id] = clone
+        this.state.experiments[clonedexp.id] = clonedexp
         this.setState(this.state)
       },
     })
@@ -128,18 +126,7 @@ export default class Experiments extends React.Component {
 
   render() {
     let experiments = toArray(this.state.experiments).filter(this.isExprimentFiltered.bind(this))
-    let groupby = this.state.groupby
-
-    let groups = {}
-    if (groupby) {
-      for (let exp of experiments) {
-        let value = exp.tags[groupby]
-        if (!groups[value]) groups[value] = []
-        groups[value].push(exp)
-      }
-    } else {
-      groups[''] = experiments
-    }
+    let groups = groupBy(experiments, e => e.tags[this.state.groupby])
 
     return (
       <div className="page">
@@ -149,9 +136,9 @@ export default class Experiments extends React.Component {
 
         <div style={{'display': 'flex'}}>
           <div className="experiments-container">
-            {Object.keys(groups).map(key => (
+            {map(groups, (key, group) => (
               <div key={key}>
-                {groupby ? <h2>{groupby + ': ' + key}</h2> : null}
+                {this.state.groupby ? <h2>{this.state.groupby + ': ' + key}</h2> : null}
                 <table className="experiments">
                 <thead>
                   <tr>
@@ -160,7 +147,7 @@ export default class Experiments extends React.Component {
                   </tr>
                 </thead>
                 <tbody>
-                  {groups[key].map(e => (
+                  {group.map(e => (
                     <tr key={e.id}>
                       <td><Link to={`/experiments/${e.id}`}>{e.name}</Link></td>
                       <td>
@@ -180,7 +167,7 @@ export default class Experiments extends React.Component {
             <p>Group by:{' '}
               <select onChange={e => this.onGroupByChange(e.target.value)}>
                 <option value="">-- None --</option>
-                {Object.keys(this.state.filters).map(key => <option key={key} value={key}>{key}</option>)}
+                {map(this.state.filters, key => <option key={key} value={key}>{key}</option>)}
               </select>
             </p>
 
@@ -198,7 +185,7 @@ class Filters extends React.Component {
   }
 
   onChange(key, changes) {
-    let allfilters = JSON.parse(JSON.stringify(this.props.filters))
+    let allfilters = clone(this.props.filters)
 
     for (let filter in allfilters[key]) {
       if (filter in changes) {
@@ -212,8 +199,8 @@ class Filters extends React.Component {
   render() {
     return (
       <div>
-        {Object.keys(this.props.filters).map(key => (
-          <Filter key={key} name={key} filters={this.props.filters[key]}
+        {map(this.props.filters, (key, filter) => (
+          <Filter key={key} name={key} filters={filter}
                   onChange={changes => this.onChange(key, changes)} />
         ))}
       </div>
@@ -250,13 +237,13 @@ class Filter extends React.Component {
           <a href onClick={e => this.checkAll(e, false)}>Clear all</a>
         </p>
         <ul>
-          {Object.keys(this.props.filters).map(name => (
+          {map(this.props.filters, (name, filter) => (
             <li key={name}>
               <label>
-                <input type="checkbox" checked={this.props.filters[name].selected}
+                <input type="checkbox" checked={filter.selected}
                       onChange={e => this.check(e, name, e.target.checked)}/>
                 {name}{' '}
-                <small>({this.props.filters[name].count})</small>
+                <small>({filter.count})</small>
               </label>
             </li>
           ))}

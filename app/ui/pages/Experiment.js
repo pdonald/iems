@@ -15,6 +15,8 @@ import Variables from './Experiment/Variables'
 import Toolbox from './Experiment/Toolbox'
 import Actions from './Experiment/Actions'
 
+import { clone, map } from '../utils'
+
 export default React.createClass({
   getInitialState: function() {
     return {
@@ -55,7 +57,7 @@ export default React.createClass({
     let stack = this.state.document.stack
     delete this.state.document.stack
 
-    let data = JSON.parse(JSON.stringify(this.state.document))
+    let data = clone(this.state.document)
     let graphjson = Output.JSON(stack[0])
     eval("data.graph = " + graphjson) // hahaha
     //console.log(data)
@@ -107,7 +109,7 @@ export default React.createClass({
     if (x >= offset.left && x <= offset.right && y >= offset.top && y <= offset.bottom) {
       var nextid = this.currentGraph().getMaxId() + 1;
       if (!template.toBash) {
-        var group = JSON.parse(JSON.stringify(template));
+        var group = clone(template);
         group.id = nextid;
         group.x = x - offset.left;
         group.y = y - offset.top;
@@ -233,7 +235,7 @@ export default React.createClass({
           </div>
           <div className="preview">
             <div className="options">
-              {Object.keys(Output).map(key => (
+              {map(Output, key => (
                 <span key={key}>
                   <label><input type="radio" readOnly name="outtype" checked={this.state.output == key ? 'checked' : ''} onClick={e => this.changeOutputType(key)}/> {key}</label>
                 </span>
