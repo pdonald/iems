@@ -10,7 +10,10 @@ export default React.createClass({
   },
 
   onAdd: function() {
-    this.onChange(this.refs.key.value, this.refs.value.value);
+    let varName = this.refs.key.value
+    if (!varName.length) return
+    if (varName[0] == '$') varName = varName.substr(1) // remove accidental $
+    this.onChange(varName, this.refs.value.value);
     this.refs.key.value = this.refs.value.value = '';
   },
 

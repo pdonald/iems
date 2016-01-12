@@ -74,7 +74,15 @@ export default React.createClass({
   },
 
   onParamChanged: function(process, key, value) {
-    process.params[key] = value;
+    if (process == this.state.document) {
+      if (key in process) {
+        process[key] = value;
+      } else {
+        process.tags[key] = value;
+      }
+    } else {
+      process.params[key] = value;
+    }
     this.setState(this.state);
   },
 
@@ -205,7 +213,7 @@ export default React.createClass({
       <div id="editor">
         <div id="sidebar">
           <div className="container">
-            <div className="block properties"><Properties graph={this.currentGraph()}/></div>
+            <div className="block properties"><Properties doc={this.state.document} graph={this.currentGraph()}/></div>
             <div className="block variables"><Variables vars={this.state.document.vars}/></div>
             <div className="block toolbox"><Toolbox/></div>
           </div>
