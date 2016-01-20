@@ -5,7 +5,8 @@ import App from './pages/App'
 import Dashboard from './pages/Dashboard'
 import Experiments from './pages/Experiments'
 import Experiment from './pages/Experiment'
-import Hosts from './pages/Hosts'
+import Cluster from './pages/Cluster'
+import * as ClusterConfigs from './pages/ClusterConfigs'
 import About from './pages/About'
 
 export default (
@@ -14,7 +15,10 @@ export default (
       <IndexRoute component={Dashboard}/>
       <Route path="experiments" component={Experiments}/>
       <Route path="experiments/:id" component={Experiment}/>
-      <Route path="hosts" component={Hosts}/>
+      <Route path="cluster" component={Cluster}/>
+      <Route path="cluster/configs" component={ClusterConfigs.Index}/>
+      <Route path="cluster/configs/add" component={ClusterConfigs.Edit}/>
+      <Route path="cluster/configs/:id" component={ClusterConfigs.Edit}/>
       <Route path="about" component={About}/>
     </Route>
   </Router>

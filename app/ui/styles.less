@@ -13,8 +13,8 @@ html, body, #app, #container {
   outline: none;
 }
 
+//overflow: hidden;
 html, body {
-  overflow: hidden;
 }
 
 @header-height: 50px;
@@ -421,5 +421,32 @@ table.experiments {
     padding: 5px 10px;
     border-bottom: 1px solid #eee;
     text-align: left;
+  }
+}
+
+.alert-error {
+  color: rgb(169, 68, 66);
+  background: rgb(242, 222, 222);
+  border: 1px solid rgb(235, 204, 209);
+  padding: 15px 20px;
+}
+
+.page {
+  thead th, tbody td { border: 1px solid #ccc; padding: 5px 10px; }
+  tfoot td { text-align: right; }
+  form {
+    label {
+      font-weight: bold;
+      display: inline-block;
+      width: 150px;
+    }
+
+    .row {
+      padding: 5px 0px;
+    }
+
+    input, select {
+      width: 170px;
+    }
   }
 }

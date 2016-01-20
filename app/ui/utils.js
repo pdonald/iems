@@ -1,3 +1,5 @@
+import jQuery from 'jquery'
+
 export function toArray(obj) {
   return Object.keys(obj).map(key => obj[key])
 }
@@ -26,4 +28,28 @@ export function map(obj, fn) {
     result.push(fn(key, obj[key]))
   }
   return result
+}
+
+export function merge(obj, changed) {
+  return Object.assign({}, obj, changed)
+}
+
+export function get(url) {
+  return jQuery.get(url)
+}
+
+export function post(url, json) {
+  return jQuery.ajax({
+    type: 'POST',
+    url: url,
+    data: JSON.stringify(json),
+    contentType: 'application/json'
+  })
+}
+
+export function del(url) {
+  return jQuery.ajax({
+    type: 'DELETE',
+    url: url
+  })
 }

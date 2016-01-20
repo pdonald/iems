@@ -11,7 +11,7 @@ export default class App extends React.Component {
           <nav>
             <ul>
               <li><Link to="/experiments" activeClassName="active">Experiments</Link></li>
-              <li><Link to="/hosts" activeClassName="active">Hosts</Link></li>
+              <li><Link to="/cluster" activeClassName="active">Cluster</Link></li>
               <li><Link to="/about" activeClassName="active">About</Link></li>
             </ul>
           </nav>
