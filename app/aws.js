@@ -14,21 +14,32 @@ function sshexec(ssh, cmd, cb) {
 }
 
 class AwsEc2 {
-  constructor(configs) {
-    this.configs = configs // clone
+  constructor() {
+    this.configs = {
+      'testconf1': {
+        id: 'testconf1',
+        service: 'awsec2',
+        name: 'AWS EC2 Micro 1GB/1vCPU',
+        accessKeyId: 'xx',
+        secretAccessKey: 'xx',
+        region: 'eu-west-1b',
+        instanceType: 't1.micro',
+        imageId: 'ami-5da23a2a',
+        sshPort: 22,
+        sshUsername: 'ubuntu',
+        sshPrivateKey: require('fs').readFileSync('c:\\users\\peteris\\downloads\\iems-test.pem').toString(),
+        sshScript: 'touch /home/ubuntu/i-was-here && echo I am in!'
+      },
+    }
+
     this.aws = []
 
-    this.setup(configs)
-
-    // describe instances 5 minutes, every 10 sec after launch for 5 minutes
-    // ssh every 1 minute
-  }
-
-  getData() {
-    return {
+    this.data = {
       id: 'awsec2',
       name: 'AWS EC2',
       title: 'Amazon Web Services (AWS) Elastic Cloud Compute (EC2)',
+      configs: this.configs,
+      instances: {},
       ui: {
         configs: {
           columns: {
@@ -54,6 +65,13 @@ class AwsEc2 {
         }
       }
     }
+
+    // describe instances 5 minutes, every 10 sec after launch for 5 minutes
+    // ssh every 1 minute
+  }
+
+  getData() {
+    return this.data
   }
 
   setup(configs) {
@@ -76,9 +94,8 @@ class AwsEc2 {
   }
 
   launch(config, cb) {
-    this.configs[config.id] = config
     this.setup(this.configs)
-
+    
     let region = config.region.substr(0, config.region.length - 1)
     let hash = [region, config.accessKeyId, config.secretAccessKey].join('/')
     let aws = this.aws[hash]

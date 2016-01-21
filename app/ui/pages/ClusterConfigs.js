@@ -14,8 +14,7 @@ export class Index extends React.Component {
     this.state = {
       loading: null,
       error: null,
-      services: null,
-      configs: null
+      services: null
     }
   }
 
@@ -54,7 +53,7 @@ export class Index extends React.Component {
       <section key={key} className={'serice-' + key}>
         <h2>{service.title}</h2>
         <Table columns={service.ui.configs.columns}
-               data={map(this.state.configs, (ckey, c) => c).filter(c => c.service == key)} buttons={buttons}
+               data={map(service.configs, (key, config) => config)} buttons={buttons}
                emptyText="No configurations created yet" />
       </section>
     ))
@@ -63,28 +62,24 @@ export class Index extends React.Component {
   load() {
     this.setState({ loading: true, error: null })
 
-    jQuery
-      .when(
-        get(`${url}/cluster/services`).then(data => data),
-        get(`${url}/cluster/configs`).then(data => data)
-      )
-      .done((services, configs) => this.setState({ loading: false, services: services, configs: configs }))
+    get(`${url}/cluster/services`)
+      .then(services => this.setState({ loading: false, services: services }))
       .fail(err => this.setState({ loading: false, error: 'Could not load data' }))
   }
 
   edit(config) {
-    browserHistory.push(`/cluster/configs/${config.id}`)
+    browserHistory.push(`/cluster/configs/${config.service}/${config.id}`)
   }
 
   clone(config) {
     console.log('cloning', config)
-    post(`${url}/cluster/configs`, config)
-      .done(config => browserHistory.push(`/cluster/configs/${config.id}`))
+    post(`${url}/cluster/services/${config.service}/configs`, config)
+      .done(config => browserHistory.push(`/cluster/configs/${config.service}/${config.id}`))
       .fail(err => this.setState({ error: `Could not clone ${config.name}` }))
   }
 
   delete(config) {
-    del(`${url}/cluster/configs/${config.id}`)
+    del(`${url}/cluster/services/${config.service}/configs/${config.id}`)
       .done(_ => this.load())
       .fail(err => this.setState({ error: `Could not delete ${config.name}` }))
   }
@@ -134,7 +129,7 @@ export class Edit extends React.Component {
   load() {
     this.setState({ loading: true, error: null })
 
-    get(`${url}/cluster/configs/${this.props.routeParams.id}`)
+    get(`${url}/cluster/services/${this.props.routeParams.service}/configs/${this.props.routeParams.id}`)
       .then(config => { this.setState({ config: config }); return config })
       .then(config => get(`${url}/cluster/services/${config.service}`).then(service => this.setState({ service: service })))
       .done(_ => this.setState({ loading: false }))
@@ -143,14 +138,14 @@ export class Edit extends React.Component {
 
   save(config) {
     console.log('saving', config)
-    post(`${url}/cluster/configs/${config.id}`, config)
+    post(`${url}/cluster/services/${config.service}/configs/${config.id}`, config)
       .done(config => this.setState({ config: config }))
       .fail(err => this.setState({ error: `Could not save changes` }))
   }
 
   delete() {
     let config = this.state.config
-    del(`${url}/cluster/configs/${config.id}`)
+    del(`${url}/cluster/services/${config.service}/configs/${config.id}`)
       .done(_ => browserHistory.push('/cluster/configs'))
       .fail(err => this.setState({ error: `Could not delete ${config.name}` }))
   }

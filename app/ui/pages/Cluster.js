@@ -11,7 +11,7 @@ export default class Cluster extends React.Component {
     super(props)
 
     this.state = {
-      loading: null,
+      loading: true,
       error: null,
       configs: null
     }
@@ -40,16 +40,15 @@ export default class Cluster extends React.Component {
 
     return (
       <div>
-        <p><Link to="/cluster/configs">Launch configurations</Link></p>
-
         <div>
           <select ref="config">
-            {map(this.state.configs, (id, config) => (
-              <option key={id} value={id}>{config.name}</option>
+            {this.state.configs.map((config, index) => (
+              <option key={config.service+'/'+config.id} value={index}>{config.name}</option>
             ))}
           </select>{' '}
           <input type="text" ref="count" style={{width:'20px','textAlign':'center'}} defaultValue="1"/>{' '}
-          <button onClick={() => this.launch()}>Launch</button>
+          <button onClick={() => this.launch()}>Launch</button>{' '}
+          <Link to="/cluster/configs">Launch configurations</Link>
         </div>
 
         <p>Table of instances... IP/uptime/specs(ram/cpus/disk)/usage graph/how much $$ so far</p>
@@ -70,7 +69,7 @@ export default class Cluster extends React.Component {
     let count = parseInt(this.refs.count.value)
     console.log('launching', config, count, 'times')
 
-    post(`${url}/cluster/configs/${config.id}/launch`)
+    post(`${url}/cluster/services/${config.service}/configs/${config.id}/launch`)
       .fail(err => this.setState({ error: 'Could not launch' }))
   }
 }

@@ -17,8 +17,8 @@ export default (
       <Route path="experiments/:id" component={Experiment}/>
       <Route path="cluster" component={Cluster}/>
       <Route path="cluster/configs" component={ClusterConfigs.Index}/>
-      <Route path="cluster/configs/add" component={ClusterConfigs.Edit}/>
-      <Route path="cluster/configs/:id" component={ClusterConfigs.Edit}/>
+      <Route path="cluster/configs/:service/add" component={ClusterConfigs.Edit}/>
+      <Route path="cluster/configs/:service/:id" component={ClusterConfigs.Edit}/>
       <Route path="about" component={About}/>
     </Route>
   </Router>

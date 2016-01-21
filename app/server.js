@@ -6,13 +6,16 @@ let fs = require('fs');
 let path = require('path');
 let AwsEc2 = require('./aws').AwsEc2;
 
+let awsec2 = new AwsEc2()
+
 let db = {
   experiments: require('../build/db/experiments.json'),
-  cluster: require('../build/db/cluster.js')
+  cluster: {
+    services: {
+      awsec2: awsec2
+    }
+  }
 }
-
-let awsec2 = new AwsEc2(db.cluster.configs)
-db.cluster.services.awsec2 = awsec2.getData()
 
 setInterval(() => {
   awsec2.status((err, status) => {
@@ -24,6 +27,8 @@ setInterval(() => {
 
 let app = express();
 
+app.set('json spaces', 2);
+
 app.use(bodyParser.json());
 
 app.use((req, res, next) => {
@@ -33,61 +38,117 @@ app.use((req, res, next) => {
   next()
 })
 
+app.get('/api/cluster/configs', (req, res) => {
+  let configs = []
+  for (let id in db.cluster.services) {
+    let serviceConfigs = db.cluster.services[id].getData().configs
+    for (let cid in serviceConfigs) {
+      configs.push(serviceConfigs[cid])
+    }
+  }
+  res.send(configs)
+})
+
 app.get('/api/cluster/services', (req, res) => {
-  res.send(db.cluster.services)
+  let services = {}
+  for (let id in db.cluster.services)
+    services[id] = db.cluster.services[id].getData()
+  res.send(services)
 })
 
 app.get('/api/cluster/services/:id', (req, res) => {
   const service = db.cluster.services[req.params.id]
-  res.status(service ? 200 : 404).send(service)
+  if (service) res.send(service.getData())
+  else res.status(404).send()
 })
 
-app.get('/api/cluster/configs', (req, res) => {
-  res.send(db.cluster.configs)
+app.get('/api/cluster/services/:id/instances', (req, res) => {
+  const service = db.cluster.services[req.params.id]
+  if (service) res.send(service.getData().instances)
+  else res.status(404).send()
 })
 
-app.post('/api/cluster/configs', (req, res) => {
-  const config = db.cluster.configs[req.params.id]
-  if (config) return res.status(400).send('Already exists')
-  if (!db.cluster.services[req.body.service]) return res.status(400).send('Invalid service')
-  delete req.body.id
-  req.body.id = Object.keys(db.cluster.configs).length + 1 + 1
-  db.cluster.configs[req.body.id] = req.body
-  res.send(req.body)
+app.get('/api/cluster/services/:id/configs', (req, res) => {
+  const service = db.cluster.services[req.params.id]
+  if (service) res.send(service.getData().configs)
+  else res.status(404).send()
 })
 
-app.get('/api/cluster/configs/:id', (req, res) => {
-  const config = db.cluster.configs[req.params.id]
-  res.status(config ? 200 : 404).send(config)
+app.post('/api/cluster/services/:id/configs', (req, res) => {
+  const service = db.cluster.services[req.params.id]
+  if (service) {
+    let configs = service.getData().configs
+    let config = req.body
+    config.id = Object.keys(configs).length + 1
+    configs[config.id] = config
+    service.setup(configs)
+    res.send(config)
+  } else {
+    res.status(404).send('No such service')
+  }
 })
 
-app.post('/api/cluster/configs/:id', (req, res) => {
-  const config = db.cluster.configs[req.params.id]
-  if (!config) return res.status(404)
-  delete req.body.id
-  delete req.body.service
-  db.cluster.configs[req.params.id] = Object.assign({}, config, req.body)
-  res.status(200).send(db.cluster.configs[req.params.id])
+app.get('/api/cluster/services/:id/configs/:cid', (req, res) => {
+  const service = db.cluster.services[req.params.id]
+  if (service) {
+    const config = service.getData().configs[req.params.cid]
+    if (config) res.send(config)
+    else res.status(404).send('No such config')
+  } else {
+    res.status(404).send('No such service')
+  }
 })
 
-app.delete('/api/cluster/configs/:id', (req, res) => {
-  const config = db.cluster.configs[req.params.id]
-  if (config) delete db.cluster.configs[req.params.id]
-  res.status(config ? 200 : 404).send()
-})
-
-app.post('/api/cluster/configs/:id/launch', (req, res) => {
-  const config = db.cluster.configs[req.params.id]
-  if (config) {
-    if (config.service == 'awsec2') {
-      console.log('launching', config)
-      awsec2.launch(config)
-      res.send()
+app.post('/api/cluster/services/:id/configs/:cid', (req, res) => {
+  const service = db.cluster.services[req.params.id]
+  if (service) {
+    let config = service.getData().configs[req.params.cid]
+    if (config) {
+      // todo: validate
+      config = Object.assign({}, config, req.body)
+      config.id = req.params.cid
+      service.getData().configs[config.id] = config
+      res.send(config)
     } else {
-      res.status(500).send('Not supported yet')
+      res.status(404).send('No such config')
     }
   } else {
-    res.status(404).send()
+    res.status(404).send('No such service')
+  }
+})
+
+app.delete('/api/cluster/services/:id/configs/:cid', (req, res) => {
+  const service = db.cluster.services[req.params.id]
+  if (service) {
+    const config = service.getData().configs[req.params.cid]
+    if (config) {
+      delete service.getData().configs[config.id]
+      res.send()
+    } else {
+      res.status(404).send('No such config')
+    }
+  } else {
+    res.status(404).send('No such service')
+  }
+})
+
+app.post('/api/cluster/services/:id/configs/:cid/launch', (req, res) => {
+  const service = db.cluster.services[req.params.id]
+  if (service) {
+    const config = service.getData().configs[req.params.cid]
+    if (config) {
+      if (config.service == 'awsec2') {
+        console.log('launching', config)
+        awsec2.launch(config)
+        res.send()
+      } else {
+        res.status(500).send('Not supported yet')
+      }
+    } else {
+      res.status(404).send('No such config')
+    }
+  } else {
+    res.status(404).send('No such service')
   }
 })
 
