@@ -1,30 +1,76 @@
 import React from 'react'
 import { Link } from 'react-router'
 
-export default class Hosts extends React.Component {
+import { Page, Loading, ErrorMessage } from './Page'
+import { map, get, post } from '../utils'
+
+let url = "http://localhost:8081/api"
+
+export default class Cluster extends React.Component {
+  constructor(props) {
+    super(props)
+
+    this.state = {
+      loading: null,
+      error: null,
+      configs: null
+    }
+  }
+
+  componentDidMount() {
+    this.load()
+  }
+
   render() {
     return (
-      <article className="page" id="hosts">
-        <h1>Cluster</h1>
+      <Page heading="Cluster">
+        {this.renderContent()}
+      </Page>
+    )
+  }
 
+  renderContent() {
+    if (this.state.loading) {
+      return <Loading/>
+    }
+
+    if (this.state.error) {
+        return <ErrorMessage error={this.state.error} retry={() => this.load()}/>
+    }
+
+    return (
+      <div>
         <p><Link to="/cluster/configs">Launch configurations</Link></p>
 
         <div>
-          <select>
-            <optgroup label="AWS EC2">
-              <option>Spot 2vCPU/15GB - $0.04/h</option>
-              <option>Spot 4vCPU/30GB - $0.10/h</option>
-              <option>Spot 8vCPU/60GB - $0.20/h</option>
-              <option>Spot 12vCPU/122GB - $0.40/h</option>
-              <option>Spot 12vCPU/240GB - $0.60/h</option>
-            </optgroup>
+          <select ref="config">
+            {map(this.state.configs, (id, config) => (
+              <option key={id} value={id}>{config.name}</option>
+            ))}
           </select>{' '}
-          <input type="text" style={{width:'20px','textAlign':'center'}} value="1"/>{' '}
-          <input type="submit" value="Launch"/>
+          <input type="text" ref="count" style={{width:'20px','textAlign':'center'}} defaultValue="1"/>{' '}
+          <button onClick={() => this.launch()}>Launch</button>
         </div>
 
         <p>Table of instances... IP/uptime/specs(ram/cpus/disk)/usage graph/how much $$ so far</p>
-      </article>
+      </div>
     )
+  }
+
+  load() {
+    this.setState({ loading: true, error: null })
+
+    get(`${url}/cluster/configs`)
+      .done(configs => this.setState({ loading: false, configs: configs }))
+      .fail(err => this.setState({ loading: false, error: 'Could not load data' }))
+  }
+
+  launch() {
+    let config = this.state.configs[this.refs.config.value]
+    let count = parseInt(this.refs.count.value)
+    console.log('launching', config, count, 'times')
+
+    post(`${url}/cluster/configs/${config.id}/launch`)
+      .fail(err => this.setState({ error: 'Could not launch' }))
   }
 }

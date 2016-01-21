@@ -120,7 +120,9 @@ export class Form extends React.Component {
           )
         }
       } else if (field.secret) {
-        input = <input type="password" onChange={e => this.handleChange(e, key)} />
+        input = <input type="password" value={this.state.values[key] || field.defaultValue} onChange={e => this.handleChange(e, key)} />
+      } else if (field.rows) {
+        input = <textarea onChange={e => this.handleChange(e, key)} rows={field.rows} value={this.state.values[key] || field.defaultValue} />
       } else {
         input = <input type="text" value={this.state.values[key] || field.defaultValue} onChange={e => this.handleChange(e, key)} />
       }

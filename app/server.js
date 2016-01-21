@@ -4,6 +4,23 @@ let express = require('express');
 let bodyParser = require('body-parser')
 let fs = require('fs');
 let path = require('path');
+let AwsEc2 = require('./aws').AwsEc2;
+
+let db = {
+  experiments: require('../build/db/experiments.json'),
+  cluster: require('../build/db/cluster.js')
+}
+
+let awsec2 = new AwsEc2(db.cluster.configs)
+db.cluster.services.awsec2 = awsec2.getData()
+
+setInterval(() => {
+  awsec2.status((err, status) => {
+    if (err) throw err;
+    //console.log(status);
+  });
+}, 1000);
+
 
 let app = express();
 
@@ -15,11 +32,6 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Headers', 'Content-Type')
   next()
 })
-
-let db = {
-  experiments: require('../build/db/experiments.json'),
-  cluster: require('../build/db/cluster.js')
-}
 
 app.get('/api/cluster/services', (req, res) => {
   res.send(db.cluster.services)
@@ -62,6 +74,21 @@ app.delete('/api/cluster/configs/:id', (req, res) => {
   const config = db.cluster.configs[req.params.id]
   if (config) delete db.cluster.configs[req.params.id]
   res.status(config ? 200 : 404).send()
+})
+
+app.post('/api/cluster/configs/:id/launch', (req, res) => {
+  const config = db.cluster.configs[req.params.id]
+  if (config) {
+    if (config.service == 'awsec2') {
+      console.log('launching', config)
+      awsec2.launch(config)
+      res.send()
+    } else {
+      res.status(500).send('Not supported yet')
+    }
+  } else {
+    res.status(404).send()
+  }
 })
 
 app.get('/api/experiments', (req, res) => {
