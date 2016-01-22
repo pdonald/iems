@@ -17,14 +17,6 @@ let db = {
   }
 }
 
-setInterval(() => {
-  awsec2.status((err, status) => {
-    if (err) throw err;
-    //console.log(status);
-  });
-}, 1000);
-
-
 let app = express();
 
 app.set('json spaces', 2);
