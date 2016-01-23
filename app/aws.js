@@ -193,6 +193,12 @@ class AwsEc2 {
 // updates every 30sec from describeInstances()
 // on connect => get specs
 // update load/disk/mem every 20s
+
+// launchuptime (date, time since launch)
+// cost (how much $$ so far)
+
+// spot-requested, spot-pending, spot-fulfilled
+// launched, launched-tagged, pending, running, shutting-down, terminated
 class Instance {
   constructor() {
     this.state = null
@@ -200,10 +206,9 @@ class Instance {
     this.instanceLastUpdated = null
     this.config = null
     this.ssh = null
+    this.log = []
 
     this.stats = {
-      // launchuptime (date, time since launch)
-      // cost (how much $$ so far)
       lastUpdated: null,
 
       uptime: {
@@ -229,13 +234,17 @@ class Instance {
     this.instanceLastUpdated = date.toString()
     this.instance = instance
 
-    if (instance.State.Name == 'running') {
-      let prevState = this.state
-      this.state = 'running'
+    let prevState = this.state
+    this.state = instance.State.Name
 
-      if (prevState != 'running') {
-        this.connect()
-      }
+    if (prevState != this.state) {
+      this.log.push({ type: 'state-change', from: prevState, to: this.state, date: date })
+    }
+
+    if (prevState != 'running' && this.state == 'running') {
+      this.connect()
+    } else if (prevState == 'running' && this.state != 'running') {
+      this.disconnect()
     }
   }
 
@@ -251,15 +260,32 @@ class Instance {
       this.refreshStatsTimer = setInterval(() => this.refreshStats(), 30 * 1000)
       this.refreshStats()
 
-      this.provision()
+      //this.provision()
 
-      setInterval(() => {
+      let intv = setInterval(() => {
+        if (!this.ssh) return clearInterval(intv)
         sshexec(this.ssh, 'uptime', (err, code, stdout) => {
-          if (err) throw err;
-          console.log(stdout.trim())
+          if (err) console.error('uptime error:', err)
+          if (code != 0) console.error('uptime exit code:', code)
+          if (stdout) console.log(stdout.trim())
         })
       }, 1000)
     })
+
+    ssh.once('error', err => {
+      if (err.syscall == 'connect') {
+        if (err.code == 'ECONNREFUSED' || err.code == 'ETIMEDOUT') {
+          this.connect()
+        } else {
+          this.log.push({ type: 'ssh-connect-error', errcode: err.code })
+        }
+      } else {
+        this.disconnect()
+        this.connect()
+      }
+    })
+
+    ssh.once('end', () => this.disconnect())
 
     ssh.connect({
       host: this.instance.PublicIpAddress,
@@ -285,16 +311,11 @@ class Instance {
     }
   }
 
-  reconnect() {
-    this.disconnect()
-    this.connect()
-  }
-
   provision() {
     if (this.config.sshScript) {
       console.log('executing SSH script')
       sshexec(this.ssh, this.config.sshScript, (err, code, stdout, stderr) => {
-        if (err) throw err;
+        if (err) throw err
         console.log('SSH exit: ' + code)
         if (stdout) console.log('SSH stdout: ' + stdout.trim())
         if (stderr) console.log('SSH stderr: '+  stderr.trim())
@@ -303,6 +324,8 @@ class Instance {
   }
 
   refreshStats() {
+    if (!this.ssh) return // disconnected
+
     let cmds = {
       'cat /proc/uptime': (stdout) => {
         this.stats.uptime.boot = parseInt(stdout.trim().split(/\s+/)[0])
@@ -356,6 +379,8 @@ class Instance {
 
   toJSON() {
     return {
+      state: this.state,
+      connected: !!this.ssh,
       instance: this.instance,
       config: this.config,
       stats: this.stats

@@ -104,6 +104,7 @@ class AwsEc2Instances extends React.Component {
   render() {
     let columns = {
       config: { title: 'Launch Config' },
+      state: { title: 'State' },
       uptime: { title: 'Uptime' },
       loadavg: { title: 'Load Avg.' },
       cores: { title: 'vCPU' },
@@ -114,12 +115,13 @@ class AwsEc2Instances extends React.Component {
 
     let instances = this.props.instances.map(instance => {
       return {
+        state: instance.state,
         config: instance.config.name,
         loadavg: instance.stats.cpu.loadavg && instance.stats.cpu.loadavg.join(' '),
         cores: instance.stats.cpu.cores,
-        ram: this.format(instance.stats.memory.ram.used) + ' / ' + this.format(instance.stats.memory.ram.total),
-        swap: this.format(instance.stats.memory.swap.used) + ' / ' + this.format(instance.stats.memory.swap.total),
-        disk: this.format(instance.stats.memory.disk.used) + ' / ' + this.format(instance.stats.memory.disk.total),
+        ram: instance.stats.memory.ram ? this.format(instance.stats.memory.ram.used) + ' / ' + this.format(instance.stats.memory.ram.total) : null,
+        swap: instance.stats.memory.swap ? this.format(instance.stats.memory.swap.used) + ' / ' + this.format(instance.stats.memory.swap.total) : null,
+        disk: instance.stats.memory.disk ? this.format(instance.stats.memory.disk.used) + ' / ' + this.format(instance.stats.memory.disk.total) : null,
         uptime: this.formatElapsed(instance.stats.uptime.boot)
       }
     })
