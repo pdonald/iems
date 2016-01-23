@@ -214,7 +214,7 @@ class Instance {
       cpu: {
         cores: null,
         model: null,
-        load: null
+        loadavg: null
       },
 
       memory: {
@@ -312,7 +312,7 @@ class Instance {
       },
       'cat /proc/loadavg': (stdout) => {
         //  0.00 0.01 0.05 2/66 4307
-        this.stats.cpu.load = stdout.trim().split(' ').slice(0, 3).map(n => parseFloat(n))
+        this.stats.cpu.loadavg = stdout.trim().split(' ').slice(0, 3).map(n => parseFloat(n))
       },
       'cat /proc/cpuinfo': (stdout) => {
         // processor       : 0

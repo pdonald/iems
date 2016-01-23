@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router'
 
-import { Page, Loading, ErrorMessage } from './Page'
+import { Page, Loading, ErrorMessage, Table } from './Page'
 import { map, get, post } from '../utils'
 
 let url = "http://localhost:8081/api"
@@ -13,12 +13,19 @@ export default class Cluster extends React.Component {
     this.state = {
       loading: true,
       error: null,
-      configs: null
+      configs: null,
+      services: null
     }
   }
 
   componentDidMount() {
     this.load()
+    this.refresh()
+    this.timer = setInterval(() => this.refresh(), 5000)
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.timer)
   }
 
   render() {
@@ -51,9 +58,18 @@ export default class Cluster extends React.Component {
           <Link to="/cluster/configs">Launch configurations</Link>
         </div>
 
-        <p>Table of instances... IP/uptime/specs(ram/cpus/disk)/usage graph/how much $$ so far</p>
+        {this.renderInstances()}
       </div>
     )
+  }
+
+  renderInstances() {
+    return map(this.state.services, (key, service) => (
+      <section key={key} className={'service-' + key}>
+        <h2>{service.name}</h2>
+        {service.id == 'awsec2' && <AwsEc2Instances instances={service.instances} />}
+      </section>
+    ))
   }
 
   load() {
@@ -64,6 +80,12 @@ export default class Cluster extends React.Component {
       .fail(err => this.setState({ loading: false, error: 'Could not load data' }))
   }
 
+  refresh() {
+    get(`${url}/cluster/services`)
+      .done(services => this.setState({ services: services }))
+      .fail(err => this.setState({ error: 'Could not load data' }))
+  }
+
   launch() {
     let config = this.state.configs[this.refs.config.value]
     let count = parseInt(this.refs.count.value)
@@ -71,5 +93,58 @@ export default class Cluster extends React.Component {
 
     post(`${url}/cluster/services/${config.service}/configs/${config.id}/launch`)
       .fail(err => this.setState({ error: 'Could not launch' }))
+  }
+}
+
+class AwsEc2Instances extends React.Component {
+  constructor(props) {
+    super(props)
+  }
+
+  render() {
+    let columns = {
+      config: { title: 'Launch Config' },
+      uptime: { title: 'Uptime' },
+      loadavg: { title: 'Load Avg.' },
+      cores: { title: 'vCPU' },
+      ram: { title: 'RAM' },
+      swap: { title: 'Swap' },
+      disk: { title: 'Disk' },
+    }
+
+    let instances = this.props.instances.map(instance => {
+      return {
+        config: instance.config.name,
+        loadavg: instance.stats.cpu.loadavg && instance.stats.cpu.loadavg.join(' '),
+        cores: instance.stats.cpu.cores,
+        ram: this.format(instance.stats.memory.ram.used) + ' / ' + this.format(instance.stats.memory.ram.total),
+        swap: this.format(instance.stats.memory.swap.used) + ' / ' + this.format(instance.stats.memory.swap.total),
+        disk: this.format(instance.stats.memory.disk.used) + ' / ' + this.format(instance.stats.memory.disk.total),
+        uptime: this.formatElapsed(instance.stats.uptime.boot)
+      }
+    })
+
+    return (
+      <Table columns={columns} data={instances} />
+    )
+  }
+
+  format(bytes) {
+    function round(n, d = 0) { let p = Math.pow(10, d); return Math.round(n*p)/p; }
+    if (bytes < 1024) return bytes + 'B'
+    if (bytes < 1024*1024) return round(bytes/1024) + 'KB'
+    if (bytes < 1024*1024*1024) return round(bytes/1024/1024) + 'MB'
+    if (bytes < 1024*1024*1024*1024) return round(bytes/1024/1024/1024, 1) + 'GB'
+    if (bytes < 1024*1024*1024*1024*1024) return round(bytes/1024/1024/1024/1024, 2) + 'TB'
+    return 'too much'
+  }
+
+  formatElapsed(sec_num) {
+    let hours   = Math.floor(sec_num / 3600)
+    let minutes = Math.floor((sec_num - (hours * 3600)) / 60)
+    let seconds = sec_num - (hours * 3600) - (minutes * 60)
+    if (hours   < 10) hours   = "0" + hours
+    if (minutes < 10) minutes = "0" + minutes
+    return hours + ':' + minutes
   }
 }

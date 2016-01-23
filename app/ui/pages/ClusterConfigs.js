@@ -50,7 +50,7 @@ export class Index extends React.Component {
     ]
 
     return map(this.state.services, (key, service) => (
-      <section key={key} className={'serice-' + key}>
+      <section key={key} className={'service-' + key}>
         <h2>{service.title}</h2>
         <Table columns={service.ui.configs.columns}
                data={map(service.configs, (key, config) => config)} buttons={buttons}

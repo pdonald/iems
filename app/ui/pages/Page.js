@@ -67,14 +67,14 @@ export class Table extends React.Component {
       <thead>
       <tr>
         {map(columns, (key, col) => <th key={key}>{col.title}</th>)}
-        <th>Actions</th>
+        {this.props.buttons && <th>Actions</th>}
       </tr>
       </thead>
       <tbody>
       {rows.map((row, index) => (
         <tr key={index}>
           {map(columns, key => <td key={key}>{row[key]}</td>)}
-          <td>{this.props.buttons.map(b => <button key={b.title} onClick={e => b.handler(row)}>{b.title}</button>)}</td>
+          {this.props.buttons && <td>{this.props.buttons.map(b => <button key={b.title} onClick={e => b.handler(row)}>{b.title}</button>)}</td>}
         </tr>
       ))}
       </tbody>
