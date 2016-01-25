@@ -60,6 +60,16 @@ app.get('/api/cluster/services/:id/instances', (req, res) => {
   else res.status(404).send()
 })
 
+app.delete('/api/cluster/services/:id/instances/:iid', (req, res) => {
+  const service = db.cluster.services[req.params.id]
+  if (service) {
+    service.terminate(req.params.iid)
+    res.send()
+  } else {
+    res.status(404).send('No such service')
+  }
+})
+
 app.get('/api/cluster/services/:id/configs', (req, res) => {
   const service = db.cluster.services[req.params.id]
   if (service) res.send(service.getData().configs)

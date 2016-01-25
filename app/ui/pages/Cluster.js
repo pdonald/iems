@@ -2,7 +2,7 @@ import React from 'react'
 import { Link } from 'react-router'
 
 import { Page, Loading, ErrorMessage, Table } from './Page'
-import { map, get, post } from '../utils'
+import { map, get, post, del } from '../utils'
 
 let url = "http://localhost:8081/api"
 
@@ -14,7 +14,8 @@ export default class Cluster extends React.Component {
       loading: true,
       error: null,
       configs: null,
-      services: null
+      services: null,
+      modal: { open: false }
     }
   }
 
@@ -58,18 +59,30 @@ export default class Cluster extends React.Component {
           <Link to="/cluster/configs">Launch configurations</Link>
         </div>
 
+        <h2>Machines</h2>
         {this.renderInstances()}
+        {this.renderLogs()}
       </div>
     )
   }
 
   renderInstances() {
     return map(this.state.services, (key, service) => (
-      <section key={key} className={'service-' + key}>
-        <h2>{service.name}</h2>
-        {service.id == 'awsec2' && <AwsEc2Instances instances={service.instances} />}
-      </section>
+      <Instances key={key} instances={service.instances} onTerminate={instance => this.terminate(instance)} />
     ))
+  }
+
+  renderLogs() {
+    return
+    return (
+      <div className={'modal ' + (this.state.modal.open ? 'open' : 'closed')}>
+        <div className="modal-header">
+          <button onClick={() => this.setState({ modal: { open: false } })}>Close</button>
+          <h1>{this.state.modal.title}</h1>
+        </div>
+        <pre>{this.state.modal.content}</pre>
+      </div>
+    )
   }
 
   load() {
@@ -94,9 +107,14 @@ export default class Cluster extends React.Component {
     post(`${url}/cluster/services/${config.service}/configs/${config.id}/launch`)
       .fail(err => this.setState({ error: 'Could not launch' }))
   }
+
+  terminate(instance) {
+    del(`${url}/cluster/services/${instance.service}/instances/${instance.id}`)
+      .fail(err => this.setState({ error: 'Could not terminate instance' }))
+  }
 }
 
-class AwsEc2Instances extends React.Component {
+class Instances extends React.Component {
   constructor(props) {
     super(props)
   }
@@ -104,6 +122,7 @@ class AwsEc2Instances extends React.Component {
   render() {
     let columns = {
       config: { title: 'Launch Config' },
+      id: { title: 'ID' },
       state: { title: 'State' },
       uptime: { title: 'Uptime' },
       loadavg: { title: 'Load Avg.' },
@@ -115,6 +134,7 @@ class AwsEc2Instances extends React.Component {
 
     let instances = this.props.instances.map(instance => {
       return {
+        id: instance.id,
         state: instance.state,
         config: instance.config.name,
         loadavg: instance.stats.cpu.loadavg && instance.stats.cpu.loadavg.join(' '),
@@ -122,12 +142,18 @@ class AwsEc2Instances extends React.Component {
         ram: instance.stats.memory.ram ? this.format(instance.stats.memory.ram.used) + ' / ' + this.format(instance.stats.memory.ram.total) : null,
         swap: instance.stats.memory.swap ? this.format(instance.stats.memory.swap.used) + ' / ' + this.format(instance.stats.memory.swap.total) : null,
         disk: instance.stats.memory.disk ? this.format(instance.stats.memory.disk.used) + ' / ' + this.format(instance.stats.memory.disk.total) : null,
-        uptime: this.formatElapsed(instance.stats.uptime.boot)
+        uptime: this.formatElapsed(instance.stats.uptime.boot),
+        instance: instance
       }
     })
 
+    let buttons = [
+      //{ title: 'Reprovision', handler: instance => this.reprovision(instance) },
+      { title: 'Terminate', handler: row => this.props.onTerminate(row.instance) },
+    ]
+
     return (
-      <Table columns={columns} data={instances} />
+      <Table columns={columns} data={instances} buttons={buttons} />
     )
   }
 

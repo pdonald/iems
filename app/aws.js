@@ -124,7 +124,7 @@ class AwsEc2 {
       if (err) return cb(err)
 
       let instanceId = data.Instances[0].InstanceId;
-      let instanceInfo = new Instance()
+      let instanceInfo = new Instance(aws, instanceId)
       instanceInfo.state = 'launched'
       instanceInfo.config = config
 
@@ -151,8 +151,13 @@ class AwsEc2 {
     })
   }
 
-  terminate() {
-
+  terminate(id) {
+    for (let key in this.aws) {
+      let aws = this.aws[key]
+      if (aws.instances[id]) {
+        aws.instances[id].terminate()
+      }
+    }
   }
 
   refresh() {
@@ -176,7 +181,7 @@ class AwsEc2 {
                 console.error('Unknown config:', config)
               }
 
-              aws.instances[id] = new Instance()
+              aws.instances[id] = new Instance(aws, id)
               aws.instances[id].state = 'launched-tagged'
               aws.instances[id].config = config
             }
@@ -197,16 +202,20 @@ class AwsEc2 {
 // launchuptime (date, time since launch)
 // cost (how much $$ so far)
 
-// spot-requested, spot-pending, spot-fulfilled
+// created, created-tagged,
+// spot-requested, spot-pending, spot-fulfilled, running-connecting,
 // launched, launched-tagged, pending, running, shutting-down, terminated
+// running-provisioning
 class Instance {
-  constructor() {
+  constructor(aws, id) {
+    this.id = id
+    this.aws = aws
     this.state = null
     this.instance = null
     this.instanceLastUpdated = null
     this.config = null
     this.ssh = null
-    this.log = []
+    this.logs = []
 
     this.stats = {
       lastUpdated: null,
@@ -230,6 +239,11 @@ class Instance {
     }
   }
 
+  log(msg) {
+    msg.date = new Date().toString()
+    this.logs.push(msg)
+  }
+
   update(instance, date) {
     this.instanceLastUpdated = date.toString()
     this.instance = instance
@@ -238,7 +252,7 @@ class Instance {
     this.state = instance.State.Name
 
     if (prevState != this.state) {
-      this.log.push({ type: 'state-change', from: prevState, to: this.state, date: date })
+      this.log({ type: 'state-change', from: prevState, to: this.state, date: date })
     }
 
     if (prevState != 'running' && this.state == 'running') {
@@ -260,7 +274,7 @@ class Instance {
       this.refreshStatsTimer = setInterval(() => this.refreshStats(), 30 * 1000)
       this.refreshStats()
 
-      //this.provision()
+      this.provision()
 
       let intv = setInterval(() => {
         if (!this.ssh) return clearInterval(intv)
@@ -277,7 +291,7 @@ class Instance {
         if (err.code == 'ECONNREFUSED' || err.code == 'ETIMEDOUT') {
           this.connect()
         } else {
-          this.log.push({ type: 'ssh-connect-error', errcode: err.code })
+          this.log({ type: 'ssh-connect-error', errcode: err.code })
         }
       } else {
         this.disconnect()
@@ -311,16 +325,59 @@ class Instance {
     }
   }
 
-  provision() {
-    if (this.config.sshScript) {
-      console.log('executing SSH script')
-      sshexec(this.ssh, this.config.sshScript, (err, code, stdout, stderr) => {
-        if (err) throw err
-        console.log('SSH exit: ' + code)
-        if (stdout) console.log('SSH stdout: ' + stdout.trim())
-        if (stderr) console.log('SSH stderr: '+  stderr.trim())
-      })
+  terminate() {
+    this.log({ tag: 'aws', msg: 'terminating' })
+    this.aws.ec2.terminateInstances({ InstanceIds: [this.id] }, (err, data) => {
+      if (err) return this.log({ tag: 'aws', msg: 'error', error: err })
+      this.log({ tag: 'aws', msg: 'terminated' })
+    })
+  }
+
+  provision(force) {
+    if (!this.config.sshScript) {
+      this.log({ tag: 'provision', msg: 'skipped' })
+      return
     }
+
+    if (!force) {
+      if (this.instance.Tags.filter(t => t.Key == 'iems-provision' && t.Value == 'running').length) {
+        this.log({ tag: 'provision', msg: 'skipped-running' })
+        return
+      }
+
+      if (this.instance.Tags.filter(t => t.Key == 'iems-provision' && t.Value == 'done').length) {
+        this.log({ tag: 'provision', msg: 'skipped-done' })
+        return
+      }
+    }
+
+    this.log({ tag: 'provision', msg: 'started', script: this.config.sshScript })
+    this.tag('iems-provision', 'running')
+
+    sshexec(this.ssh, this.config.sshScript, (err, code, stdout, stderr) => {
+      if (err) {
+        this.log({ tag: 'provision', msg: 'error', error: err.code })
+        this.tag('iems-provision', 'failed')
+        return
+      }
+
+      if (code != 0) {
+        this.log({ tag: 'provision', msg: 'failed', code: code, stdout: stdout, stderr: stderr })
+        this.tag('iems-provision', 'failed')
+        return
+      }
+
+      this.log({ tag: 'provision', msg: 'success', stdout: stdout, stderr: stderr })
+      this.tag('iems-provision', 'done')
+    })
+  }
+
+  tag(name, value, cb) {
+    let tag = { Resources: [this.instance.InstanceId], Tags: [ { Key: name, Value: value } ] }
+    this.aws.ec2.createTags(tag, err => {
+      if (err) return this.log({ tag: 'aws-tag', msg: 'error', error: err })
+      cb && cb(name, value)
+    })
   }
 
   refreshStats() {
@@ -367,23 +424,25 @@ class Instance {
     }
 
     let cmd = Object.keys(cmds).join(' && echo === && ')
-    sshexec(this.ssh, cmd, (err, code, stdout) => {
-      if (err) throw err
-      if (code != 0) throw 'Exit code: ' + code
+    sshexec(this.ssh, cmd, (err, code, stdout, stderr) => {
+      if (err) return this.log({ type: 'ssh-error', errcode: err.code })
+      if (code != 0) return this.log({ type: 'ssh-exit-error', errcode: code, stdout: stdout, stderr: stderr })
       let parsers = Object.keys(cmds).map(k => cmds[k])
       stdout.split('===\n').forEach((output, index) => parsers[index](output))
       this.stats.lastUpdated = new Date().toString()
-      console.log(this.stats)
     })
   }
 
   toJSON() {
     return {
+      id: this.id,
+      service: 'awsec2',
       state: this.state,
       connected: !!this.ssh,
       instance: this.instance,
       config: this.config,
-      stats: this.stats
+      stats: this.stats,
+      logs: this.logs
     }
   }
 }
