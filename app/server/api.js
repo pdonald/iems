@@ -1,15 +1,15 @@
-"use strict";
+"use strict"
 
-let express = require('express');
-let bodyParser = require('body-parser')
-let fs = require('fs');
-let path = require('path');
-let AwsEc2 = require('./aws').AwsEc2;
+let fs = require('fs')
+
+let express = require('express')
+
+let AwsEc2 = require('./services/awsec2').AwsEc2;
 
 let awsec2 = new AwsEc2()
 
 let db = {
-  experiments: require('../build/db/experiments.json'),
+  experiments: require('../../build/db/experiments.json'),
   cluster: {
     services: {
       awsec2: awsec2
@@ -17,18 +17,7 @@ let db = {
   }
 }
 
-let app = express();
-
-app.set('json spaces', 2);
-
-app.use(bodyParser.json());
-
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:8080')
-  res.header('Access-Control-Allow-Methods', 'GET,POST,DELETE')
-  res.header('Access-Control-Allow-Headers', 'Content-Type')
-  next()
-})
+let app = module.exports = express.Router()
 
 app.get('/api/cluster/configs', (req, res) => {
   let configs = []
@@ -183,7 +172,6 @@ app.delete('/api/experiments/:id', (req, res) => {
   }
 })
 
-app.get('/bundle.js', (req, res) => fs.createReadStream('../build/bundle.js').pipe(res))
-app.get('*', (req, res) => fs.createReadStream('../build/index.html').pipe(res))
-
-app.listen(8081, () => console.log('Started http://localhost:8081'))
+app.all('/api/*', (req, res) => {
+  res.send(404)
+})
