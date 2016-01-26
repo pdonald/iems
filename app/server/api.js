@@ -4,9 +4,11 @@ let fs = require('fs')
 
 let express = require('express')
 
-let AwsEc2 = require('./services/awsec2').AwsEc2;
+let AwsEc2 = require('./services/awsec2').AwsEc2
 
-let awsec2 = new AwsEc2()
+let cluster = require('../../build/db/cluster.js')
+
+let awsec2 = new AwsEc2(cluster.configs)
 
 let db = {
   experiments: require('../../build/db/experiments.json'),

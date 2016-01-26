@@ -14,23 +14,8 @@ function sshexec(ssh, cmd, cb) {
 }
 
 class AwsEc2 {
-  constructor() {
-    this.configs = {
-      'testconf1': {
-        id: 'testconf1',
-        service: 'awsec2',
-        name: 'AWS EC2 Micro 1GB/1vCPU',
-        accessKeyId: 'AKIAIUF3Z6TBM7PW4GAQ',
-        secretAccessKey: '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',
-        region: 'eu-west-1b',
-        instanceType: 't1.micro',
-        imageId: 'ami-5da23a2a',
-        sshPort: 22,
-        sshUsername: 'ubuntu',
-        sshPrivateKey: require('fs').readFileSync('c:\\users\\peteris\\downloads\\iems-test.pem').toString(),
-        sshScript: 'touch /home/ubuntu/i-was-here && echo I am in!'
-      },
-    }
+  constructor(configs) {
+    this.configs = configs
 
     this.aws = []
 
@@ -53,9 +38,9 @@ class AwsEc2 {
             service: { hidden: true, value: 'awsec2' },
             accessKeyId: { label: 'Access Key' },
             secretAccessKey: { secret: true, label: 'Secret Access Key' },
-            region: { options: { 'eu-west-1': { title: 'EU West (Ireland)', options: ['eu-west-1a', 'eu-west-1b', 'eu-west-1c'] },
-                                'us-east-1': { title: 'US East (N. Virginia)', options: ['us-east-1a', 'us-east-1b', 'us-east-1c', 'us-east-1d', 'us-east-1e'] } },
-                      label: 'Region' },
+            region: { label: 'Region',
+                      options: { 'eu-west-1': { title: 'EU West (Ireland)', options: ['eu-west-1a', 'eu-west-1b', 'eu-west-1c'] },
+                                 'us-east-1': { title: 'US East (N. Virginia)', options: ['us-east-1a', 'us-east-1b', 'us-east-1c', 'us-east-1d', 'us-east-1e'] } } },
             instanceType: { options: ['t1.micro', 'r2.large'], label: 'Instance Type' },
             imageId: { defaultValue: 'ami-5da23a2a', label: 'Image ID' },
             sshPort: { defaultValue: 22, label: 'SSH Port' },
