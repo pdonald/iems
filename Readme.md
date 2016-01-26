@@ -16,7 +16,7 @@ You will need [node.js](https://nodejs.org/en/).
 Here is an easy way to install it:
 
 ```bash
-curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_5.x | sudo -E bash -
 sudo apt-get install -y nodejs
 ```
 
@@ -31,7 +31,8 @@ npm start      # start web server
 For development
 
 ```bash
-npm run dev
+npm run dev &
+npm start
 ```
 
 ### Moses and other tools

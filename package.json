@@ -10,7 +10,7 @@
   "license": "Apache-2.0",
   "main": "server.js",
   "scripts": {
-    "start": "node app/server.js",
+    "start": "node app/server/server.js",
     "build": "webpack --progress --colors -p",
     "dev": "webpack-dev-server --hot --inline --progress --colors --content-base build/"
   },
