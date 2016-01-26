@@ -8,7 +8,8 @@ let AwsEc2 = require('./services/awsec2').AwsEc2
 
 let cluster = require('../../build/db/cluster.js')
 
-let awsec2 = new AwsEc2(cluster.configs)
+let awsec2 = new AwsEc2()
+awsec2.connect(cluster.configs)
 
 let db = {
   experiments: require('../../build/db/experiments.json'),
@@ -21,10 +22,17 @@ let db = {
 
 let app = module.exports = express.Router()
 
+app.use('/api/*', (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'http://localhost:8080') // todo
+  res.header('Access-Control-Allow-Methods', 'GET,POST,DELETE')
+  res.header('Access-Control-Allow-Headers', 'Content-Type')
+  next()
+})
+
 app.get('/api/cluster/configs', (req, res) => {
   let configs = []
   for (let id in db.cluster.services) {
-    let serviceConfigs = db.cluster.services[id].getData().configs
+    let serviceConfigs = db.cluster.services[id].toJSON().configs
     for (let cid in serviceConfigs) {
       configs.push(serviceConfigs[cid])
     }
@@ -35,19 +43,19 @@ app.get('/api/cluster/configs', (req, res) => {
 app.get('/api/cluster/services', (req, res) => {
   let services = {}
   for (let id in db.cluster.services)
-    services[id] = db.cluster.services[id].getData()
+    services[id] = db.cluster.services[id].toJSON()
   res.send(services)
 })
 
 app.get('/api/cluster/services/:id', (req, res) => {
   const service = db.cluster.services[req.params.id]
-  if (service) res.send(service.getData())
+  if (service) res.send(service.toJSON())
   else res.status(404).send()
 })
 
 app.get('/api/cluster/services/:id/instances', (req, res) => {
   const service = db.cluster.services[req.params.id]
-  if (service) res.send(service.getData().instances)
+  if (service) res.send(service.toJSON().instances)
   else res.status(404).send()
 })
 
@@ -63,19 +71,19 @@ app.delete('/api/cluster/services/:id/instances/:iid', (req, res) => {
 
 app.get('/api/cluster/services/:id/configs', (req, res) => {
   const service = db.cluster.services[req.params.id]
-  if (service) res.send(service.getData().configs)
+  if (service) res.send(service.toJSON().configs)
   else res.status(404).send()
 })
 
 app.post('/api/cluster/services/:id/configs', (req, res) => {
   const service = db.cluster.services[req.params.id]
   if (service) {
-    let configs = service.getData().configs
+    let configs = service.configs
     let config = req.body
     config.id = Object.keys(configs).length + 1
     configs[config.id] = config
-    service.setup(configs)
-    res.send(config)
+    service.connect(configs)
+    res.send(service.toJSON().configs[config.id])
   } else {
     res.status(404).send('No such service')
   }
@@ -84,7 +92,7 @@ app.post('/api/cluster/services/:id/configs', (req, res) => {
 app.get('/api/cluster/services/:id/configs/:cid', (req, res) => {
   const service = db.cluster.services[req.params.id]
   if (service) {
-    const config = service.getData().configs[req.params.cid]
+    const config = service.toJSON().configs[req.params.cid]
     if (config) res.send(config)
     else res.status(404).send('No such config')
   } else {
@@ -95,13 +103,14 @@ app.get('/api/cluster/services/:id/configs/:cid', (req, res) => {
 app.post('/api/cluster/services/:id/configs/:cid', (req, res) => {
   const service = db.cluster.services[req.params.id]
   if (service) {
-    let config = service.getData().configs[req.params.cid]
+    let config = service.toJSON().configs[req.params.cid]
     if (config) {
       // todo: validate
       config = Object.assign({}, config, req.body)
       config.id = req.params.cid
-      service.getData().configs[config.id] = config
-      res.send(config)
+      service.configs[config.id] = config
+      service.connect(service.configs)
+      res.send(service.toJSON().configs[config.id])
     } else {
       res.status(404).send('No such config')
     }
@@ -113,9 +122,9 @@ app.post('/api/cluster/services/:id/configs/:cid', (req, res) => {
 app.delete('/api/cluster/services/:id/configs/:cid', (req, res) => {
   const service = db.cluster.services[req.params.id]
   if (service) {
-    const config = service.getData().configs[req.params.cid]
+    const config = service.toJSON().configs[req.params.cid]
     if (config) {
-      delete service.getData().configs[config.id]
+      delete service.configs[config.id]
       res.send()
     } else {
       res.status(404).send('No such config')
@@ -128,7 +137,7 @@ app.delete('/api/cluster/services/:id/configs/:cid', (req, res) => {
 app.post('/api/cluster/services/:id/configs/:cid/launch', (req, res) => {
   const service = db.cluster.services[req.params.id]
   if (service) {
-    const config = service.getData().configs[req.params.cid]
+    const config = service.configs[req.params.cid]
     if (config) {
       if (config.service == 'awsec2') {
         console.log('launching', config)
@@ -175,5 +184,5 @@ app.delete('/api/experiments/:id', (req, res) => {
 })
 
 app.all('/api/*', (req, res) => {
-  res.send(404)
+  res.sendStatus(req.method == 'OPTIONS' ? 200 : 404)
 })

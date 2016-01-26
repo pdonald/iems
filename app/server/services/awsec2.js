@@ -1,6 +1,16 @@
 "use strict";
 
+let crypto = require('crypto')
+
 let SshClient = require('ssh2').Client;
+
+function md5(s) {
+  return crypto.createHash('md5').update(s).digest('hex')
+}
+
+function clone(obj) {
+  return JSON.parse(JSON.stringify(obj))
+}
 
 function sshexec(ssh, cmd, cb) {
   ssh.exec(cmd, (err, stream) => {
@@ -14,18 +24,154 @@ function sshexec(ssh, cmd, cb) {
 }
 
 class AwsEc2 {
-  constructor(configs) {
-    this.configs = configs
-
+  constructor() {
+    this.configs = {}
     this.aws = []
 
-    this.setup(this.configs)
-
     this.data = {
+
+    }
+
+    setInterval(() => this.refresh(), 1000)
+  }
+
+  connect(configs) {
+    for (let id in configs) {
+      let config = configs[id]
+
+      if (config.service == 'awsec2') {
+        let region = config.region.substr(0, config.region.length - 1)
+        let hash = [region, config.accessKeyId, md5(config.secretAccessKey)].join('/')
+
+        if (!this.aws[hash]) {
+          let AWS = require('aws-sdk') // todo: check multiple regions
+          AWS.config.update({ region: region, accessKeyId: config.accessKeyId, secretAccessKey: config.secretAccessKey })
+          this.aws[hash] = {
+            ec2: new AWS.EC2(),
+            instances: {}
+          }
+        }
+
+        this.configs[id] = config
+      }
+    }
+  }
+
+  launch(config) {
+    this.connect({ [config.id]: config })
+
+    let region = config.region.substr(0, config.region.length - 1)
+    let hash = [region, config.accessKeyId, md5(config.secretAccessKey)].join('/')
+    let aws = this.aws[hash]
+
+    if (!aws) {
+      throw 'Unknown access point'
+    }
+
+    let params = {
+      ImageId: config.imageId,
+      InstanceType: config.instanceType,
+      MinCount: 1, MaxCount: 1,
+      Placement: { AvailabilityZone: config.region },
+      KeyName: 'iEMS-test' // todo
+    }
+
+    aws.ec2.runInstances(params, (err, data) => {
+      if (err) throw err
+
+      let instanceId = data.Instances[0].InstanceId;
+      let instanceInfo = new Instance(aws, instanceId)
+      instanceInfo.state = 'launched'
+      instanceInfo.config = config
+
+      aws.instances[instanceId] = instanceInfo
+
+      params = {
+        Resources: [instanceId],
+        Tags: [
+          { Key: 'Name', Value: 'iEMS #' + config.id + ': ' + config.name },
+          { Key: 'iems', Value: 'true' },
+          { Key: 'iems-config', Value: config.id },
+        ]
+      }
+
+      aws.ec2.createTags(params, (err) => {
+        if (err) {
+          instanceInfo.state = 'error'
+          instanceInfo.error = err
+          return
+        }
+
+        instanceInfo.state = 'launched-tagged'
+      })
+    })
+  }
+
+  terminate(id) {
+    for (let key in this.aws) {
+      let aws = this.aws[key]
+      if (aws.instances[id]) {
+        aws.instances[id].terminate()
+      }
+    }
+  }
+
+  refresh() {
+    let params = { Filters: [ { Name: 'tag:iems', Values: [ 'true' ] } ] }
+
+    for (let key in this.aws) {
+      let aws = this.aws[key]
+      aws.ec2.describeInstances(params, (err, data) => {
+        if (err) throw err
+
+        // todo: check timestamp
+
+        for (let reservation of data.Reservations) {
+          for (let instance of reservation.Instances) {
+            let id = instance.InstanceId
+
+            if (!aws.instances[id]) {
+              let configId = instance.Tags.filter(t => t.Key == 'iems-config').map(t => t.Value)[0]
+              let config = this.configs[configId]
+
+              if (!config) {
+                console.error('Unknown config:', config)
+              }
+
+              aws.instances[id] = new Instance(aws, id)
+              aws.instances[id].state = 'launched-tagged'
+              aws.instances[id].config = config
+            }
+
+            aws.instances[id].update(instance, new Date())
+          }
+        }
+      })
+    }
+  }
+
+  toJSON() {
+    let configs = {}
+    for (let id in this.configs) {
+      let config = clone(this.configs[id])
+      config.secretAccessKey = ''
+      configs[id] = config
+    }
+
+    let instances = []
+    for (let hash in this.aws) {
+      let aws = this.aws[hash]
+      for (let i in aws.instances) {
+        instances.push(aws.instances[i].toJSON())
+      }
+    }
+
+    return {
       id: 'awsec2',
       name: 'AWS EC2',
       title: 'Amazon Web Services (AWS) Elastic Cloud Compute (EC2)',
-      configs: this.configs,
+      configs: configs,
+      instances: instances,
       ui: {
         configs: {
           columns: {
@@ -51,146 +197,9 @@ class AwsEc2 {
         }
       }
     }
-
-    setInterval(() => this.refresh(), 1000)
-  }
-
-  getData() {
-    let data = Object.assign({}, {}, this.data)
-    data.instances = []
-    for (let hash in this.aws) {
-      let aws = this.aws[hash]
-      for (let i in aws.instances) {
-        data.instances.push(aws.instances[i].toJSON())
-      }
-    }
-    return data
-  }
-
-  setup(configs) {
-    for (let id in this.configs) {
-      let config = this.configs[id]
-      if (config.service == 'awsec2') {
-        let region = config.region.substr(0, config.region.length - 1)
-        let hash = [region, config.accessKeyId, config.secretAccessKey].join('/')
-
-        if (!this.aws[hash]) {
-          let AWS = require('aws-sdk')
-          AWS.config.update({ region: region, accessKeyId: config.accessKeyId, secretAccessKey: config.secretAccessKey })
-          this.aws[hash] = {
-            ec2: new AWS.EC2(),
-            instances: {}
-          }
-        }
-      }
-    }
-  }
-
-  launch(config, cb) {
-    this.setup(this.configs)
-
-    let region = config.region.substr(0, config.region.length - 1)
-    let hash = [region, config.accessKeyId, config.secretAccessKey].join('/')
-    let aws = this.aws[hash]
-
-    if (!aws) {
-      throw 'Unknown access point'
-    }
-
-    let params = {
-      ImageId: config.imageId,
-      InstanceType: config.instanceType,
-      MinCount: 1, MaxCount: 1,
-      Placement: { AvailabilityZone: config.region },
-      KeyName: 'iEMS-test'
-    }
-
-    aws.ec2.runInstances(params, (err, data) => {
-      if (err) return cb(err)
-
-      let instanceId = data.Instances[0].InstanceId;
-      let instanceInfo = new Instance(aws, instanceId)
-      instanceInfo.state = 'launched'
-      instanceInfo.config = config
-
-      aws.instances[instanceId] = instanceInfo
-
-      params = {
-        Resources: [instanceId],
-        Tags: [
-          { Key: 'Name', Value: 'iEMS #' + config.id + ': ' + config.name },
-          { Key: 'iems', Value: 'true' },
-          { Key: 'iems-config', Value: config.id },
-        ]
-      }
-
-      aws.ec2.createTags(params, (err) => {
-        if (err) {
-          instanceInfo.state = 'error'
-          instanceInfo.error = err
-          return;
-        }
-
-        instanceInfo.state = 'launched-tagged'
-      })
-    })
-  }
-
-  terminate(id) {
-    for (let key in this.aws) {
-      let aws = this.aws[key]
-      if (aws.instances[id]) {
-        aws.instances[id].terminate()
-      }
-    }
-  }
-
-  refresh() {
-    for (let key in this.aws) {
-      let aws = this.aws[key]
-
-      let params = { Filters: [ { Name: 'tag:iems', Values: [ 'true' ] } ] }
-
-      aws.ec2.describeInstances(params, (err, data) => {
-        if (err) throw err;
-        // todo: check timestamp
-        for (let reservation of data.Reservations) {
-          for (let instance of reservation.Instances) {
-            let id = instance.InstanceId
-
-            if (!aws.instances[id]) {
-              let configId = instance.Tags.filter(t => t.Key == 'iems-config').map(t => t.Value)[0]
-              let config = this.configs[configId]
-
-              if (!config) {
-                console.error('Unknown config:', config)
-              }
-
-              aws.instances[id] = new Instance(aws, id)
-              aws.instances[id].state = 'launched-tagged'
-              aws.instances[id].config = config
-            }
-
-            aws.instances[id].update(instance, new Date())
-          }
-        }
-        //console.log(aws.instances)
-      })
-    }
   }
 }
 
-// updates every 30sec from describeInstances()
-// on connect => get specs
-// update load/disk/mem every 20s
-
-// launchuptime (date, time since launch)
-// cost (how much $$ so far)
-
-// created, created-tagged,
-// spot-requested, spot-pending, spot-fulfilled, running-connecting,
-// launched, launched-tagged, pending, running, shutting-down, terminated
-// running-provisioning
 class Instance {
   constructor(aws, id) {
     this.id = id

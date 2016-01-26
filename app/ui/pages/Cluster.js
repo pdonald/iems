@@ -62,6 +62,8 @@ export default class Cluster extends React.Component {
         <h2>Machines</h2>
         {this.renderInstances()}
         {this.renderLogs()}
+
+        // show also if other non-iems ec2 instances are running
       </div>
     )
   }
