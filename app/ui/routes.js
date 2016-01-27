@@ -7,7 +7,6 @@ import Experiments from './pages/Experiments'
 import Experiment from './pages/Experiment'
 import Cluster from './pages/Cluster'
 import * as ClusterConfigs from './pages/ClusterConfigs'
-import About from './pages/About'
 
 export default (
   <Router history={browserHistory}>
@@ -19,7 +18,6 @@ export default (
       <Route path="cluster/configs" component={ClusterConfigs.Index}/>
       <Route path="cluster/configs/:service/add" component={ClusterConfigs.Edit}/>
       <Route path="cluster/configs/:service/:id" component={ClusterConfigs.Edit}/>
-      <Route path="about" component={About}/>
     </Route>
   </Router>
 )
