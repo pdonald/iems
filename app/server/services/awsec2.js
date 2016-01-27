@@ -28,10 +28,6 @@ class AwsEc2 {
     this.configs = {}
     this.aws = []
 
-    this.data = {
-
-    }
-
     setInterval(() => this.refresh(), 1000)
   }
 
