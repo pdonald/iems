@@ -139,12 +139,12 @@ class Instances extends React.Component {
         id: instance.id,
         state: instance.state,
         config: instance.config.name,
-        loadavg: instance.stats.cpu.loadavg && instance.stats.cpu.loadavg.join(' '),
-        cores: instance.stats.cpu.cores,
-        ram: instance.stats.memory.ram ? this.format(instance.stats.memory.ram.used) + ' / ' + this.format(instance.stats.memory.ram.total) : null,
-        swap: instance.stats.memory.swap ? this.format(instance.stats.memory.swap.used) + ' / ' + this.format(instance.stats.memory.swap.total) : null,
-        disk: instance.stats.memory.disk ? this.format(instance.stats.memory.disk.used) + ' / ' + this.format(instance.stats.memory.disk.total) : null,
-        uptime: this.formatElapsed(instance.stats.uptime.boot),
+        loadavg: instance.stats && instance.stats.cpu.loadavg && instance.stats.cpu.loadavg.join(' '),
+        cores: instance.stats && instance.stats.cpu.cores,
+        ram: instance.stats && instance.stats.memory.ram ? this.format(instance.stats.memory.ram.used) + ' / ' + this.format(instance.stats.memory.ram.total) : null,
+        swap: instance.stats && instance.stats.memory.swap ? this.format(instance.stats.memory.swap.used) + ' / ' + this.format(instance.stats.memory.swap.total) : null,
+        disk: instance.stats && instance.stats.memory.disk ? this.format(instance.stats.memory.disk.used) + ' / ' + this.format(instance.stats.memory.disk.total) : null,
+        uptime: instance.stats && this.formatElapsed(instance.stats.uptime.boot),
         instance: instance
       }
     })
