@@ -1,3 +1,4 @@
 build/bundle.js
+build/vagrant/
 node_modules/
 .vagrant

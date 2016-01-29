@@ -1,5 +1,14 @@
 module.exports = {
   configs: {
+    'testconf2': {
+      id: 'testconf2',
+      service: 'vagrant',
+      name: 'Vagrant Ubuntu 14.04 LTS x64',
+      box: 'ubuntu/trusty64',
+      memory: '256',
+      cores: '1',
+      sshScript: 'touch /home/ubuntu/i-was-here && echo I am in!'
+    },
     'testconf1': {
       id: 'testconf1',
       service: 'awsec2',

@@ -5,17 +5,23 @@ let fs = require('fs')
 let express = require('express')
 
 let AwsEc2 = require('./services/awsec2').AwsEc2
+let Vagrant = require('./services/vagrant').Vagrant
 
 let cluster = require('../../build/db/cluster.js')
 
 let awsec2 = new AwsEc2()
+let vagrant = new Vagrant()
+
 awsec2.connect(cluster.configs)
+vagrant.connect(cluster.configs)
+vagrant.scan()
 
 let db = {
   experiments: require('../../build/db/experiments.json'),
   cluster: {
     services: {
-      awsec2: awsec2
+      awsec2: awsec2,
+      vagrant: vagrant
     }
   }
 }
@@ -143,6 +149,10 @@ app.post('/api/cluster/services/:id/configs/:cid/launch', (req, res) => {
         console.log('launching', config)
         awsec2.launch(config)
         res.send()
+      } else if (config.service == 'vagrant') {
+          console.log('launching', config)
+          vagrant.launch(config)
+          res.send()
       } else {
         res.status(500).send('Not supported yet')
       }
