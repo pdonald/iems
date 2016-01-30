@@ -117,8 +117,8 @@ class Instance {
 
     let vagrantup = spawn('vagrant', ['up'], { cwd: this.dir })
 
-    vagrantup.stdout.on('data', (data) => console.log(`stdout: ${data.trim()}`))
-    vagrantup.stderr.on('data', (data) => console.log(`stderr: ${data.trim()}`))
+    vagrantup.stdout.on('data', (data) => console.log(`stdout: ${data.toString().trim()}`))
+    vagrantup.stderr.on('data', (data) => console.log(`stderr: ${data.toString().trim()}`))
 
     vagrantup.on('close', (code) => {
       console.log(`child process exited with code ${code}`)
