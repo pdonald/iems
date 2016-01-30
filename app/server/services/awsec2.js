@@ -209,23 +209,7 @@ class Instance {
 
       this.state = 'launched'
 
-      let params = {
-        Resources: [data.Instances[0].InstanceId],
-        Tags: [
-          { Key: 'Name', Value: 'iEMS #' + this.config.id + ': ' + this.config.name },
-          { Key: 'iems', Value: 'true' },
-          { Key: 'iems-config', Value: this.config.id },
-          { Key: 'iems-id', Value: this.id },
-        ]
-      }
-
-      this.aws.ec2.createTags(params, (err) => {
-        if (err) {
-          this.state = 'error'
-          this.error = err
-          return
-        }
-      })
+      this.tagid(data.Instances[0].InstanceId)
     })
   }
 
@@ -254,23 +238,7 @@ class Instance {
       this.spotRequest = data.SpotInstanceRequests[0]
       this.state = 'spot-requested'
 
-      let params = {
-        Resources: [this.spotRequest.SpotInstanceRequestId],
-        Tags: [
-          { Key: 'Name', Value: 'iEMS #' + this.config.id + ': ' + this.config.name },
-          { Key: 'iems', Value: 'true' },
-          { Key: 'iems-config', Value: this.config.id },
-          { Key: 'iems-id', Value: this.id },
-        ]
-      }
-
-      this.aws.ec2.createTags(params, (err) => {
-        if (err) {
-          this.state = 'error'
-          this.error = err
-          return
-        }
-      })
+      this.tagid(this.spotRequest.SpotInstanceRequestId)
     })
   }
 
@@ -299,23 +267,7 @@ class Instance {
       this.state = 'spot-' + this.spotRequest.State
 
       if (this.spotRequest.State == 'active' && this.spotRequest.InstanceId) {
-        let params = {
-          Resources: [this.spotRequest.InstanceId],
-          Tags: [
-            { Key: 'Name', Value: 'iEMS #' + this.config.id + ': ' + this.config.name },
-            { Key: 'iems', Value: 'true' },
-            { Key: 'iems-config', Value: this.config.id },
-            { Key: 'iems-id', Value: this.id },
-          ]
-        }
-
-        this.aws.ec2.createTags(params, (err) => {
-          if (err) {
-            this.state = 'error'
-            this.error = err
-            return
-          }
-        })
+        this.tagid(this.spotRequest.InstanceId)
       }
     }
   }
@@ -362,6 +314,26 @@ class Instance {
     this.aws.ec2.createTags(tag, err => {
       if (err) return this.log({ tag: 'aws-tag', msg: 'error', error: err })
       cb && cb(name, value)
+    })
+  }
+
+  tagid(id) {
+    let params = {
+      Resources: [id],
+      Tags: [
+        { Key: 'Name', Value: 'iEMS #' + this.config.id + ': ' + this.config.name },
+        { Key: 'iems', Value: 'true' },
+        { Key: 'iems-config', Value: this.config.id },
+        { Key: 'iems-id', Value: this.id },
+      ]
+    }
+
+    this.aws.ec2.createTags(params, (err) => {
+      if (err) {
+        this.state = 'error'
+        this.error = err
+        return
+      }
     })
   }
 
