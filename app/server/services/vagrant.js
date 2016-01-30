@@ -143,6 +143,7 @@ class Instance {
           port: port,
           username: 'vagrant',
           password: 'vagrant',
+          provision: this.config.sshScript
         }
 
         this.ssh = new SshConnection(sshconfig)
@@ -154,13 +155,12 @@ class Instance {
   disconnect() {
     if (this.ssh) {
       this.ssh.disconnect()
+      this.ssh = null
     }
   }
 
   terminate() {
-    if (this.ssh) {
-      this.ssh.disconnect()
-    }
+    this.disconnect()
 
     let destroy = spawn('vagrant', ['destroy', '-f'], { cwd: this.dir })
     destroy.stdout.on('data', (data) => console.log(`stdout: ${data.toString().trim()}`))

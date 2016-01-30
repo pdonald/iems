@@ -225,6 +225,7 @@ class Instance {
       port: this.config.sshPort || 22,
       username: this.config.sshUsername || 'ubuntu',
       privateKey: this.config.sshPrivateKey,
+      provision: this.config.sshScript
     }
 
     this.ssh = new SshConnection(sshconfig)
@@ -234,6 +235,7 @@ class Instance {
   disconnect() {
     if (this.ssh) {
       this.ssh.disconnect()
+      this.ssh = null
     }
   }
 

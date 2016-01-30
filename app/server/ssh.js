@@ -1,5 +1,7 @@
 "use strict"
 
+let events = require('events')
+
 let SshClient = require('ssh2').Client
 
 function sshexec(ssh, cmd, cb) {
@@ -13,9 +15,11 @@ function sshexec(ssh, cmd, cb) {
   })
 }
 
-class Connection {
+class Connection extends events.EventEmitter {
   constructor(config) {
     this.state = null
+    this.error = null
+
     this.config = config
     this.ssh = null
 
@@ -43,6 +47,7 @@ class Connection {
 
   connect() {
     this.state = 'connecting'
+    this.error = null
 
     let ssh = new SshClient()
 
@@ -53,7 +58,7 @@ class Connection {
       this.refreshStatsTimer = setInterval(() => this.refreshStats(), 30 * 1000)
       this.refreshStats()
 
-      //this.provision()
+      this.provision()
       this.ping()
     })
 
@@ -62,8 +67,8 @@ class Connection {
         if (err.code == 'ECONNREFUSED' || err.code == 'ETIMEDOUT') {
           this.connect()
         } else {
-          throw err
-          //this.log({ type: 'ssh-connect-error', errcode: err.code })
+          this.state = 'error'
+          this.error = err
         }
       } else {
         this.disconnect()
@@ -88,13 +93,12 @@ class Connection {
     if (this.ssh) {
       this.ssh.end()
       this.ssh = null
-      this.state = 'disconnected'
     }
+
+    this.state = 'disconnected'
   }
 
   refreshStats() {
-    if (!this.ssh) return // disconnected
-
     let cmds = {
       'cat /proc/uptime': (stdout) => {
         this.stats.uptime.boot = parseInt(stdout.trim().split(/\s+/)[0])
@@ -137,8 +141,8 @@ class Connection {
 
     let cmd = Object.keys(cmds).join(' && echo === && ')
     sshexec(this.ssh, cmd, (err, code, stdout, stderr) => {
-      //if (err) return this.log({ type: 'ssh-error', errcode: err.code })
-      //if (code != 0) return this.log({ type: 'ssh-exit-error', errcode: code, stdout: stdout, stderr: stderr })
+      if (err) return // this.log({ type: 'ssh-error', errcode: err.code })
+      if (code != 0) return // this.log({ type: 'ssh-exit-error', errcode: code, stdout: stdout, stderr: stderr })
       let parsers = Object.keys(cmds).map(k => cmds[k])
       stdout.split('===\n').forEach((output, index) => parsers[index](output))
       this.stats.lastUpdated = new Date().toString()
@@ -146,7 +150,7 @@ class Connection {
   }
 
   provision(force) {
-    if (!this.config.sshScript) {
+    if (!this.config.provision) {
       this.log({ tag: 'provision', msg: 'skipped' })
       return
     }
@@ -163,10 +167,10 @@ class Connection {
       }
     }
 
-    this.log({ tag: 'provision', msg: 'started', script: this.config.sshScript })
+    this.log({ tag: 'provision', msg: 'started', script: this.config.provision })
     this.tag('iems-provision', 'running')
 
-    sshexec(this.ssh, this.config.sshScript, (err, code, stdout, stderr) => {
+    sshexec(this.ssh, this.config.provision, (err, code, stdout, stderr) => {
       if (err) {
         this.log({ tag: 'provision', msg: 'error', error: err.code })
         this.tag('iems-provision', 'failed')
