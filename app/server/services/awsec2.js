@@ -57,8 +57,7 @@ class AwsEc2 {
     let id = config.id + '-' + Math.round(Math.random()*1000)
     let instance = new Instance(aws, id, config)
     instance.launch()
-
-    //this.instances[id] = instance
+    this.instances[id] = instance
   }
 
   terminate(id) {
@@ -72,6 +71,7 @@ class AwsEc2 {
 
     for (let key in this.aws) {
       let aws = this.aws[key]
+
       aws.ec2.describeInstances(params, (err, data) => {
         if (err) throw err
 
@@ -79,7 +79,11 @@ class AwsEc2 {
 
         for (let reservation of data.Reservations) {
           for (let instance of reservation.Instances) {
-            let id = instance.InstanceId
+            let id = instance.Tags.filter(t => t.Key == 'iems-id').map(t => t.Value)[0]
+
+            if (!id) {
+              continue
+            }
 
             if (!this.instances[id]) {
               let configId = instance.Tags.filter(t => t.Key == 'iems-config').map(t => t.Value)[0]
@@ -94,6 +98,31 @@ class AwsEc2 {
 
             this.instances[id].update(instance, new Date())
           }
+        }
+      })
+
+      aws.ec2.describeSpotInstanceRequests(params, (err, data) => {
+        if (err) throw err
+
+        for (let request of data.SpotInstanceRequests) {
+          let id = request.Tags.filter(t => t.Key == 'iems-id').map(t => t.Value)[0]
+
+          if (!id) {
+            continue
+          }
+
+          if (!this.instances[id]) {
+            let configId = request.Tags.filter(t => t.Key == 'iems-config').map(t => t.Value)[0]
+            let config = this.configs[configId]
+
+            if (!config) {
+              console.error('Unknown config:', config)
+            }
+
+            this.instances[id] = new Instance(aws, id, config)
+          }
+
+          this.instances[id].updateSpot(request)
         }
       })
     }
@@ -147,6 +176,7 @@ class Instance {
     this.id = id
     this.aws = aws
     this.state = null
+    this.spotRequest = null
     this.instance = null
     this.instanceLastUpdated = null
     this.config = config
@@ -155,6 +185,13 @@ class Instance {
   }
 
   launch() {
+    if (this.config.spotPrice) {
+      this.launchSpot()
+      return
+    }
+
+    this.state = 'launching'
+
     let params = {
       ImageId: this.config.imageId,
       InstanceType: this.config.instanceType,
@@ -170,15 +207,15 @@ class Instance {
         return
       }
 
-      this.id = data.Instances[0].InstanceId
       this.state = 'launched'
 
-      params = {
+      let params = {
         Resources: [data.Instances[0].InstanceId],
         Tags: [
           { Key: 'Name', Value: 'iEMS #' + this.config.id + ': ' + this.config.name },
           { Key: 'iems', Value: 'true' },
           { Key: 'iems-config', Value: this.config.id },
+          { Key: 'iems-id', Value: this.id },
         ]
       }
 
@@ -188,8 +225,51 @@ class Instance {
           this.error = err
           return
         }
+      })
+    })
+  }
 
-        this.state = 'launched-tagged'
+  launchSpot() {
+    this.state = 'spot-requesting'
+
+    let params = {
+      LaunchSpecification: {
+        ImageId: this.config.imageId,
+        InstanceType: this.config.instanceType,
+        Placement: { AvailabilityZone: this.config.region },
+        KeyName: 'iEMS-test' // todo
+      },
+      InstanceCount: 1,
+      SpotPrice: this.config.spotPrice,
+      Type: 'one-time'
+    }
+
+    this.aws.ec2.requestSpotInstances(params, (err, data) => {
+      if (err) {
+        this.state = 'error'
+        this.error = err
+        return
+      }
+
+      this.spotRequest = data.SpotInstanceRequests[0]
+      this.state = 'spot-requested'
+
+      let params = {
+        Resources: [this.spotRequest.SpotInstanceRequestId],
+        Tags: [
+          { Key: 'Name', Value: 'iEMS #' + this.config.id + ': ' + this.config.name },
+          { Key: 'iems', Value: 'true' },
+          { Key: 'iems-config', Value: this.config.id },
+          { Key: 'iems-id', Value: this.id },
+        ]
+      }
+
+      this.aws.ec2.createTags(params, (err) => {
+        if (err) {
+          this.state = 'error'
+          this.error = err
+          return
+        }
       })
     })
   }
@@ -209,6 +289,34 @@ class Instance {
       this.connect()
     } else if (prevState == 'running' && this.state != 'running') {
       this.disconnect()
+    }
+  }
+
+  updateSpot(request) {
+    this.spotRequest = request
+
+    if (!this.instance) {
+      this.state = 'spot-' + this.spotRequest.State
+
+      if (this.spotRequest.State == 'active' && this.spotRequest.InstanceId) {
+        let params = {
+          Resources: [this.spotRequest.InstanceId],
+          Tags: [
+            { Key: 'Name', Value: 'iEMS #' + this.config.id + ': ' + this.config.name },
+            { Key: 'iems', Value: 'true' },
+            { Key: 'iems-config', Value: this.config.id },
+            { Key: 'iems-id', Value: this.id },
+          ]
+        }
+
+        this.aws.ec2.createTags(params, (err) => {
+          if (err) {
+            this.state = 'error'
+            this.error = err
+            return
+          }
+        })
+      }
     }
   }
 
@@ -233,6 +341,15 @@ class Instance {
   }
 
   terminate() {
+    if (this.spotRequest) {
+      this.log({ tag: 'aws', msg: 'canceling-spot' })
+      let params = { SpotInstanceRequestIds: [ this.spotRequest.SpotInstanceRequestId ] }
+      this.aws.ec2.cancelSpotInstanceRequests(params, (err, data) => {
+        if (err) return this.log({ tag: 'aws', msg: 'error', error: err })
+        this.log({ tag: 'aws', msg: 'canceled-spot' })
+      })
+    }
+
     this.log({ tag: 'aws', msg: 'terminating' })
     this.aws.ec2.terminateInstances({ InstanceIds: [this.instance.InstanceId] }, (err, data) => {
       if (err) return this.log({ tag: 'aws', msg: 'error', error: err })
