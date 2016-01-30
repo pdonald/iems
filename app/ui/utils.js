@@ -34,6 +34,10 @@ export function merge(obj, changed) {
   return Object.assign({}, obj, changed)
 }
 
+export function deepmerge(obj, changes) {
+  return jQuery.extend(true, {}, obj, changes)
+}
+
 export function get(url) {
   return jQuery.get(url)
 }

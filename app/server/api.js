@@ -1,30 +1,31 @@
 "use strict"
 
 let fs = require('fs')
-
 let express = require('express')
+let stringify = require('json-stringify-pretty-compact')
 
 let AwsEc2 = require('./services/awsec2').AwsEc2
 let Vagrant = require('./services/vagrant').Vagrant
 
-let cluster = require('../../build/db/cluster.js')
+function loaddb() {
+  db = JSON.parse(fs.readFileSync(dbfile))
+}
+
+function savedb() {
+  fs.writeFileSync(dbfile, stringify(db, { maxLength: 160 }))
+}
+
+let db = {}
+let dbfile = __dirname + '/../../build/db.json'
+
+loaddb()
 
 let awsec2 = new AwsEc2()
 let vagrant = new Vagrant()
 
-awsec2.connect(cluster.configs)
-vagrant.connect(cluster.configs)
+awsec2.connect(db.cluster.configs)
+vagrant.connect(db.cluster.configs)
 vagrant.scan()
-
-let db = {
-  experiments: require('../../build/db/experiments.json'),
-  cluster: {
-    services: {
-      awsec2: awsec2,
-      vagrant: vagrant
-    }
-  }
-}
 
 let app = module.exports = express.Router()
 
@@ -179,14 +180,14 @@ app.get('/api/experiments/:id', (req, res) => {
 
 app.post('/api/experiments/:id', (req, res) => {
   db.experiments[req.params.id] = req.body
-  fs.writeFileSync('../build/db/experiments.json', JSON.stringify(db.experiments, null, 2))
+  savedb()
   res.send('ok')
 })
 
 app.delete('/api/experiments/:id', (req, res) => {
   if (db.experiments[req.params.id]) {
     delete db.experiments[req.params.id]
-    fs.writeFileSync('../build/db/experiments.json', JSON.stringify(db.experiments, null, 2))
+    savedb()
     res.send('ok')
   } else {
     res.send(404, 'Not found')

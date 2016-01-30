@@ -21,6 +21,7 @@
     "body-parser": "^1.13.3",
     "express": "^4.13.3",
     "glob": "^6.0.4",
+    "json-stringify-pretty-compact": "^1.0.1",
     "rimraf": "^2.5.1"
   },
   "devDependencies": {
