@@ -479,3 +479,25 @@ table.experiments {
   float: right;
   padding: 10px;
 }
+
+.cool-table {
+  th {
+    user-select: none;
+    text-align: left;
+
+    &.sortable {
+      cursor: pointer;
+    }
+
+    .arrow {
+      float: right;
+      padding-left: 8px;
+    }
+  }
+
+  td.actions {
+    button {
+      margin: 0 2px;
+    }
+  }
+}

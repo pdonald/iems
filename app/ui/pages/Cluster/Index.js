@@ -60,7 +60,6 @@ export default class Cluster extends React.Component {
 
         <h2>Machines</h2>
         {this.renderInstances()}
-        {this.renderLogs()}
 
         {/*show also if other non-iems ec2 instances are running*/}
       </div>
@@ -141,6 +140,7 @@ class Instances extends React.Component {
     let instances = this.props.instances.map(instance => {
       return {
         id: instance.id,
+        service: instance.service,
         state: instance.state,
         config: instance.config.name,
         loadavg: instance.stats && instance.stats.cpu.loadavg && instance.stats.cpu.loadavg.join(' '),
@@ -158,9 +158,7 @@ class Instances extends React.Component {
       { title: 'Terminate', handler: row => this.props.onTerminate(row.instance) },
     ]
 
-    return (
-      <Table columns={columns} data={instances} buttons={buttons} />
-    )
+    return <Table columns={columns} rows={instances} buttons={buttons} id={row => row.service + '/' + row.id} />
   }
 
   format(bytes) {

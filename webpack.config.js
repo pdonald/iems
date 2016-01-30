@@ -9,12 +9,13 @@ module.exports = {
         query: { presets: ['es2015', 'react'] },
         exclude: /node_modules/
       },
-      { test: /\.less$/, loader: 'style-loader!css-loader!less-loader' },
+      { test: /\.less$/, loader: 'style-loader!css-loader!less-loader!postcss-loader' },
     ]
   },
   resolve: {
     extensions: ['', '.js']
   },
+  postcss: () => [require('autoprefixer')],
   devtool: 'inline-source-map',
   devServer: { historyApiFallback: true }
-};
+}

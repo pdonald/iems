@@ -18,10 +18,12 @@
     "node": ">=4.0.0"
   },
   "dependencies": {
+    "autoprefixer": "^6.3.1",
     "body-parser": "^1.13.3",
     "express": "^4.13.3",
     "glob": "^6.0.4",
     "json-stringify-pretty-compact": "^1.0.1",
+    "postcss-loader": "^0.8.0",
     "rimraf": "^2.5.1"
   },
   "devDependencies": {
