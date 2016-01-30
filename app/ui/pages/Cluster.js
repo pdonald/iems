@@ -69,9 +69,14 @@ export default class Cluster extends React.Component {
   }
 
   renderInstances() {
-    return map(this.state.services, (key, service) => (
-      <Instances key={key} instances={service.instances} onTerminate={instance => this.terminate(instance)} />
-    ))
+    let instances = []
+    for (let service in this.state.services) {
+      for (let instance of this.state.services[service].instances) {
+        instances.push(instance)
+      }
+    }
+
+    return <Instances instances={instances} onTerminate={instance => this.terminate(instance)} />
   }
 
   renderLogs() {

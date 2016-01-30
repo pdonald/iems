@@ -133,6 +133,7 @@ class AwsEc2 {
     for (let id in this.configs) {
       let config = clone(this.configs[id])
       config.secretAccessKey = ''
+      config.sshPrivateKey = ''
       configs[id] = config
     }
 
@@ -302,11 +303,13 @@ class Instance {
       })
     }
 
-    this.log({ tag: 'aws', msg: 'terminating' })
-    this.aws.ec2.terminateInstances({ InstanceIds: [this.instance.InstanceId] }, (err, data) => {
-      if (err) return this.log({ tag: 'aws', msg: 'error', error: err })
-      this.log({ tag: 'aws', msg: 'terminated' })
-    })
+    if (this.instance) {
+      this.log({ tag: 'aws', msg: 'terminating' })
+      this.aws.ec2.terminateInstances({ InstanceIds: [this.instance.InstanceId] }, (err, data) => {
+        if (err) return this.log({ tag: 'aws', msg: 'error', error: err })
+        this.log({ tag: 'aws', msg: 'terminated' })
+      })
+    }
   }
 
   tag(name, value, cb) {

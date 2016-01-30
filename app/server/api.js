@@ -20,12 +20,14 @@ let dbfile = __dirname + '/../../build/db.json'
 
 loaddb()
 
-let awsec2 = new AwsEc2()
-let vagrant = new Vagrant()
+let services = {
+  awsec2: new AwsEc2(),
+  vagrant: new Vagrant()
+}
 
-awsec2.connect(db.cluster.configs)
-vagrant.connect(db.cluster.configs)
-vagrant.scan()
+services.awsec2.connect(db.cluster.configs)
+services.vagrant.connect(db.cluster.configs)
+services.vagrant.scan()
 
 let app = module.exports = express.Router()
 
@@ -38,8 +40,8 @@ app.use('/api/*', (req, res, next) => {
 
 app.get('/api/cluster/configs', (req, res) => {
   let configs = []
-  for (let id in db.cluster.services) {
-    let serviceConfigs = db.cluster.services[id].toJSON().configs
+  for (let id in services) {
+    let serviceConfigs = services[id].toJSON().configs
     for (let cid in serviceConfigs) {
       configs.push(serviceConfigs[cid])
     }
@@ -48,26 +50,27 @@ app.get('/api/cluster/configs', (req, res) => {
 })
 
 app.get('/api/cluster/services', (req, res) => {
-  let services = {}
-  for (let id in db.cluster.services)
-    services[id] = db.cluster.services[id].toJSON()
-  res.send(services)
+  let result = {}
+  for (let id in services) {
+    result[id] = services[id].toJSON()
+  }
+  res.send(result)
 })
 
 app.get('/api/cluster/services/:id', (req, res) => {
-  const service = db.cluster.services[req.params.id]
+  const service = services[req.params.id]
   if (service) res.send(service.toJSON())
   else res.status(404).send()
 })
 
 app.get('/api/cluster/services/:id/instances', (req, res) => {
-  const service = db.cluster.services[req.params.id]
+  const service = services[req.params.id]
   if (service) res.send(service.toJSON().instances)
   else res.status(404).send()
 })
 
 app.delete('/api/cluster/services/:id/instances/:iid', (req, res) => {
-  const service = db.cluster.services[req.params.id]
+  const service = services[req.params.id]
   if (service) {
     service.terminate(req.params.iid)
     res.send()
@@ -77,13 +80,13 @@ app.delete('/api/cluster/services/:id/instances/:iid', (req, res) => {
 })
 
 app.get('/api/cluster/services/:id/configs', (req, res) => {
-  const service = db.cluster.services[req.params.id]
+  const service = services[req.params.id]
   if (service) res.send(service.toJSON().configs)
   else res.status(404).send()
 })
 
 app.post('/api/cluster/services/:id/configs', (req, res) => {
-  const service = db.cluster.services[req.params.id]
+  const service = services[req.params.id]
   if (service) {
     let configs = service.configs
     let config = req.body
@@ -97,7 +100,7 @@ app.post('/api/cluster/services/:id/configs', (req, res) => {
 })
 
 app.get('/api/cluster/services/:id/configs/:cid', (req, res) => {
-  const service = db.cluster.services[req.params.id]
+  const service = services[req.params.id]
   if (service) {
     const config = service.toJSON().configs[req.params.cid]
     if (config) res.send(config)
@@ -108,7 +111,7 @@ app.get('/api/cluster/services/:id/configs/:cid', (req, res) => {
 })
 
 app.post('/api/cluster/services/:id/configs/:cid', (req, res) => {
-  const service = db.cluster.services[req.params.id]
+  const service = services[req.params.id]
   if (service) {
     let config = service.toJSON().configs[req.params.cid]
     if (config) {
@@ -127,7 +130,7 @@ app.post('/api/cluster/services/:id/configs/:cid', (req, res) => {
 })
 
 app.delete('/api/cluster/services/:id/configs/:cid', (req, res) => {
-  const service = db.cluster.services[req.params.id]
+  const service = services[req.params.id]
   if (service) {
     const config = service.toJSON().configs[req.params.cid]
     if (config) {
@@ -142,17 +145,17 @@ app.delete('/api/cluster/services/:id/configs/:cid', (req, res) => {
 })
 
 app.post('/api/cluster/services/:id/configs/:cid/launch', (req, res) => {
-  const service = db.cluster.services[req.params.id]
+  const service = services[req.params.id]
   if (service) {
     const config = service.configs[req.params.cid]
     if (config) {
       if (config.service == 'awsec2') {
         console.log('launching', config)
-        awsec2.launch(config)
+        services.awsec2.launch(config)
         res.send()
       } else if (config.service == 'vagrant') {
           console.log('launching', config)
-          vagrant.launch(config)
+          services.vagrant.launch(config)
           res.send()
       } else {
         res.status(500).send('Not supported yet')
