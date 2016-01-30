@@ -2,8 +2,8 @@ import React from 'react'
 import { browserHistory } from 'react-router'
 import jQuery from 'jquery'
 
-import { Page, Loading, ErrorMessage, Table, Form } from './Page'
-import { map, get, post, del } from '../utils'
+import { Page, Loading, ErrorMessage, Table, Form } from '../Page'
+import { map, get, post, del } from '../../utils'
 
 let url = "http://localhost:8081/api"
 
