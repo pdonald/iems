@@ -1,11 +1,9 @@
 import React from 'react'
 import { browserHistory } from 'react-router'
-import jQuery from 'jquery'
 
 import { Page, Loading, ErrorMessage, Table, Form } from '../Page'
 import { map, get, post, del } from '../../utils'
-
-let url = "http://localhost:8081/api"
+import { apiurl } from '../../settings'
 
 export class Index extends React.Component {
   constructor(props) {
@@ -62,7 +60,7 @@ export class Index extends React.Component {
   load() {
     this.setState({ loading: true, error: null })
 
-    get(`${url}/cluster/services`)
+    get(`${apiurl}/cluster/services`)
       .then(services => this.setState({ loading: false, services: services }))
       .fail(err => this.setState({ loading: false, error: 'Could not load data' }))
   }
@@ -73,13 +71,13 @@ export class Index extends React.Component {
 
   clone(config) {
     console.log('cloning', config)
-    post(`${url}/cluster/services/${config.service}/configs`, config)
+    post(`${apiurl}/cluster/services/${config.service}/configs`, config)
       .done(config => browserHistory.push(`/cluster/configs/${config.service}/${config.id}`))
       .fail(err => this.setState({ error: `Could not clone ${config.name}` }))
   }
 
   delete(config) {
-    del(`${url}/cluster/services/${config.service}/configs/${config.id}`)
+    del(`${apiurl}/cluster/services/${config.service}/configs/${config.id}`)
       .done(_ => this.load())
       .fail(err => this.setState({ error: `Could not delete ${config.name}` }))
   }
@@ -129,23 +127,23 @@ export class Edit extends React.Component {
   load() {
     this.setState({ loading: true, error: null })
 
-    get(`${url}/cluster/services/${this.props.routeParams.service}/configs/${this.props.routeParams.id}`)
+    get(`${apiurl}/cluster/services/${this.props.routeParams.service}/configs/${this.props.routeParams.id}`)
       .then(config => { this.setState({ config: config }); return config })
-      .then(config => get(`${url}/cluster/services/${config.service}`).then(service => this.setState({ service: service })))
+      .then(config => get(`${apiurl}/cluster/services/${config.service}`).then(service => this.setState({ service: service })))
       .done(_ => this.setState({ loading: false }))
       .fail(err => this.setState({ loading: false, error: 'Could not load data' }))
   }
 
   save(config) {
     console.log('saving', config)
-    post(`${url}/cluster/services/${config.service}/configs/${config.id}`, config)
+    post(`${apiurl}/cluster/services/${config.service}/configs/${config.id}`, config)
       .done(config => this.setState({ config: config }))
       .fail(err => this.setState({ error: `Could not save changes` }))
   }
 
   delete() {
     let config = this.state.config
-    del(`${url}/cluster/services/${config.service}/configs/${config.id}`)
+    del(`${apiurl}/cluster/services/${config.service}/configs/${config.id}`)
       .done(_ => browserHistory.push('/cluster/configs'))
       .fail(err => this.setState({ error: `Could not delete ${config.name}` }))
   }

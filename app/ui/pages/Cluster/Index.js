@@ -3,8 +3,7 @@ import { Link } from 'react-router'
 
 import { Page, Loading, ErrorMessage, Table } from '../Page'
 import { map, get, post, del } from '../../utils'
-
-let url = "http://localhost:8081/api"
+import { apiurl } from '../../settings'
 
 export default class Cluster extends React.Component {
   constructor(props) {
@@ -63,7 +62,7 @@ export default class Cluster extends React.Component {
         {this.renderInstances()}
         {this.renderLogs()}
 
-        // show also if other non-iems ec2 instances are running
+        {/*show also if other non-iems ec2 instances are running*/}
       </div>
     )
   }
@@ -95,13 +94,13 @@ export default class Cluster extends React.Component {
   load() {
     this.setState({ loading: true, error: null })
 
-    get(`${url}/cluster/configs`)
+    get(`${apiurl}/cluster/configs`)
       .done(configs => this.setState({ loading: false, configs: configs }))
       .fail(err => this.setState({ loading: false, error: 'Could not load data' }))
   }
 
   refresh() {
-    get(`${url}/cluster/services`)
+    get(`${apiurl}/cluster/services`)
       .done(services => this.setState({ services: services }))
       .fail(err => this.setState({ error: 'Could not load data' }))
   }
@@ -111,12 +110,12 @@ export default class Cluster extends React.Component {
     let count = parseInt(this.refs.count.value)
     console.log('launching', config, count, 'times')
 
-    post(`${url}/cluster/services/${config.service}/configs/${config.id}/launch`)
+    post(`${apiurl}/cluster/services/${config.service}/configs/${config.id}/launch`)
       .fail(err => this.setState({ error: 'Could not launch' }))
   }
 
   terminate(instance) {
-    del(`${url}/cluster/services/${instance.service}/instances/${instance.id}`)
+    del(`${apiurl}/cluster/services/${instance.service}/instances/${instance.id}`)
       .fail(err => this.setState({ error: 'Could not terminate instance' }))
   }
 }
@@ -133,7 +132,7 @@ class Instances extends React.Component {
       state: { title: 'State' },
       uptime: { title: 'Uptime' },
       loadavg: { title: 'Load Avg.' },
-      cores: { title: 'vCPU' },
+      cores: { title: 'Cores' },
       ram: { title: 'RAM' },
       swap: { title: 'Swap' },
       disk: { title: 'Disk' },
