@@ -17,6 +17,8 @@ function sshexec(ssh, cmd, cb) {
 
 class Connection extends events.EventEmitter {
   constructor(config) {
+    super()
+
     this.state = null
     this.error = null
 
@@ -58,7 +60,7 @@ class Connection extends events.EventEmitter {
       this.refreshStatsTimer = setInterval(() => this.refreshStats(), 30 * 1000)
       this.refreshStats()
 
-      this.provision()
+      //this.provision()
       this.ping()
     })
 

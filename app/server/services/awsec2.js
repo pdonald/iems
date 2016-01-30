@@ -14,8 +14,9 @@ function clone(obj) {
 
 class AwsEc2 {
   constructor() {
-    this.configs = {}
     this.aws = []
+    this.configs = {}
+    this.instances = {}
 
     setInterval(() => this.refresh(), 1000)
   }
@@ -53,51 +54,16 @@ class AwsEc2 {
       throw 'Unknown access point'
     }
 
-    let params = {
-      ImageId: config.imageId,
-      InstanceType: config.instanceType,
-      MinCount: 1, MaxCount: 1,
-      Placement: { AvailabilityZone: config.region },
-      KeyName: 'iEMS-test' // todo
-    }
+    let id = config.id + '-' + Math.round(Math.random()*1000)
+    let instance = new Instance(aws, id, config)
+    instance.launch()
 
-    aws.ec2.runInstances(params, (err, data) => {
-      if (err) throw err
-
-      let instanceId = data.Instances[0].InstanceId;
-      let instanceInfo = new Instance(aws, instanceId)
-      instanceInfo.state = 'launched'
-      instanceInfo.config = config
-
-      aws.instances[instanceId] = instanceInfo
-
-      params = {
-        Resources: [instanceId],
-        Tags: [
-          { Key: 'Name', Value: 'iEMS #' + config.id + ': ' + config.name },
-          { Key: 'iems', Value: 'true' },
-          { Key: 'iems-config', Value: config.id },
-        ]
-      }
-
-      aws.ec2.createTags(params, (err) => {
-        if (err) {
-          instanceInfo.state = 'error'
-          instanceInfo.error = err
-          return
-        }
-
-        instanceInfo.state = 'launched-tagged'
-      })
-    })
+    //this.instances[id] = instance
   }
 
   terminate(id) {
-    for (let key in this.aws) {
-      let aws = this.aws[key]
-      if (aws.instances[id]) {
-        aws.instances[id].terminate()
-      }
+    if (this.instances[id]) {
+      this.instances[id].terminate()
     }
   }
 
@@ -115,7 +81,7 @@ class AwsEc2 {
           for (let instance of reservation.Instances) {
             let id = instance.InstanceId
 
-            if (!aws.instances[id]) {
+            if (!this.instances[id]) {
               let configId = instance.Tags.filter(t => t.Key == 'iems-config').map(t => t.Value)[0]
               let config = this.configs[configId]
 
@@ -123,12 +89,10 @@ class AwsEc2 {
                 console.error('Unknown config:', config)
               }
 
-              aws.instances[id] = new Instance(aws, id)
-              aws.instances[id].state = 'launched-tagged'
-              aws.instances[id].config = config
+              this.instances[id] = new Instance(aws, id, config)
             }
 
-            aws.instances[id].update(instance, new Date())
+            this.instances[id].update(instance, new Date())
           }
         }
       })
@@ -143,20 +107,12 @@ class AwsEc2 {
       configs[id] = config
     }
 
-    let instances = []
-    for (let hash in this.aws) {
-      let aws = this.aws[hash]
-      for (let i in aws.instances) {
-        instances.push(aws.instances[i].toJSON())
-      }
-    }
-
     return {
       id: 'awsec2',
       name: 'AWS EC2',
       title: 'Amazon Web Services (AWS) Elastic Cloud Compute (EC2)',
       configs: configs,
-      instances: instances,
+      instances: Object.keys(this.instances).map(key => this.instances[key].toJSON()),
       ui: {
         configs: {
           columns: {
@@ -169,6 +125,7 @@ class AwsEc2 {
             service: { hidden: true, value: 'awsec2' },
             accessKeyId: { label: 'Access Key' },
             secretAccessKey: { secret: true, label: 'Secret Access Key' },
+            spotPrice: { label: 'Spot price', min: 0.00, max: 10 },
             region: { label: 'Region',
                       options: { 'eu-west-1': { title: 'EU West (Ireland)', options: ['eu-west-1a', 'eu-west-1b', 'eu-west-1c'] },
                                  'us-east-1': { title: 'US East (N. Virginia)', options: ['us-east-1a', 'us-east-1b', 'us-east-1c', 'us-east-1d', 'us-east-1e'] } } },
@@ -186,19 +143,55 @@ class AwsEc2 {
 }
 
 class Instance {
-  constructor(aws, id) {
+  constructor(aws, id, config) {
     this.id = id
     this.aws = aws
     this.state = null
     this.instance = null
     this.instanceLastUpdated = null
-    this.config = null
+    this.config = config
     this.logs = []
+    this.error = null
   }
 
-  log(msg) {
-    msg.date = new Date().toString()
-    this.logs.push(msg)
+  launch() {
+    let params = {
+      ImageId: this.config.imageId,
+      InstanceType: this.config.instanceType,
+      MinCount: 1, MaxCount: 1,
+      Placement: { AvailabilityZone: this.config.region },
+      KeyName: 'iEMS-test' // todo
+    }
+
+    this.aws.ec2.runInstances(params, (err, data) => {
+      if (err) {
+        this.state = 'error'
+        this.error = err
+        return
+      }
+
+      this.id = data.Instances[0].InstanceId
+      this.state = 'launched'
+
+      params = {
+        Resources: [data.Instances[0].InstanceId],
+        Tags: [
+          { Key: 'Name', Value: 'iEMS #' + this.config.id + ': ' + this.config.name },
+          { Key: 'iems', Value: 'true' },
+          { Key: 'iems-config', Value: this.config.id },
+        ]
+      }
+
+      this.aws.ec2.createTags(params, (err) => {
+        if (err) {
+          this.state = 'error'
+          this.error = err
+          return
+        }
+
+        this.state = 'launched-tagged'
+      })
+    })
   }
 
   update(instance, date) {
@@ -209,10 +202,10 @@ class Instance {
     this.state = instance.State.Name
 
     if (prevState != this.state) {
-      this.log({ type: 'state-change', from: prevState, to: this.state, date: date })
+      //this.log({ type: 'state-change', from: prevState, to: this.state, date: date })
     }
 
-    if (prevState != 'running' && this.state == 'running') {
+    if (this.state == 'running' && !this.ssh) {
       this.connect()
     } else if (prevState == 'running' && this.state != 'running') {
       this.disconnect()
@@ -241,7 +234,7 @@ class Instance {
 
   terminate() {
     this.log({ tag: 'aws', msg: 'terminating' })
-    this.aws.ec2.terminateInstances({ InstanceIds: [this.id] }, (err, data) => {
+    this.aws.ec2.terminateInstances({ InstanceIds: [this.instance.InstanceId] }, (err, data) => {
       if (err) return this.log({ tag: 'aws', msg: 'error', error: err })
       this.log({ tag: 'aws', msg: 'terminated' })
     })
@@ -253,6 +246,11 @@ class Instance {
       if (err) return this.log({ tag: 'aws-tag', msg: 'error', error: err })
       cb && cb(name, value)
     })
+  }
+
+  log(msg) {
+    msg.date = new Date().toString()
+    this.logs.push(msg)
   }
 
   toJSON() {
