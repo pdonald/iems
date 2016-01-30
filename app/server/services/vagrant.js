@@ -5,6 +5,7 @@ const fs = require('fs')
 const path = require('path')
 const spawn = require('child_process').spawn
 const exec = require('child_process').exec
+const rmdir = require('rimraf')
 
 let SshConnection = require('../ssh').Connection
 
@@ -167,6 +168,7 @@ class Instance {
     destroy.stderr.on('data', (data) => console.log(`stderr: ${data.toString().trim()}`))
     destroy.on('close', (code) => console.log(`child process exited with code ${code}`))
     destroy.on('close', (code) => this.state = 'terminated')
+    destroy.on('close', (code) => code == 0 && rmdir(this.dir, err => {}))
   }
 
   toJSON() {

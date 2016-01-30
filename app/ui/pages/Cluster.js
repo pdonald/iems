@@ -22,7 +22,7 @@ export default class Cluster extends React.Component {
   componentDidMount() {
     this.load()
     this.refresh()
-    this.timer = setInterval(() => this.refresh(), 5000)
+    this.timer = setInterval(() => this.refresh(), 2000)
   }
 
   componentWillUnmount() {
