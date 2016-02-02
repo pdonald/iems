@@ -424,11 +424,28 @@ table.experiments {
   }
 }
 
+.alert-success {
+  color: teal;
+  background: lightgreen;
+  border: 1px solid rgb(235, 204, 209);
+  padding: 15px 20px;
+  margin-bottom: 5px;
+
+  button {
+    float: right;
+  }
+}
+
 .alert-error {
   color: rgb(169, 68, 66);
   background: rgb(242, 222, 222);
   border: 1px solid rgb(235, 204, 209);
   padding: 15px 20px;
+  margin-bottom: 5px;
+
+  button {
+    float: right;
+  }
 }
 
 .page {
@@ -448,6 +465,12 @@ table.experiments {
 
     input, select, textarea {
       width: 270px;
+    }
+
+    footer {
+      .button-group {
+        margin-left: 152px;
+      }
     }
   }
 }
@@ -481,6 +504,9 @@ table.experiments {
 }
 
 .cool-table {
+  margin-left: -2px;
+  margin-bottom: 8px;
+
   th {
     user-select: none;
     text-align: left;
@@ -498,6 +524,18 @@ table.experiments {
   td.actions {
     button {
       margin: 0 2px;
+      cursor: pointer;
     }
+  }
+}
+
+.button-create {
+  //margin-left: 2px;
+}
+
+.button-group {
+  button {
+    margin-left: 2px;
+    margin-right: 2px;
   }
 }

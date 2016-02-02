@@ -38,6 +38,40 @@ export class ErrorMessage extends React.Component {
   }
 }
 
+export class Notifications extends React.Component {
+  constructor(props) {
+    super(props)
+
+    this.state = {
+      messages: []
+    }
+  }
+
+  success(msg) {
+    this.setState({
+      messages: [...this.state.messages, { type: 'success', text: msg }]
+    })
+  }
+
+  error(msg) {
+    this.setState({
+      messages: [...this.state.messages, { type: 'error', text: msg }]
+    })
+  }
+
+  render() {
+    return (
+      <div>
+        {this.state.messages.map((msg, index) => (
+          <div key={index} className={'alert alert-' + msg.type} role="alert">
+            <strong>{msg.type}:</strong> {msg.text}
+          </div>
+        ))}
+      </div>
+    )
+  }
+}
+
 export class Loading extends React.Component {
   render() {
     return <p>Loading...</p>
@@ -177,11 +211,13 @@ export class Form extends React.Component {
     return (
       <form>
         {fields}
-        <div>
-          <button onClick={e => this.handleSave(e)}>Save</button>
-          <button onClick={e => this.handleCancel(e)}>Cancel</button>
-          <button onClick={e => this.handleDelete(e)}>Delete</button>
-        </div>
+        <footer>
+          <div className="button-group">
+            <button onClick={e => this.handleSave(e)}>Save</button>
+            <button onClick={e => this.handleCancel(e)}>Cancel</button>
+            <button onClick={e => this.handleDelete(e)} className="delete">Delete</button>
+          </div>
+        </footer>
       </form>
     )
   }
