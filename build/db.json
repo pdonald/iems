@@ -111,16 +111,7 @@
         "box": "ubuntu/trusty64",
         "memory": "256",
         "cores": "1",
-        "sshScript": "touch /home/ubuntu/i-was-here && echo I am in!"
-      },
-      "testconf99": {
-        "id": "testconf99",
-        "service": "vagrant",
-        "name": "Vagrant Ubuntu 14.04 LTS x32",
-        "box": "ubuntu/trusty32",
-        "memory": "128",
-        "cores": "1",
-        "sshScript": "touch /home/ubuntu/i-was-here && echo I am in!"
+        "sshScript": "touch /home/vagrant/i-was-here && echo I am in!"
       },
       "testconf1": {
         "id": "testconf1",
