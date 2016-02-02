@@ -57,14 +57,34 @@ and navigate to [http://localhost:8080/](http://localhost:8080/) in your browser
 
 Make sure you have plenty of RAM for this or it will take forever.
 
-## TODO
+## Cluster
 
-* load/save
-* multiple experiments
-* error pane for missing connections, make output
-* view file
-* add tools in UI
-* resize
+You can launch new virtual servers for running your experiments.
+
+### AWS EC2
+
+* Sign up for [Amazon Web Services (AWS)](https://aws.amazon.com/getting-started/). You'll need to enter your credit card details.
+* Log into [AWS Management Console](https://console.aws.amazon.com/console/home)
+* Go to [Security Credentials](https://console.aws.amazon.com/iam/home#security_credential), expand Access Keys (Access Key ID and Secret Access Key)
+* Click `Create New Access Key`, then `Show Access Key` and then write it down (you won't be able to see the secret access key again)
+* Guard the secret access key like your credit card number
+
+### Vagrant
+
+[Vagrant](https://www.vagrantup.com/) is a tool that lets you quickly launch machines in VirtualBox.
+
+#### Windows
+
+* Download and install [Oracle VirtualBox](https://www.virtualbox.org/wiki/Downloads)
+* Download and install [Vagrant](https://www.vagrantup.com/downloads.html)
+
+#### Linux
+
+Ubuntu 14.04 LTS
+
+```
+sudo apt-get install -y virtualbox virtualbox-dkms vagrant
+```
 
 ## License
 

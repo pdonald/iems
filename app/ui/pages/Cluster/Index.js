@@ -58,7 +58,6 @@ export default class Cluster extends React.Component {
           <Link to="/cluster/configs">Launch configurations</Link>
         </div>
 
-        <h2>Machines</h2>
         {this.renderInstances()}
 
         {/*show also if other non-iems ec2 instances are running*/}
@@ -74,7 +73,16 @@ export default class Cluster extends React.Component {
       }
     }
 
-    return <Instances instances={instances} onTerminate={instance => this.terminate(instance)} />
+    if (instances.length == 0) {
+      return null
+    }
+
+    return (
+      <div>
+        <h2>Machines</h2>
+        <Instances instances={instances} onTerminate={instance => this.terminate(instance)} />
+      </div>
+    )
   }
 
   renderLogs() {
