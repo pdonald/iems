@@ -161,6 +161,8 @@ class Instance {
   }
 
   terminate() {
+    this.state = 'shutting-down'
+    
     this.disconnect()
 
     let destroy = spawn('vagrant', ['destroy', '-f'], { cwd: this.dir })
