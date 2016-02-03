@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router'
 
-import { Page, ErrorMessage, Loading } from './Page'
+import { Page, Table, ErrorMessage, Loading } from './Page'
 import { get, post, del, toArray, groupBy, clone, map } from '../utils'
 import { apiurl } from '../settings'
 
@@ -194,26 +194,13 @@ export default class Experiments extends React.Component {
             {map(groups, (key, group) => (
               <div key={key}>
                 {this.state.groupby ? <h2>{this.state.groupby + ': ' + key}</h2> : null}
-                <table className="experiments">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {group.map(e => (
-                    <tr key={e.id}>
-                      <td><Link to={`/experiments/${e.id}`}>{e.name}</Link></td>
-                      <td>
-                        <button onClick={() => this.cloneExperiment(e)}>Clone</button>
-                        {' '}
-                        <button onClick={() => this.deleteExperiment(e)}>Delete</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-                </table>
+
+                <Table columns={{ name: { title: 'Name' } }}
+                       rows={group.map(e => { return { name: <Link to={`/experiments/${e.id}`}>{e.name}</Link>, exp: e } })}
+                       buttons={[
+                         { title: 'Clone', handler: row => this.cloneExperiment(row.exp) },
+                         { title: 'Delete', handler: row => this.deleteExperiment(row.exp) }
+                       ]}/>
               </div>
             ))}
           </section>
