@@ -1,7 +1,6 @@
 "use strict"
 
 let events = require('events')
-
 let SshClient = require('ssh2').Client
 
 function sshexec(ssh, cmd, cb) {
@@ -48,6 +47,7 @@ class Connection extends events.EventEmitter {
   }
 
   connect() {
+    this.ssh = null
     this.state = 'connecting'
     this.error = null
 
@@ -60,7 +60,7 @@ class Connection extends events.EventEmitter {
       this.refreshStatsTimer = setInterval(() => this.refreshStats(), 30 * 1000)
       this.refreshStats()
 
-      //this.provision()
+      this.provision()
       this.ping()
     })
 
@@ -80,10 +80,16 @@ class Connection extends events.EventEmitter {
 
     ssh.once('end', () => this.disconnect())
 
-    //readyTimeout: 2 * 60 * 1000,
-    //keepaliveInterval: 20 * 1000,
-    //keepaliveCountMax: 3
-    ssh.connect(this.config)
+    let sshconfig = {
+      readyTimeout: 2 * 60 * 1000,
+      keepaliveInterval: 20 * 1000,
+      keepaliveCountMax: 3
+    }
+
+    for (let key in this.config)
+      sshconfig[key] = this.config[key]
+
+    ssh.connect(sshconfig)
   }
 
   disconnect() {
@@ -143,50 +149,23 @@ class Connection extends events.EventEmitter {
 
     let cmd = Object.keys(cmds).join(' && echo === && ')
     sshexec(this.ssh, cmd, (err, code, stdout, stderr) => {
-      if (err) return // this.log({ type: 'ssh-error', errcode: err.code })
-      if (code != 0) return // this.log({ type: 'ssh-exit-error', errcode: code, stdout: stdout, stderr: stderr })
-      let parsers = Object.keys(cmds).map(k => cmds[k])
-      stdout.split('===\n').forEach((output, index) => parsers[index](output))
-      this.stats.lastUpdated = new Date().toString()
+      if (err) return this.emit('error', 'Error while refreshing stats', err)
+      if (code != 0) return this.emit('error', 'Stats commands exited with non-zero status', code, stdout, stderr)
+
+      try {
+        let parsers = Object.keys(cmds).map(k => cmds[k])
+        stdout.split('===\n').forEach((output, index) => parsers[index](output))
+        this.stats.lastUpdated = new Date().toString()
+      } catch (e) {
+        this.emit('error', 'Could not parse stats output', e)
+      }
     })
   }
 
-  provision(force) {
-    if (!this.config.provision) {
-      this.log({ tag: 'provision', msg: 'skipped' })
-      return
-    }
-
-    if (!force) {
-      if (this.instance.Tags.filter(t => t.Key == 'iems-provision' && t.Value == 'running').length) {
-        this.log({ tag: 'provision', msg: 'skipped-running' })
-        return
-      }
-
-      if (this.instance.Tags.filter(t => t.Key == 'iems-provision' && t.Value == 'done').length) {
-        this.log({ tag: 'provision', msg: 'skipped-done' })
-        return
-      }
-    }
-
-    this.log({ tag: 'provision', msg: 'started', script: this.config.provision })
-    this.tag('iems-provision', 'running')
-
+  provision() {
     sshexec(this.ssh, this.config.provision, (err, code, stdout, stderr) => {
-      if (err) {
-        this.log({ tag: 'provision', msg: 'error', error: err.code })
-        this.tag('iems-provision', 'failed')
-        return
-      }
-
-      if (code != 0) {
-        this.log({ tag: 'provision', msg: 'failed', code: code, stdout: stdout, stderr: stderr })
-        this.tag('iems-provision', 'failed')
-        return
-      }
-
-      this.log({ tag: 'provision', msg: 'success', stdout: stdout, stderr: stderr })
-      this.tag('iems-provision', 'done')
+      if (err) return this.emit('error', 'Error while provisioning', err)
+      if (code != 0) return this.emit('error', 'Provisioning was not successful', code, stdout, stderr)
     })
   }
 

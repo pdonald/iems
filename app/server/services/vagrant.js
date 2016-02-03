@@ -31,7 +31,7 @@ class Vagrant {
       files.map(file => path.dirname(file)).forEach(dir => {
         let dirname = path.basename(dir)
         let configid = dirname.split('-')[0]
-        let id = dirname.split('-')[1]
+        let id = dirname //.split('-')[1]
         let instance = new Instance(this.configs[configid], id, dir)
         this.instances[id] = instance
         instance.connect()
@@ -122,9 +122,8 @@ class Instance {
     vagrantup.stderr.on('data', (data) => console.log(`stderr: ${data.toString().trim()}`))
 
     vagrantup.on('close', (code) => {
-      console.log(`child process exited with code ${code}`)
       if (code == 0) {
-        this.state = 'up'
+        this.state = 'running'
         this.connect()
       } else {
         this.state = 'error'
@@ -135,7 +134,7 @@ class Instance {
   connect() {
     exec('vagrant ssh-config', { cwd: this.dir }, (err, stdout, stderr) => {
       if (!err && stdout.indexOf('Port') !== -1) {
-        this.state = 'up'
+        this.state = 'running'
 
         let port = parseInt(stdout.split('\n').map(l => l.trim()).filter(l => l.startsWith('Port'))[0].split(/\s+/)[1])
 
@@ -162,7 +161,7 @@ class Instance {
 
   terminate() {
     this.state = 'shutting-down'
-    
+
     this.disconnect()
 
     let destroy = spawn('vagrant', ['destroy', '-f'], { cwd: this.dir })
