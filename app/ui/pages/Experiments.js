@@ -1,9 +1,8 @@
 import React from 'react'
 import { Link } from 'react-router'
-import jQuery from 'jquery'
 
 import { Page, ErrorMessage, Loading } from './Page'
-import { toArray, groupBy, clone, map } from '../utils'
+import { get, post, del, toArray, groupBy, clone, map } from '../utils'
 import { apiurl } from '../settings'
 
 // filters in url
@@ -74,8 +73,7 @@ export default class Experiments extends React.Component {
   loadExperiments() {
     this.setState({ init: { loading: true, error: null }})
 
-    jQuery
-      .get(`${apiurl}/experiments`)
+    get(`${apiurl}/experiments`)
       .done(exps => {
         this.setState({
           init: { loading: false, error: null },
@@ -103,17 +101,12 @@ export default class Experiments extends React.Component {
       }
     }
 
-    jQuery.ajax({
-      type: 'POST',
-      url: `${apiurl}/experiments/${exp.id}`,
-      data: JSON.stringify(exp),
-      contentType: 'application/json',
-      success: (res) => {
+    post(`${apiurl}/experiments/${exp.id}`, exp)
+      .then(res => {
         console.log(res)
         this.state.experiments[exp.id] = exp
         this.setState(this.state)
-      },
-    })
+      })
   }
 
   cloneExperiment(exp) {
@@ -129,45 +122,37 @@ export default class Experiments extends React.Component {
 
     this.setState({ save: { saving: true, error: null }})
 
-    jQuery.ajax({
-      type: 'POST',
-      url: `${apiurl}/experiments/${clonedexp.id}`,
-      data: JSON.stringify(clonedexp),
-      contentType: 'application/json',
-      success: () => {
+    post(`${apiurl}/experiments/${clonedexp.id}`, clonedexp)
+      .then(() => {
         this.state.experiments[clonedexp.id] = clonedexp
         this.setState({
           save: { saving: false, error: null },
           experiments: this.state.experiments,
           filters: this.makeFilters(toArray(this.state.experiments))
         })
-      },
-      error: msg => {
+      })
+      .fail(msg => {
         console.error(msg)
         this.setState({ save: { saving: false, error: `Could not clone experiment ${exp.name}` } })
-      }
-    })
+      })
   }
 
   deleteExperiment(exp) {
     this.setState({ save: { saving: true, error: null }})
 
-    jQuery.ajax({
-      type: 'DELETE',
-      url: `${apiurl}/experiments/${exp.id}`,
-      success: () => {
+    del(`${apiurl}/experiments/${exp.id}`)
+      .then(() => {
         delete this.state.experiments[exp.id]
         this.setState({
           save: { saving: false, error: null },
           experiments: this.state.experiments,
           filters: this.makeFilters(toArray(this.state.experiments))
         })
-      },
-      error: msg => {
+      })
+      .fail(msg => {
         console.error(msg)
         this.setState({ save: { saving: false, error: `Could not clone experiment ${exp.name}` } })
-      }
-    })
+      })
   }
 
   render() {
