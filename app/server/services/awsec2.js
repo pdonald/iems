@@ -8,10 +8,6 @@ function md5(s) {
   return crypto.createHash('md5').update(s).digest('hex')
 }
 
-function clone(obj) {
-  return JSON.parse(JSON.stringify(obj))
-}
-
 class AwsEc2 {
   constructor() {
     this.aws = []
@@ -32,10 +28,9 @@ class AwsEc2 {
         if (!this.aws[hash]) {
           let AWS = require('aws-sdk') // todo: check multiple regions
           AWS.config.update({ region: region, accessKeyId: config.accessKeyId, secretAccessKey: config.secretAccessKey })
-          this.aws[hash] = {
-            ec2: new AWS.EC2(),
-            instances: {}
-          }
+          this.aws[hash] = { ec2: new AWS.EC2(), failures: 0 }
+        } else {
+          this.aws[hash].failures = 0
         }
 
         this.configs[id] = config
@@ -72,8 +67,18 @@ class AwsEc2 {
     for (let key in this.aws) {
       let aws = this.aws[key]
 
+      if (aws.failures > 5) {
+        continue
+      }
+
       aws.ec2.describeInstances(params, (err, data) => {
-        if (err) throw err
+        if (err) {
+          console.error(err.message)
+          aws.failures++
+          return
+        }
+
+        aws.failures = 0
 
         // todo: check timestamp
 
@@ -102,7 +107,13 @@ class AwsEc2 {
       })
 
       aws.ec2.describeSpotInstanceRequests(params, (err, data) => {
-        if (err) throw err
+        if (err) {
+          console.error(err.message)
+          aws.failures++
+          return
+        }
+
+        aws.failures = 0
 
         for (let request of data.SpotInstanceRequests) {
           let id = request.Tags.filter(t => t.Key == 'iems-id').map(t => t.Value)[0]
@@ -131,7 +142,7 @@ class AwsEc2 {
   toJSON() {
     let configs = {}
     for (let id in this.configs) {
-      let config = clone(this.configs[id])
+      let config = Object.assign({}, this.configs[id])
       config.secretAccessKey = ''
       config.sshPrivateKey = ''
       configs[id] = config
