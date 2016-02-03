@@ -16,6 +16,7 @@ import Toolbox from './Experiment/Toolbox'
 import Actions from './Experiment/Actions'
 
 import { clone, map } from '../utils'
+import { apiurl } from '../settings'
 
 export default React.createClass({
   getInitialState: function() {
@@ -45,7 +46,7 @@ export default React.createClass({
 
      //this.clipboard = new ZeroClipboard(this.refs.copyMakefileButton);
 
-     jQuery.get('http://localhost:8081/api/experiments/' + this.props.routeParams.id, (document) => {
+     jQuery.get(`${apiurl}/experiments/${this.props.routeParams.id}`, (document) => {
        let graph = document.graph
        delete document.graph
        document.stack = [new GroupModel(graph, null, document)]
@@ -66,7 +67,7 @@ export default React.createClass({
 
     jQuery.ajax({
       type: 'POST',
-      url: 'http://localhost:8081/api/experiments/' + this.props.routeParams.id,
+      url: `${apiurl}/experiments/${this.props.routeParams.id}`,
       data: JSON.stringify(data),
       contentType: 'application/json',
       success: (res) => {

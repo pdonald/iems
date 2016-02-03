@@ -4,6 +4,7 @@ import jQuery from 'jquery'
 
 import { Page, ErrorMessage, Loading } from './Page'
 import { toArray, groupBy, clone, map } from '../utils'
+import { apiurl } from '../settings'
 
 // filters in url
 // load, save error handling
@@ -16,8 +17,6 @@ import { toArray, groupBy, clone, map } from '../utils'
 // redux?
 // preloading
 // search filter
-
-let url = "http://localhost:8081/api"
 
 export default class Experiments extends React.Component {
   constructor(props) {
@@ -76,7 +75,7 @@ export default class Experiments extends React.Component {
     this.setState({ init: { loading: true, error: null }})
 
     jQuery
-      .get(`${url}/experiments`)
+      .get(`${apiurl}/experiments`)
       .done(exps => {
         this.setState({
           init: { loading: false, error: null },
@@ -106,7 +105,7 @@ export default class Experiments extends React.Component {
 
     jQuery.ajax({
       type: 'POST',
-      url: 'http://localhost:8081/api/experiments/' + exp.id,
+      url: `${apiurl}/experiments/${exp.id}`,
       data: JSON.stringify(exp),
       contentType: 'application/json',
       success: (res) => {
@@ -132,7 +131,7 @@ export default class Experiments extends React.Component {
 
     jQuery.ajax({
       type: 'POST',
-      url: `${url}/experiments/${clonedexp.id}`,
+      url: `${apiurl}/experiments/${clonedexp.id}`,
       data: JSON.stringify(clonedexp),
       contentType: 'application/json',
       success: () => {
@@ -155,7 +154,7 @@ export default class Experiments extends React.Component {
 
     jQuery.ajax({
       type: 'DELETE',
-      url: `${url}/experiments/${exp.id}`,
+      url: `${apiurl}/experiments/${exp.id}`,
       success: () => {
         delete this.state.experiments[exp.id]
         this.setState({
