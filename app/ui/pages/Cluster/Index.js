@@ -79,7 +79,7 @@ export default class Cluster extends React.Component {
 
     return (
       <div>
-        <h2>Machines</h2>
+        <h2>Hosts</h2>
         <Instances instances={instances} onTerminate={instance => this.terminate(instance)} />
       </div>
     )

@@ -2,6 +2,7 @@
 
 let fs = require('fs')
 let crypto = require('crypto')
+let request = require('request')
 
 let SshConnection = require('../ssh').Connection
 
@@ -20,7 +21,7 @@ class AwsEc2 {
 
   configHash(config) {
     let region = config.region.substr(0, config.region.length - 1)
-    let hash = [region, config.accessKeyId, md5(config.secretAccessKey)].join('_')
+    let hash = [region, config.accessKeyId.substr(0, 5), md5(config.secretAccessKey).substr(0, 5)].join('-')
     return hash
   }
 
@@ -40,6 +41,7 @@ class AwsEc2 {
             keyName: `iEMS-${hash}`,
             keyData: null,
             keyFilename: `${__dirname}/../../../build/awsec2/iems-${hash}.pem`, // todo
+            securityGroup: `iEMS-${hash}`,
             failures: 0
           }
 
@@ -53,8 +55,24 @@ class AwsEc2 {
                 })
               })
             } else {
-              aws.keyData = fs.readFileSync(aws.keyFilename)
+              aws.keyData = fs.readFileSync(aws.keyFilename) // todo: file exists but kp doesn't
             }
+
+            aws.ec2.createSecurityGroup({ GroupName: aws.securityGroup, Description: 'iEMS' }, (err, data) => {
+              request('https://api.ipify.org/', (err, resp, body) => {
+                if (err) return
+                let params = {
+                  GroupName: aws.securityGroup,
+                  FromPort: 22, // todo: move into launch
+                  ToPort: 22,
+                  CidrIp: body + '/32',
+                  IpProtocol: 'tcp'
+                }
+                aws.ec2.authorizeSecurityGroupIngress(params, (err, data) => {
+                  if (err) console.error(err)
+                })
+              })
+            })
           }
         } else {
           this.aws[hash].failures = 0
@@ -233,7 +251,8 @@ class Instance {
       InstanceType: this.config.instanceType,
       MinCount: 1, MaxCount: 1,
       Placement: { AvailabilityZone: this.config.region },
-      KeyName: this.aws.keyName
+      KeyName: this.aws.keyName,
+      SecurityGroups: [this.aws.securityGroup]
     }
 
     this.aws.ec2.runInstances(params, (err, data) => {
@@ -257,7 +276,8 @@ class Instance {
         ImageId: this.config.imageId,
         InstanceType: this.config.instanceType,
         Placement: { AvailabilityZone: this.config.region },
-        KeyName: this.aws.keyName
+        KeyName: this.aws.keyName,
+        SecurityGroups: [this.aws.securityGroup]
       },
       InstanceCount: 1,
       SpotPrice: this.config.spotPrice,

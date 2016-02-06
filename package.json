@@ -24,6 +24,7 @@
     "glob": "^6.0.4",
     "json-stringify-pretty-compact": "^1.0.1",
     "postcss-loader": "^0.8.0",
+    "request": "^2.69.0",
     "rimraf": "^2.5.1"
   },
   "devDependencies": {

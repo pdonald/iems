@@ -1,4 +1,5 @@
 build/bundle.js
+build/awsec2/*.pem
 build/vagrant/
 node_modules/
 .vagrant
