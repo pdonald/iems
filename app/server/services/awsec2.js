@@ -1,5 +1,6 @@
 "use strict"
 
+let fs = require('fs')
 let crypto = require('crypto')
 
 let SshConnection = require('../ssh').Connection
@@ -17,18 +18,44 @@ class AwsEc2 {
     setInterval(() => this.refresh(), 1000)
   }
 
+  configHash(config) {
+    let region = config.region.substr(0, config.region.length - 1)
+    let hash = [region, config.accessKeyId, md5(config.secretAccessKey)].join('_')
+    return hash
+  }
+
   connect(configs) {
     for (let id in configs) {
       let config = configs[id]
 
       if (config.service == 'awsec2') {
         let region = config.region.substr(0, config.region.length - 1)
-        let hash = [region, config.accessKeyId, md5(config.secretAccessKey)].join('/')
+        let hash = this.configHash(config)
 
         if (!this.aws[hash]) {
           let AWS = require('aws-sdk') // todo: check multiple regions
           AWS.config.update({ region: region, accessKeyId: config.accessKeyId, secretAccessKey: config.secretAccessKey })
-          this.aws[hash] = { ec2: new AWS.EC2(), failures: 0 }
+          let aws = this.aws[hash] = {
+            ec2: new AWS.EC2(),
+            keyName: `iEMS-${hash}`,
+            keyData: null,
+            keyFilename: `${__dirname}/../../../build/awsec2/iems-${hash}.pem`, // todo
+            failures: 0
+          }
+
+          if (config.accessKeyId && config.secretAccessKey) {
+            if (!fs.existsSync(aws.keyFilename)) {
+              let params = { KeyName: aws.keyName }
+              aws.ec2.deleteKeyPair(params, (err, data) => {
+                aws.ec2.createKeyPair(params, (err, data) => {
+                  if (err) return console.error(err)
+                  fs.writeFileSync(aws.keyFilename, data.KeyMaterial)
+                })
+              })
+            } else {
+              aws.keyData = fs.readFileSync(aws.keyFilename)
+            }
+          }
         } else {
           this.aws[hash].failures = 0
         }
@@ -41,8 +68,7 @@ class AwsEc2 {
   launch(config) {
     this.connect({ [config.id]: config })
 
-    let region = config.region.substr(0, config.region.length - 1)
-    let hash = [region, config.accessKeyId, md5(config.secretAccessKey)].join('/')
+    let hash = this.configHash(config)
     let aws = this.aws[hash]
 
     if (!aws) {
@@ -144,7 +170,6 @@ class AwsEc2 {
     for (let id in this.configs) {
       let config = Object.assign({}, this.configs[id])
       config.secretAccessKey = ''
-      config.sshPrivateKey = ''
       configs[id] = config
     }
 
@@ -174,7 +199,6 @@ class AwsEc2 {
             imageId: { defaultValue: 'ami-5da23a2a', label: 'Image ID' },
             sshPort: { defaultValue: 22, label: 'SSH Port' },
             sshUsername: { defaultValue: 'ubuntu', label: 'SSH Username' },
-            sshPrivateKey: { label: 'SSH Private Key', secret: true },
             sshScript: { label: 'SSH Script', rows: 10 },
           }
         }
@@ -209,7 +233,7 @@ class Instance {
       InstanceType: this.config.instanceType,
       MinCount: 1, MaxCount: 1,
       Placement: { AvailabilityZone: this.config.region },
-      KeyName: 'iEMS-test' // todo
+      KeyName: this.aws.keyName
     }
 
     this.aws.ec2.runInstances(params, (err, data) => {
@@ -233,7 +257,7 @@ class Instance {
         ImageId: this.config.imageId,
         InstanceType: this.config.instanceType,
         Placement: { AvailabilityZone: this.config.region },
-        KeyName: 'iEMS-test' // todo
+        KeyName: this.aws.keyName
       },
       InstanceCount: 1,
       SpotPrice: this.config.spotPrice,
@@ -289,7 +313,7 @@ class Instance {
       host: this.instance.PublicIpAddress,
       port: this.config.sshPort || 22,
       username: this.config.sshUsername || 'ubuntu',
-      privateKey: this.config.sshPrivateKey,
+      privateKey: this.aws.keyData,
       provision: this.config.sshScript
     }
 
