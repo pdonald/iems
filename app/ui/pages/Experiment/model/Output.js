@@ -25,11 +25,15 @@ var Output = {
     if (graph.ports) json += pad + `ports: { input: ['${graph.ports.input.join("', '")}'], output: ['${graph.ports.output.join("', '")}'] },` + '\n';
 
     // processes data
-    json += pad + 'processes: [' + '\n';
-    json += graph.processes
-      .map(p => `{ id: ${p.id}, x: ${p.x}, y: ${p.y}, type: '${p.type}', params: { ${params2str(p.params)} } }`)
-      .map(s => pad2 + s).join(',\n') + '\n';
-    json += pad + ']';
+    if (graph.processes.length > 0) {
+      json += pad + 'processes: [' + '\n';
+      json += graph.processes
+        .map(p => `{ id: ${p.id}, x: ${p.x}, y: ${p.y}, type: '${p.type}', params: { ${params2str(p.params)} } }`)
+        .map(s => pad2 + s).join(',\n') + '\n';
+      json += pad + ']';
+    } else {
+      json += pad + 'processes: []';
+    }
 
     // links data
     if (graph.links.length) {

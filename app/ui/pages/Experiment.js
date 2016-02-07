@@ -255,7 +255,7 @@ export default React.createClass({
         </div>
         <pre>
           <div className="inner">
-            {Output[this.state.output](this.currentGraph())}
+            {Output[this.state.output](this.currentGraph()).trim()}
           </div>
         </pre>
       </div>
