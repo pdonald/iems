@@ -1,0 +1,217 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Verdana;
+  font-size: 12px;
+}
+
+html, body, #app, #container {
+  height: 100%;
+}
+
+*:focus {
+  outline: none;
+}
+
+@header-height: 50px;
+
+#header {
+  @color: #fff;
+
+  background: #101010;
+  height: @header-height;
+  display: flex;
+  padding: 0 20px;
+  align-items: center;
+
+  a, a:visited {
+    color: @color;
+    text-decoration: none;
+
+    &:hover {
+      color: #ccc;
+    }
+  }
+
+  h1 {
+    color: @color;
+    margin: 0;
+    font-size: 24px;
+  }
+
+  ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+
+    li {
+      display: inline-block;
+      margin-left: 15px;
+      font-size: 16px;
+
+      a {
+        padding: 5px 15px;
+      }
+
+      .active {
+        background: #666;
+      }
+    }
+  }
+}
+
+main {
+  height: 100%;
+
+  .page {
+    padding: 10px 20px;
+  }
+}
+
+.filter-group {
+  ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+
+    small {
+      color: #ccc;
+    }
+  }
+}
+
+.filters {
+  margin-left: auto;
+  padding: 0px 20px;
+  min-width: 200px;
+}
+
+.experiments-container {
+  width: 100%;
+}
+
+table.experiments {
+  width: 100%;
+
+  th, td {
+    padding: 5px 10px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+  }
+}
+
+.alert-success {
+  color: teal;
+  background: lightgreen;
+  border: 1px solid rgb(235, 204, 209);
+  padding: 15px 20px;
+  margin-bottom: 5px;
+
+  button {
+    float: right;
+  }
+}
+
+.alert-error {
+  color: rgb(169, 68, 66);
+  background: rgb(242, 222, 222);
+  border: 1px solid rgb(235, 204, 209);
+  padding: 15px 20px;
+  margin-bottom: 5px;
+
+  button {
+    float: right;
+  }
+}
+
+.page {
+  thead th, tbody td { border: 1px solid #ccc; padding: 5px 10px; }
+  tfoot td { text-align: right; }
+  form {
+    label {
+      font-weight: bold;
+      display: inline-block;
+      width: 150px;
+      vertical-align: top;
+    }
+
+    .row {
+      padding: 5px 0px;
+    }
+
+    input, select, textarea {
+      width: 270px;
+    }
+
+    footer {
+      .button-group {
+        margin-left: 152px;
+      }
+    }
+  }
+}
+
+.modal {
+  position: absolute;
+  border: 1px solid black;
+  background: white;
+  z-index: 1000;
+  left: 20%;
+  top: 20%;
+  width: 70%;
+  height: 50%;
+  padding: 20px;
+  overflow: auto;
+}
+.modal.closed {
+  display: none;
+}
+.modal pre {
+  clear: both;
+}
+.modal-header {
+  margin-bottom: 10px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid black;
+}
+.modal-header button {
+  float: right;
+  padding: 10px;
+}
+
+.cool-table {
+  margin-left: -2px;
+  margin-bottom: 8px;
+
+  th {
+    user-select: none;
+    text-align: left;
+
+    &.sortable {
+      cursor: pointer;
+    }
+
+    .arrow {
+      float: right;
+      padding-left: 8px;
+    }
+  }
+
+  td.actions {
+    button {
+      margin: 0 2px;
+      cursor: pointer;
+    }
+  }
+}
+
+.button-create {
+  //margin-left: 2px;
+}
+
+.button-group {
+  button {
+    margin-left: 2px;
+    margin-right: 2px;
+  }
+}

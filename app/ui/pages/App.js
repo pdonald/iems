@@ -1,6 +1,8 @@
 import React from 'react'
 import { Link } from 'react-router'
 
+import './App.less'
+
 export default class App extends React.Component {
   render() {
     return (

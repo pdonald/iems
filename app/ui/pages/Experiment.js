@@ -17,6 +17,7 @@ import Actions from './Experiment/Actions'
 
 import { clone, map } from '../utils'
 import { apiurl } from '../settings'
+import './Experiment.less'
 
 export default React.createClass({
   getInitialState: function() {
@@ -52,6 +53,12 @@ export default React.createClass({
        document.stack = [new GroupModel(graph, null, document)]
        this.setState({ document: document })
      })
+
+     jQuery('body').addClass('experiment')
+  },
+
+  componentWillUnmount() {
+    jQuery('body').removeClass('experiment')
   },
 
   save: function() {

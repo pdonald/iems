@@ -1,0 +1,326 @@
+@import './App.less';
+
+body.experiment {
+  overflow: hidden;
+}
+
+#editor {
+  display: flex;
+  height: ~"calc(100% - "@header-height~")";
+
+  .dragobj {
+    position: absolute;
+    width: 150px;
+    height: 50px;
+    border: 1px solid black;
+    background: teal;
+    opacity: 0.5;
+    z-index: 9999;
+    cursor: pointer;
+  }
+
+  #sidebar, #content {
+    flex: 1;
+  }
+
+  #sidebar {
+    background: rgb(81,81,81);
+    max-width: 300px;
+    width: 30%;
+    height: 100%;
+    overflow-y: auto;
+
+    .container {
+      padding: 10px 15px;
+    }
+
+    h2 {
+      font-size: 14px;
+      color: #fff;
+      margin-bottom: 15px;
+    }
+
+    h3 {
+      font-size: 11px;
+      color: #fff;
+      margin-bottom: 15px;
+    }
+
+    br {
+    	clear:both;
+    }
+
+    th {
+    	color: lightgrey;
+    	padding-right: 3px;
+    }
+
+    .toolbox {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+
+      ul {
+        margin: 0;
+        padding: 0;
+        list-style-type: none;
+      }
+
+      li {
+        border: 2px solid black;
+        background: rgb(90,90,90);
+        color: white;
+        cursor: pointer;
+        padding: 10px 10px;
+        background: #2ECC71;
+        color: black;
+        border: 1px solid black;
+        font-size: 10px;
+        //width: 45%;
+        float: left;
+        margin: 5px 5px;
+        margin-left: 0;
+      }
+
+      .toolbox-group {
+        clear: both;
+        h3 {
+          margin: 0;
+          padding: 0;
+          margin-bottom: 5px;
+        }
+      }
+    }
+
+    .properties {
+      th input[type="text"] {
+        width: 100%;
+      }
+      td input {
+        width: 100%;
+      }
+    }
+
+    .variables {
+      th {
+        text-align: left;
+      }
+      th input[type="text"] {
+        width: 100%;
+      }
+      td input {
+        width: 100%;
+      }
+    }
+
+    .server {
+      button {
+        margin-right: 5px;
+        padding: 5px;
+      }
+
+      input {
+        width: 100%;
+      }
+    }
+  }
+
+  #content {
+    width: 70%;
+    height: 100%;
+    //overflow-y: hidden;
+
+    .grid {
+      //width: 100%;
+      height: 70%;
+      overflow-y: auto;
+
+      background-size: 10px 10px;
+      background-image: repeating-linear-gradient(0deg, #eee, #eee 1px, transparent 1px, transparent 40px),
+      repeating-linear-gradient(-90deg, #eee, #eee 1px, transparent 1px, transparent 40px);
+    }
+
+    nav.depth {
+      padding-left: 5px;
+      border-bottom: 1px solid #ccc;
+
+      ul {
+        margin: 0;
+        padding: 0;
+      }
+
+      li {
+        margin: 5px 3px;
+        border: 1px solid black;
+        padding: 5px 15px;
+        display: inline-block;
+        cursor: pointer;
+      }
+
+      li.active {
+        background: #ccc;
+      }
+      li.run {
+        background: lime;
+      }
+      li.right {
+        float: right;
+      }
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+
+      rect.select {
+        fill: rgba(173,216,230,0.5);
+        stroke: navy;
+      }
+      rect.blank {
+        fill: rgba(0,0,0,0);
+        stroke: none;
+      }
+
+      .process .process-rect {
+        cursor: move;
+        fill: #2ECC71;
+        stroke: #000;
+      }
+      .process text {
+        color: black;
+      }
+      .process .port-input circle {
+        fill: lightblue;
+        stroke: #000;
+      }
+      .process .port-output circle {
+        fill: hotpink;
+        stroke: #000;
+      }
+      .connector:hover line {
+        stroke: yellow;
+        stroke-width: 6px;
+      }
+      .connector line, .port-line {
+        stroke: #000;
+        stroke-width: 1px;
+        cursor: pointer;
+      }
+      .connector.incompatible-types line {
+        stroke: red;
+      }
+      .connector.incompatible-types rect {
+        fill: yellow;
+        stroke: red;
+      }
+      .connector.incompatible-types text {
+        fill: red;
+      }
+      .connector.selected line {
+        stroke: red;
+      }
+      .process .port-on circle {
+        fill: yellow;
+      }
+
+      .process.error .process-rect {
+        stroke: red;
+      }
+      .process.selected .process-rect {
+        stroke: red !important;
+        fill: yellow !important;
+      }
+      .process.blank > g > .process-rect {
+        fill: none !important;
+      }
+      .process.main.blank > g > .process-rect {
+        stroke: none;
+      }
+      .process.running > g > .process-rect {
+        stroke: black;
+        fill: purple;
+      }
+      .process.done > g > .process-rect {
+        stroke: black;
+        fill: lime;
+      }
+
+      .zoom-in {
+        cursor: zoom-in;
+      }
+
+      .resize {
+      }
+    }
+
+    .preview {
+      border-top: 1px solid #ccc;
+      background: #fff;
+      //padding: 0px 0px;
+      height: 30%;
+
+      .options {
+        //display: none;
+        padding: 10px 5px;
+      }
+
+      pre {
+        margin-top: -5px;
+        width: 100%;
+        height: ~"calc(100% - 73px)";
+        overflow: auto;
+        -moz-tab-size:    2;
+        -o-tab-size:      2;
+        tab-size:         2;
+        white-space: pre;
+        -webkit-touch-callout: text;
+        -webkit-user-select: text;
+        -khtml-user-select: text;
+        -moz-user-select: text;
+        -ms-user-select: text;
+        user-select: text;
+
+        .inner {
+          padding: 10px;
+        }
+      }
+    }
+  }
+}
+
+::-webkit-scrollbar {
+  width: 0.5em;
+  height: 0.5em;
+}
+
+::-webkit-scrollbar-thumb {
+  background: slategray;
+}
+
+::-webkit-scrollbar-track {
+  background: #b7bfc7;
+}
+
+.cell-scroll-inner.grid::-webkit-scrollbar-thumb {
+  background: #E6E6E6;
+}
+
+.cell-scroll-inner.grid::-webkit-scrollbar-track {
+  background: #F2F2F2;
+}
+
+#makefile::-webkit-scrollbar-thumb {
+  background: #E6E6E6;
+}
+
+#makefile::-webkit-scrollbar-track {
+  background: #F2F2F2;
+}
+
+body {
+  scrollbar-face-color: slategray;
+  scrollbar-track-color: #b7bfc7;
+}
