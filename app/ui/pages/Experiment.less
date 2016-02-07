@@ -2,12 +2,45 @@
 
 body.experiment {
   overflow: hidden;
+
+  &, #app, #container, main {
+    height: 100%;
+  }
 }
 
-#editor {
+.experiment-layout {
   display: flex;
   height: ~"calc(100% - "@header-height~")";
 
+  .experiment-sidebar {
+    flex: 1 30%;
+    max-width: 300px;
+    overflow-y: auto;
+  }
+
+  .experiment-main {
+    flex: 1 70%;
+    overflow: auto;
+    width: 100%;
+    height: 100%;
+  }
+
+  .experiment-main-top {
+    height: 40px;
+  }
+
+  .experiment-main-middle {
+    height: ~"calc(100% - 40px - 150px)";
+    overflow: auto;
+  }
+
+  .experiment-main-bottom {
+    height: 150px;
+    overflow: hidden;
+  }
+}
+
+body.experiment {
   .dragobj {
     position: absolute;
     width: 150px;
@@ -19,20 +52,9 @@ body.experiment {
     cursor: pointer;
   }
 
-  #sidebar, #content {
-    flex: 1;
-  }
-
   #sidebar {
     background: rgb(81,81,81);
-    max-width: 300px;
-    width: 30%;
-    height: 100%;
-    overflow-y: auto;
-
-    .container {
-      padding: 10px 15px;
-    }
+    padding: 10px 15px;
 
     h2 {
       font-size: 14px;
@@ -70,6 +92,7 @@ body.experiment {
       }
 
       li {
+        display: inline-block;
         border: 2px solid black;
         background: rgb(90,90,90);
         color: white;
@@ -79,8 +102,6 @@ body.experiment {
         color: black;
         border: 1px solid black;
         font-size: 10px;
-        //width: 45%;
-        float: left;
         margin: 5px 5px;
         margin-left: 0;
       }
@@ -115,180 +136,162 @@ body.experiment {
         width: 100%;
       }
     }
+  }
 
-    .server {
-      button {
-        margin-right: 5px;
-        padding: 5px;
-      }
+  #grid {
+    background-size: 10px 10px;
+    background-image: repeating-linear-gradient(0deg, #eee, #eee 1px, transparent 1px, transparent 40px),
+    repeating-linear-gradient(-90deg, #eee, #eee 1px, transparent 1px, transparent 40px);
+  }
 
-      input {
-        width: 100%;
-      }
+  #top {
+    padding-left: 5px;
+    border-bottom: 1px solid #ccc;
+
+    ul {
+      margin: 0;
+      padding: 0;
+    }
+
+    li {
+      margin: 5px 3px;
+      border: 1px solid black;
+      padding: 5px 15px;
+      display: inline-block;
+      cursor: pointer;
+    }
+
+    li.active {
+      background: #ccc;
+    }
+    li.run {
+      background: lime;
+    }
+    li.right {
+      float: right;
     }
   }
 
-  #content {
-    width: 70%;
-    height: 100%;
-    //overflow-y: hidden;
+  #preview {
+    border-top: 1px solid #ccc;
+    background: #fff;
 
-    .grid {
-      //width: 100%;
-      height: 70%;
-      overflow-y: auto;
-
-      background-size: 10px 10px;
-      background-image: repeating-linear-gradient(0deg, #eee, #eee 1px, transparent 1px, transparent 40px),
-      repeating-linear-gradient(-90deg, #eee, #eee 1px, transparent 1px, transparent 40px);
+    .options {
+      padding: 10px 5px;
+      height: 10px;
     }
 
-    nav.depth {
-      padding-left: 5px;
-      border-bottom: 1px solid #ccc;
-
-      ul {
-        margin: 0;
-        padding: 0;
-      }
-
-      li {
-        margin: 5px 3px;
-        border: 1px solid black;
-        padding: 5px 15px;
-        display: inline-block;
-        cursor: pointer;
-      }
-
-      li.active {
-        background: #ccc;
-      }
-      li.run {
-        background: lime;
-      }
-      li.right {
-        float: right;
-      }
-    }
-
-    svg {
+    pre {
       width: 100%;
-      height: 100%;
+      height: 107px;
+      overflow: auto;
 
-      rect.select {
-        fill: rgba(173,216,230,0.5);
-        stroke: navy;
-      }
-      rect.blank {
-        fill: rgba(0,0,0,0);
-        stroke: none;
-      }
+      -moz-tab-size:    2;
+      -o-tab-size:      2;
+      tab-size:         2;
+      white-space: pre;
+      -webkit-touch-callout: text;
+      -webkit-user-select: text;
+      -khtml-user-select: text;
+      -moz-user-select: text;
+      -ms-user-select: text;
+      user-select: text;
 
-      .process .process-rect {
-        cursor: move;
-        fill: #2ECC71;
-        stroke: #000;
-      }
-      .process text {
-        color: black;
-      }
-      .process .port-input circle {
-        fill: lightblue;
-        stroke: #000;
-      }
-      .process .port-output circle {
-        fill: hotpink;
-        stroke: #000;
-      }
-      .connector:hover line {
-        stroke: yellow;
-        stroke-width: 6px;
-      }
-      .connector line, .port-line {
-        stroke: #000;
-        stroke-width: 1px;
-        cursor: pointer;
-      }
-      .connector.incompatible-types line {
-        stroke: red;
-      }
-      .connector.incompatible-types rect {
-        fill: yellow;
-        stroke: red;
-      }
-      .connector.incompatible-types text {
-        fill: red;
-      }
-      .connector.selected line {
-        stroke: red;
-      }
-      .process .port-on circle {
-        fill: yellow;
-      }
-
-      .process.error .process-rect {
-        stroke: red;
-      }
-      .process.selected .process-rect {
-        stroke: red !important;
-        fill: yellow !important;
-      }
-      .process.blank > g > .process-rect {
-        fill: none !important;
-      }
-      .process.main.blank > g > .process-rect {
-        stroke: none;
-      }
-      .process.running > g > .process-rect {
-        stroke: black;
-        fill: purple;
-      }
-      .process.done > g > .process-rect {
-        stroke: black;
-        fill: lime;
-      }
-
-      .zoom-in {
-        cursor: zoom-in;
-      }
-
-      .resize {
-      }
-    }
-
-    .preview {
-      border-top: 1px solid #ccc;
-      background: #fff;
-      //padding: 0px 0px;
-      height: 30%;
-
-      .options {
-        //display: none;
-        padding: 10px 5px;
-      }
-
-      pre {
-        margin-top: -5px;
-        width: 100%;
-        height: ~"calc(100% - 73px)";
-        overflow: auto;
-        -moz-tab-size:    2;
-        -o-tab-size:      2;
-        tab-size:         2;
-        white-space: pre;
-        -webkit-touch-callout: text;
-        -webkit-user-select: text;
-        -khtml-user-select: text;
-        -moz-user-select: text;
-        -ms-user-select: text;
-        user-select: text;
-
-        .inner {
-          padding: 10px;
-        }
+      .inner {
+        padding: 10px;
       }
     }
   }
+
+  svg {
+    width: 100%;
+    height: 100%;
+
+    rect.select {
+      fill: rgba(173,216,230,0.5);
+      stroke: navy;
+    }
+    rect.blank {
+      fill: rgba(0,0,0,0);
+      stroke: none;
+    }
+
+    .process .process-rect {
+      cursor: move;
+      fill: #2ECC71;
+      stroke: #000;
+    }
+    .process text {
+      color: black;
+    }
+    .process .port-input circle {
+      fill: lightblue;
+      stroke: #000;
+    }
+    .process .port-output circle {
+      fill: hotpink;
+      stroke: #000;
+    }
+    .connector:hover line {
+      stroke: yellow;
+      stroke-width: 6px;
+    }
+    .connector line, .port-line {
+      stroke: #000;
+      stroke-width: 1px;
+      cursor: pointer;
+    }
+    .connector.incompatible-types line {
+      stroke: red;
+    }
+    .connector.incompatible-types rect {
+      fill: yellow;
+      stroke: red;
+    }
+    .connector.incompatible-types text {
+      fill: red;
+    }
+    .connector.selected line {
+      stroke: red;
+    }
+    .process .port-on circle {
+      fill: yellow;
+    }
+
+    .process.error .process-rect {
+      stroke: red;
+    }
+    .process.selected .process-rect {
+      stroke: red !important;
+      fill: yellow !important;
+    }
+    .process.blank > g > .process-rect {
+      fill: none !important;
+    }
+    .process.main.blank > g > .process-rect {
+      stroke: none;
+    }
+    .process.running > g > .process-rect {
+      stroke: black;
+      fill: purple;
+    }
+    .process.done > g > .process-rect {
+      stroke: black;
+      fill: lime;
+    }
+
+    .zoom-in {
+      cursor: zoom-in;
+    }
+
+    .resize {
+    }
+  }
+}
+
+body {
+  scrollbar-face-color: slategray;
+  scrollbar-track-color: #b7bfc7;
 }
 
 ::-webkit-scrollbar {
@@ -302,25 +305,4 @@ body.experiment {
 
 ::-webkit-scrollbar-track {
   background: #b7bfc7;
-}
-
-.cell-scroll-inner.grid::-webkit-scrollbar-thumb {
-  background: #E6E6E6;
-}
-
-.cell-scroll-inner.grid::-webkit-scrollbar-track {
-  background: #F2F2F2;
-}
-
-#makefile::-webkit-scrollbar-thumb {
-  background: #E6E6E6;
-}
-
-#makefile::-webkit-scrollbar-track {
-  background: #F2F2F2;
-}
-
-body {
-  scrollbar-face-color: slategray;
-  scrollbar-track-color: #b7bfc7;
 }

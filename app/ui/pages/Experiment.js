@@ -219,44 +219,71 @@ export default React.createClass({
   render: function() {
     if (!this.state.document) return <p>Loading</p>
 
-    return (
-      <div id="editor">
-        <div id="sidebar">
-          <div className="container">
-            <div className="block properties"><Properties doc={this.state.document} graph={this.currentGraph()}/></div>
-            <div className="block variables"><Variables vars={this.state.document.vars}/></div>
-            <div className="block toolbox"><Toolbox/></div>
-          </div>
-        </div>
+    let sidebar = (
+      <div id="sidebar">
+        <div className="block properties"><Properties doc={this.state.document} graph={this.currentGraph()}/></div>
+        <div className="block variables"><Variables vars={this.state.document.vars}/></div>
+        <div className="block toolbox"><Toolbox/></div>
+      </div>
+    )
 
-        <div id="content">
-          <nav className="depth">
-            <ul>
-              {this.state.document.stack.map((g, index) => <li key={index} onClick={() => this.goTo(index)}>{(g.title || g.name || '#'+g.id)}</li>)}
-              <li className="right" onClick={() => this.save()}>Save</li>
-            </ul>
-          </nav>
-          <div className="grid">
-            <Graph ref="graph" graph={this.currentGraph()}>
-              <Group group={this.currentGraph()} blank={true} main={true}/>
-            </Graph>
+    let top = (
+      <div id="top">
+        <ul>
+          {this.state.document.stack.map((g, index) => <li key={index} onClick={() => this.goTo(index)}>{(g.title || g.name || '#'+g.id)}</li>)}
+          <li className="right" onClick={() => this.save()}>Save</li>
+        </ul>
+      </div>
+    )
+
+    let grid = (
+      <div id="grid">
+        <Graph ref="graph" graph={this.currentGraph()}>
+          <Group group={this.currentGraph()} blank={true} main={true}/>
+        </Graph>
+      </div>
+    )
+
+    let preview = (
+      <div id="preview">
+        <div className="options">
+          {map(Output, key => (
+            <span key={key}>
+              <label><input type="radio" readOnly name="outtype" checked={this.state.output == key ? 'checked' : ''} onClick={e => this.changeOutputType(key)}/> {key}</label>
+            </span>
+          ))}
+        </div>
+        <pre>
+          <div className="inner">
+            {Output[this.state.output](this.currentGraph())}
           </div>
-          <div className="preview">
-            <div className="options">
-              {map(Output, key => (
-                <span key={key}>
-                  <label><input type="radio" readOnly name="outtype" checked={this.state.output == key ? 'checked' : ''} onClick={e => this.changeOutputType(key)}/> {key}</label>
-                </span>
-              ))}
-            </div>
-            <pre id="makefile">
-              <div className="inner">
-                {Output[this.state.output](this.currentGraph())}
-              </div>
-            </pre>
+        </pre>
+      </div>
+    )
+
+    return <ExperimentLayout sidebar={sidebar} mainTop={top} mainMiddle={grid} mainBottom={preview} />
+  }
+})
+
+class ExperimentLayout extends React.Component {
+  render() {
+    return (
+      <div className="experiment-layout">
+        <div className="experiment-sidebar">
+          {this.props.sidebar}
+        </div>
+        <div className="experiment-main">
+          <div className="experiment-main-top">
+            {this.props.mainTop}
+          </div>
+          <div className="experiment-main-middle">
+            {this.props.mainMiddle}
+          </div>
+          <div className="experiment-main-bottom">
+            {this.props.mainBottom}
           </div>
         </div>
       </div>
-    );
+    )
   }
-});
+}
