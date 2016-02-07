@@ -149,13 +149,14 @@ app.post('/api/cluster/services/:id/configs/:cid/launch', (req, res) => {
   if (service) {
     const config = service.configs[req.params.cid]
     if (config) {
+      const count = parseInt(req.query.count)
+      if (!count || count < 0) count = 1
+      if (count > 10) return res.status(400).send('Not starting more than 10 instances')
       if (config.service == 'awsec2') {
-        console.log('launching', config)
-        services.awsec2.launch(config)
+        for (let i = 0; i < count; i++) services.awsec2.launch(config)
         res.send()
       } else if (config.service == 'vagrant') {
-          console.log('launching', config)
-          services.vagrant.launch(config)
+          for (let i = 0; i < count; i++) services.vagrant.launch(config)
           res.send()
       } else {
         res.status(500).send('Not supported yet')

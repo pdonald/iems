@@ -115,9 +115,8 @@ export default class Cluster extends React.Component {
   launch() {
     let config = this.state.configs[this.refs.config.value]
     let count = parseInt(this.refs.count.value)
-    console.log('launching', config, count, 'times')
 
-    post(`${apiurl}/cluster/services/${config.service}/configs/${config.id}/launch`)
+    post(`${apiurl}/cluster/services/${config.service}/configs/${config.id}/launch?count=${count}`)
       .fail(err => this.setState({ error: 'Could not launch' }))
   }
 
