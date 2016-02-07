@@ -7,7 +7,6 @@ import Dashboard from './pages/Dashboard'
 import Experiments from './pages/Experiments'
 import Experiment from './pages/Experiment'
 
-import Cluster from './pages/Cluster'
 import ClusterIndex from './pages/Cluster/Index'
 import * as ClusterConfigs from './pages/Cluster/Configs'
 
@@ -15,9 +14,11 @@ export default (
   <Router history={browserHistory}>
     <Route path="/" component={App}>
       <IndexRoute component={Dashboard}/>
-      <Route path="experiments" component={Experiments}/>
-      <Route path="experiments/:id" component={Experiment}/>
-      <Route path="cluster" component={Cluster}>
+      <Route path="experiments" component={Container}>
+        <IndexRoute component={Experiments}/>
+        <Route path=":id" component={Experiment}/>
+      </Route>
+      <Route path="cluster" component={Container}>
         <IndexRoute component={ClusterIndex}/>
         <Route path="configs" component={ClusterConfigs.Index}/>
         <Route path="configs/:service/add" component={ClusterConfigs.Edit}/>
@@ -26,3 +27,9 @@ export default (
     </Route>
   </Router>
 )
+
+class Container extends React.Component {
+  render() {
+    return this.props.children
+  }
+}
