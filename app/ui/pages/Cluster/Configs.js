@@ -55,6 +55,8 @@ export class Index extends React.Component {
     return map(this.state.services, (key, service) => (
       <section key={key} className={'service-' + key}>
         <h2>{service.title}</h2>
+        {!service.info.installed && <p className="alert alert-warning">{service.title} is not available.
+                                        Please read the setup instructions in the Readme file.</p>}
         <Table columns={service.ui.configs.columns}
                rows={map(service.configs, (key, config) => config)}
                buttons={buttons}

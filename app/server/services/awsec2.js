@@ -15,6 +15,7 @@ class AwsEc2 {
     this.aws = []
     this.configs = {}
     this.instances = {}
+    this.version = require('aws-sdk/package.json').description + ' ' + require('aws-sdk/package.json').version
 
     setInterval(() => this.refresh(), 1000)
   }
@@ -198,6 +199,10 @@ class AwsEc2 {
       title: 'Amazon Web Services (AWS) Elastic Cloud Compute (EC2)',
       configs: configs,
       instances: Object.keys(this.instances).map(key => this.instances[key].toJSON()),
+      info: {
+        installed: true,
+        version: this.version
+      },
       ui: {
         configs: {
           columns: {

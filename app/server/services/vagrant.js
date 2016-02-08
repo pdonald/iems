@@ -14,6 +14,7 @@ class Vagrant {
     this.configs = {}
     this.instances = {}
     this.basedir = __dirname + '/../../../build/vagrant/'
+    this.vagrantVersion = null
   }
 
   connect(configs) {
@@ -27,6 +28,11 @@ class Vagrant {
   }
 
   scan() {
+    exec('vagrant --version', { cwd: this.dir }, (err, stdout, stderr) => {
+      if (err) return console.error(err)
+      if (stdout.trim()) this.vagrantVersion = stdout.trim()
+    })
+
     glob(this.basedir + '/*/Vagrantfile', (err, files) => {
       files.map(file => path.dirname(file)).forEach(dir => {
         let dirname = path.basename(dir)
@@ -62,6 +68,10 @@ class Vagrant {
       id: 'vagrant',
       name: 'Vagrant',
       title: 'Vagrant',
+      info: {
+        installed: !!this.vagrantVersion,
+        version: this.vagrantVersion
+      },
       configs: this.configs,
       instances: Object.keys(this.instances).map(key => this.instances[key]),
       ui: {
