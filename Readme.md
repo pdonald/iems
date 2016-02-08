@@ -53,7 +53,7 @@ npm run build
 npm start
 ```
 
-and navigate to [http://localhost:8080/](http://localhost:8080/) in your browser.
+and navigate to [http://localhost:8081/](http://localhost:8081/) in your browser.
 
 Make sure you have plenty of RAM for this or it will take forever.
 

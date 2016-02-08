@@ -5,6 +5,11 @@ set -ex
 export TOOLS=/tools
 export WORK=$HOME
 
+curl -sL https://deb.nodesource.com/setup_5.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+exit 0 # for now
+
 sudo apt-get -qq update
 sudo apt-get -qq install htop unzip pigz wget curl coreutils
 sudo apt-get -qq install build-essential cmake git automake libtool flex
@@ -13,9 +18,6 @@ sudo apt-get -qq install libboost-all-dev libgoogle-perftools-dev libsparsehash-
 sudo apt-get -qq install graphviz imagemagick
 
 sudo PERL_MM_USE_DEFAULT=1 cpan install XML::Twig > /dev/null
-
-curl -sL https://deb.nodesource.com/setup_4.x | sudo -E bash -
-sudo apt-get install -y nodejs
 
 sudo mkdir -p $TOOLS $WORK
 sudo chown -R $USER $TOOLS $WORK
