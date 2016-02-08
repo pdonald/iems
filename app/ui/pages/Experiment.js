@@ -15,7 +15,7 @@ import Variables from './Experiment/Variables'
 import Toolbox from './Experiment/Toolbox'
 import Actions from './Experiment/Actions'
 
-import { clone, map } from '../utils'
+import { clone, map, isodate } from '../utils'
 import { apiurl } from '../settings'
 import './Experiment.less'
 
@@ -62,6 +62,9 @@ export default React.createClass({
   },
 
   save: function() {
+    this.state.document.props.updated = isodate()
+    this.forceUpdate()
+
     let stack = this.state.document.stack
     delete this.state.document.stack
 

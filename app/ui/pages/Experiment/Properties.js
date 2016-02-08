@@ -15,9 +15,8 @@ export default React.createClass({
     var heading, body;
     if (!selected || !selected.params) {
       let props = {};
-      let exceptions = { id:true, graph: true, vars: true, tags: true, stack: true };
-      for (let key in this.props.doc.tags) props[key] = this.props.doc.tags[key];
-      for (let key in this.props.doc) if (!exceptions[key]) props[key] = this.props.doc[key];
+      for (let key in this.props.doc.props) props[key] = this.props.doc.props[key];
+      for (let key in this.props.doc.tags) if (!props.hasOwnProperty(key)) props[key] = this.props.doc.tags[key];
       var children = Object.keys(props).map(key => {
         return (
           <tr key={key}>

@@ -2,7 +2,7 @@ import React from 'react'
 import { Link, browserHistory } from 'react-router'
 
 import { Page, Table, ErrorMessage, Loading } from './Page'
-import { get, post, del, toArray, groupBy, clone, map } from '../utils'
+import { get, post, del, toArray, groupBy, clone, map, isodate } from '../utils'
 import { apiurl } from '../settings'
 
 import './Experiments.less'
@@ -64,7 +64,7 @@ export default class Experiments extends React.Component {
                 {this.state.groupby ? <h2>{this.state.groupby + ': ' + key}</h2> : null}
 
                 <Table columns={{ name: { title: 'Name' } }}
-                       rows={group.map(e => { return { name: e.name, exp: e } })}
+                       rows={group.map(e => { return { name: e.props.name, exp: e } })}
                        buttons={[
                          { title: 'Edit', handler: row => browserHistory.push(`/experiments/${row.exp.id}`) },
                          { title: 'Clone', handler: row => this.cloneExperiment(row.exp) },
@@ -146,11 +146,13 @@ export default class Experiments extends React.Component {
   createExperiment() {
     let exp = {
       id: 'exp-' + Math.round(Math.random() * 1000),
-      name: 'New Experiment',
-      vars: {},
-      "created": new Date().toString(),
-      "updated": new Date().toString(),
+      props: {
+        "name": 'New Experiment',
+        "created": isodate(),
+        "updated": isodate()
+      },
       tags: {},
+      vars: {},
       "graph": {
         "id": 0, "title": "Main", "type": "main", "category": "undefined",
         "x": 0, "y": 0, "collapsed": false,
@@ -175,7 +177,9 @@ export default class Experiments extends React.Component {
       clonedexp.id = exp.id + '-clone' + (i ? i : '')
     }
 
-    clonedexp.name = clonedexp.name + ' (Clone' + (i ? ` #${i}` : '') + ')'
+    clonedexp.props.name = clonedexp.props.name + ' (Clone' + (i ? ` #${i}` : '') + ')'
+    clonedexp.props.created = isodate()
+    clonedexp.props.updated = isodate()
 
     this.setState({ save: { saving: true, error: null }})
 
@@ -187,6 +191,7 @@ export default class Experiments extends React.Component {
           experiments: this.state.experiments,
           filters: this.makeFilters(toArray(this.state.experiments))
         })
+        browserHistory.push(`/experiments/${clonedexp.id}`)
       })
       .fail(msg => {
         console.error(msg)

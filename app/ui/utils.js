@@ -57,3 +57,7 @@ export function del(url) {
     url: url
   })
 }
+
+export function isodate() {
+  return new Date().toISOString().substr(0, 19).replace('T', ' ')
+}

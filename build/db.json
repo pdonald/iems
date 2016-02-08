@@ -2,7 +2,6 @@
   "experiments": {
     "exp1": {
       "id": "exp1",
-      "name": "Experiment #1",
       "vars": {
         "srclang": "en",
         "trglang": "lv",
@@ -14,8 +13,7 @@
         "workdir": "/tools/train",
         "tempdir": "/tmp"
       },
-      "created": "2016-01-09T21:00:00",
-      "updated": "2016-01-09T21:01:00",
+      "props": {"name": "Experiment #1 EN-LV", "created": "2016-01-09T21:00:00", "updated": "2016-01-09T21:01:00"},
       "tags": {"Source Language": "EN", "Target Language": "LV", "BLEU": "41.5", "TER": "0.64"},
       "graph": {
         "id": 0,
@@ -125,7 +123,6 @@
         "spotPrice": "0.05",
         "sshPort": 22,
         "sshUsername": "ubuntu",
-        "sshPrivateKey": "",
         "sshScript": "touch /home/ubuntu/i-was-here && echo I am in!"
       },
       "testconf2": {
@@ -140,7 +137,6 @@
         "spotPrice": null,
         "sshPort": 22,
         "sshUsername": "ubuntu",
-        "sshPrivateKey": "",
         "sshScript": "touch /home/ubuntu/i-was-here && echo I am in!"
       }
     }
