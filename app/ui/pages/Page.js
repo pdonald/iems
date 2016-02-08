@@ -8,7 +8,7 @@ export class Page extends React.Component {
     let loading = this.props.loading ? <p>Loading...</p> : null
 
     return (
-      <div className="page">
+      <div className="page" id={this.props.id}>
         {heading}
         {loading}
         {this.props.children}
@@ -107,12 +107,13 @@ export class Table extends React.Component {
       <thead>
       <tr>
         {map(columns, (key, col) => (
-          <th key={key} onClick={() => col.sortable !== false && this.sortby(key)} className={col.sortable !== false ? 'sortable' : ''}>
+          <th key={key} onClick={() => col.sortable !== false && this.sortby(key)}
+              className={key + ' ' + (col.sortable !== false ? 'sortable' : '')}>
             {col.title}{' '}
             {col.sortable !== false && <span className="arrow">{sortby === key ? (this.state.sort.asc ? '↑' : '↓') : '\u00b7'}</span>}
           </th>
         ))}
-        {this.props.buttons && <th>Actions</th>}
+        {this.props.buttons && <th className="actions">Actions</th>}
       </tr>
       </thead>
       <tbody>
@@ -152,7 +153,7 @@ export class Table extends React.Component {
     if (!a[by] && !a[by]) return 0
     if (!a[by]) return x
     if (!b[by]) return -x
-    return a[by].localeCompare(b[by]) * x
+    return a[by].toString().localeCompare(b[by].toString()) * x
   }
 }
 

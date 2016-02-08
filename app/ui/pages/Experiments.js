@@ -1,21 +1,11 @@
 import React from 'react'
-import { Link } from 'react-router'
+import { Link, browserHistory } from 'react-router'
 
 import { Page, Table, ErrorMessage, Loading } from './Page'
 import { get, post, del, toArray, groupBy, clone, map } from '../utils'
 import { apiurl } from '../settings'
 
-// filters in url
-// load, save error handling
-// add exp => update filters
-// better server side
-// remember filters
-// undo
-// better props/tags structure
-// css
-// redux?
-// preloading
-// search filter
+import './Experiments.less'
 
 export default class Experiments extends React.Component {
   constructor(props) {
@@ -33,6 +23,73 @@ export default class Experiments extends React.Component {
 
   componentDidMount() {
     this.loadExperiments()
+  }
+
+  render() {
+    return (
+      <Page heading='Experiments' id='experiments'>
+        {this.renderContent()}
+      </Page>
+    )
+  }
+
+  renderContent() {
+    if (this.state.init.loading) {
+      return <Loading/>
+    }
+
+    if (this.state.init.error) {
+      return <ErrorMessage error={this.state.init.error} retry={() => this.loadExperiments()}/>
+    }
+
+    let extra;
+    if (this.state.save.saving) {
+      extra = <p>Saving...</p>
+    }
+    if (this.state.save.error) {
+      extra = <ErrorMessage error={this.state.save.error} dismiss={true} />
+    }
+
+    let experiments = toArray(this.state.experiments).filter(this.isExprimentFiltered.bind(this))
+    let groups = groupBy(experiments, e => e.tags[this.state.groupby])
+
+    return (
+      <div>
+        {extra}
+
+        <div className="flex">
+          <section className="experiments-container">
+            {map(groups, (key, group) => (
+              <div key={key}>
+                {this.state.groupby ? <h2>{this.state.groupby + ': ' + key}</h2> : null}
+
+                <Table columns={{ name: { title: 'Name' } }}
+                       rows={group.map(e => { return { name: e.name, exp: e } })}
+                       buttons={[
+                         { title: 'Edit', handler: row => browserHistory.push(`/experiments/${row.exp.id}`) },
+                         { title: 'Clone', handler: row => this.cloneExperiment(row.exp) },
+                         { title: 'Delete', handler: row => this.deleteExperiment(row.exp) }
+                       ]}/>
+              </div>
+            ))}
+          </section>
+
+          <section className="filters">
+            <div><button onClick={() => this.createExperiment()} className="primary">Create</button></div>
+            <p><input type="search" placeholder="Search"/></p>
+
+            <p>Group by:{' '}
+              <select onChange={e => this.onGroupByChange(e.target.value)}>
+                <option value="">-- None --</option>
+                {map(this.state.filters, key => <option key={key} value={key}>{key}</option>)}
+              </select>
+            </p>
+
+            <Filters filters={this.state.filters} onChange={filters => this.onFiltersChange(filters)}/>
+          </section>
+        </div>
+      </div>
+    )
   }
 
   makeFilters(experiments) {
@@ -102,10 +159,10 @@ export default class Experiments extends React.Component {
     }
 
     post(`${apiurl}/experiments/${exp.id}`, exp)
-      .then(res => {
-        console.log(res)
+      .then(_ => {
         this.state.experiments[exp.id] = exp
         this.setState(this.state)
+        browserHistory.push(`/experiments/${exp.id}`)
       })
   }
 
@@ -153,76 +210,6 @@ export default class Experiments extends React.Component {
         console.error(msg)
         this.setState({ save: { saving: false, error: `Could not clone experiment ${exp.name}` } })
       })
-  }
-
-  render() {
-    let heading = 'Experiments'
-
-    if (this.state.init.loading) {
-      return (
-        <Page heading={heading}>
-          <Loading/>
-        </Page>
-      )
-    }
-
-    if (this.state.init.error) {
-      return (
-        <Page heading={heading}>
-          <ErrorMessage error={this.state.init.error} retry={() => this.loadExperiments()}/>
-        </Page>
-      )
-    }
-
-    let extra;
-    if (this.state.save.saving) {
-      extra = <p>Saving...</p>
-    }
-    if (this.state.save.error) {
-      extra = <ErrorMessage error={this.state.save.error} dismiss={true} />
-    }
-
-    let experiments = toArray(this.state.experiments).filter(this.isExprimentFiltered.bind(this))
-    let groups = groupBy(experiments, e => e.tags[this.state.groupby])
-
-    return (
-      <Page heading={heading}>
-        {extra}
-
-        <div style={{'display': 'flex'}}>
-          <section className="experiments-container">
-            {map(groups, (key, group) => (
-              <div key={key}>
-                {this.state.groupby ? <h2>{this.state.groupby + ': ' + key}</h2> : null}
-
-                <Table columns={{ name: { title: 'Name' } }}
-                       rows={group.map(e => { return { name: <Link to={`/experiments/${e.id}`}>{e.name}</Link>, exp: e } })}
-                       buttons={[
-                         { title: 'Clone', handler: row => this.cloneExperiment(row.exp) },
-                         { title: 'Delete', handler: row => this.deleteExperiment(row.exp) }
-                       ]}/>
-              </div>
-            ))}
-          </section>
-
-          <section className="filters">
-            <p>
-              <input type="text" placeholder="Search"/>
-              <button onClick={() => this.createExperiment()}>Create</button>
-            </p>
-
-            <p>Group by:{' '}
-              <select onChange={e => this.onGroupByChange(e.target.value)}>
-                <option value="">-- None --</option>
-                {map(this.state.filters, key => <option key={key} value={key}>{key}</option>)}
-              </select>
-            </p>
-
-            <Filters filters={this.state.filters} onChange={filters => this.onFiltersChange(filters)}/>
-          </section>
-        </div>
-      </Page>
-    )
   }
 }
 
