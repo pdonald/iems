@@ -60,7 +60,7 @@ class AwsEc2 {
 
             aws.ec2.createSecurityGroup({ GroupName: aws.securityGroup, Description: 'iEMS' }, (err, data) => {
               request('https://api.ipify.org/', (err, resp, body) => {
-                if (err) return
+                if (err) return console.error(err)
                 let params = {
                   GroupName: aws.securityGroup,
                   FromPort: 22, // todo: move into launch
@@ -69,6 +69,7 @@ class AwsEc2 {
                   IpProtocol: 'tcp'
                 }
                 aws.ec2.authorizeSecurityGroupIngress(params, (err, data) => {
+                  if (err && err.code == 'InvalidPermission.Duplicate') return
                   if (err) console.error(err)
                 })
               })
