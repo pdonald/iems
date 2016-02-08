@@ -1,5 +1,9 @@
+node_modules/
+npm-*
+
+.vagrant/
+
 build/bundle.js
 build/awsec2/*.pem
-build/vagrant/
-node_modules/
-.vagrant
+build/vagrant/*
+!build/vagrant/.gitkeep
