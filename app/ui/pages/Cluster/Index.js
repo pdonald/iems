@@ -49,8 +49,8 @@ export default class Cluster extends React.Component {
       <div>
         <div>
           <select ref="config">
-            {this.state.configs.map((config, index) => (
-              <option key={config.service+'/'+config.id} value={index}>{config.name}</option>
+            {map(this.state.configs, (id, config) => (
+              <option key={id} value={id}>{config.name}</option>
             ))}
           </select>{' '}
           <input type="text" ref="count" style={{width:'20px','textAlign':'center'}} defaultValue="1"/>{' '}
@@ -116,7 +116,7 @@ export default class Cluster extends React.Component {
     let config = this.state.configs[this.refs.config.value]
     let count = parseInt(this.refs.count.value)
 
-    post(`${apiurl}/cluster/services/${config.service}/configs/${config.id}/launch?count=${count}`)
+    post(`${apiurl}/cluster/services/${config.service}/launch?config=${config.id}&count=${count}`)
       .fail(err => this.setState({ error: 'Could not launch' }))
   }
 

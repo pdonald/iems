@@ -15,7 +15,7 @@ import Variables from './Experiment/Variables'
 import Toolbox from './Experiment/Toolbox'
 import Actions from './Experiment/Actions'
 
-import { clone, map, isodate } from '../utils'
+import { clone, map, isodate, get } from '../utils'
 import { apiurl } from '../settings'
 import './Experiment.less'
 
@@ -23,7 +23,8 @@ export default React.createClass({
   getInitialState: function() {
     return {
       output: 'Makefile',
-      document: null
+      document: null,
+      configs: []
     }
   },
 
@@ -47,12 +48,15 @@ export default React.createClass({
 
      //this.clipboard = new ZeroClipboard(this.refs.copyMakefileButton);
 
-     jQuery.get(`${apiurl}/experiments/${this.props.routeParams.id}`, (document) => {
+     get(`${apiurl}/experiments/${this.props.routeParams.id}`).then((document) => {
        let graph = document.graph
        delete document.graph
        document.stack = [new GroupModel(graph, null, document)]
        this.setState({ document: document })
      })
+
+     get(`${apiurl}/cluster/configs`)
+       .done(configs => this.setState({ configs: configs }))
 
      jQuery('body').addClass('experiment')
   },
@@ -233,8 +237,15 @@ export default React.createClass({
     let top = (
       <div id="top">
         <ul>
-          {this.state.document.stack.map((g, index) => <li key={index} onClick={() => this.goTo(index)}>{(g.title || g.name || '#'+g.id)}</li>)}
-          <li className="right" onClick={() => this.save()}>Save</li>
+          {this.state.document.stack.map((g, index) => <li key={index} className="border" onClick={() => this.goTo(index)}>{(g.title || g.name || '#'+g.id)}</li>)}
+          <li className="right border">Run</li>
+          <li className="right">
+            <select>
+              <option>- Launch configurations -</option>
+              {map(this.state.configs, (id, config) => <option key={id}>{config.name}</option>)}
+            </select>
+          </li>
+          <li className="right border" onClick={() => this.save()}>Save</li>
         </ul>
       </div>
     )

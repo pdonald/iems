@@ -18,7 +18,6 @@ class Vagrant {
   }
 
   connect(configs) {
-    this.configs = {}
     for (let id in configs) {
       let config = configs[id]
       if (config.service == 'vagrant') {
@@ -72,7 +71,6 @@ class Vagrant {
         installed: !!this.vagrantVersion,
         version: this.vagrantVersion
       },
-      configs: this.configs,
       instances: Object.keys(this.instances).map(key => this.instances[key]),
       ui: {
         configs: {

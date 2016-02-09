@@ -42,14 +42,55 @@ app.use('/api/*', (req, res, next) => {
 })
 
 app.get('/api/cluster/configs', (req, res) => {
-  let configs = []
-  for (let id in services) {
-    let serviceConfigs = services[id].toJSON().configs
-    for (let cid in serviceConfigs) {
-      configs.push(serviceConfigs[cid])
-    }
+  res.send(db.cluster.configs) // todo: secret keys
+})
+
+app.post('/api/cluster/configs', (req, res) => {
+  let config = req.body
+  config.id = `c-${config.service}-` + Object.keys(db.cluster.configs).length + 1
+  db.cluster.configs[config.id] = config
+  res.send(config)
+  // todo: connect
+})
+
+app.get('/api/cluster/configs/:id', (req, res) => {
+  const config = db.cluster.configs[req.params.id]
+  if (config) res.send(config) // todo: secret keys
+  else res.status(404).send('No such config')
+})
+
+app.post('/api/cluster/configs/:id', (req, res) => {
+  if (db.cluster.configs[req.params.id]) {
+    let config = req.body
+    config.id = req.params.id
+    db.cluster.configs[config.id] = config
+    res.send(config) // todo: secret keys
+    // todo: connect
+  } else {
+    res.status(404).send('No such config')
   }
-  res.send(configs)
+})
+
+app.post('/api/cluster/configs/:id/clone', (req, res) => {
+  if (db.cluster.configs[req.params.id]) {
+    let config = Object.assign({}, db.cluster.configs[req.params.id])
+    config.id = `c-${config.service}-` + Object.keys(db.cluster.configs).length + 1
+    db.cluster.configs[config.id] = config
+    res.send(config) // todo: secret keys
+    // todo: connect
+  } else {
+    res.status(404).send('No such config')
+  }
+})
+
+app.delete('/api/cluster/configs/:id', (req, res) => {
+  if (db.cluster.configs[req.params.id]) {
+    // todo: connect
+    delete db.cluster.configs[req.params.id]
+    res.send()
+  } else {
+    res.status(404).send('No such config')
+  }
 })
 
 app.get('/api/cluster/services', (req, res) => {
@@ -63,94 +104,13 @@ app.get('/api/cluster/services', (req, res) => {
 app.get('/api/cluster/services/:id', (req, res) => {
   const service = services[req.params.id]
   if (service) res.send(service.toJSON())
-  else res.status(404).send()
+  else res.status(404).send('No such service')
 })
 
-app.get('/api/cluster/services/:id/instances', (req, res) => {
-  const service = services[req.params.id]
-  if (service) res.send(service.toJSON().instances)
-  else res.status(404).send()
-})
-
-app.delete('/api/cluster/services/:id/instances/:iid', (req, res) => {
+app.post('/api/cluster/services/:id/launch', (req, res) => {
   const service = services[req.params.id]
   if (service) {
-    service.terminate(req.params.iid)
-    res.send()
-  } else {
-    res.status(404).send('No such service')
-  }
-})
-
-app.get('/api/cluster/services/:id/configs', (req, res) => {
-  const service = services[req.params.id]
-  if (service) res.send(service.toJSON().configs)
-  else res.status(404).send()
-})
-
-app.post('/api/cluster/services/:id/configs', (req, res) => {
-  const service = services[req.params.id]
-  if (service) {
-    let configs = service.configs
-    let config = req.body
-    config.id = Object.keys(configs).length + 1
-    configs[config.id] = config
-    service.connect(configs)
-    res.send(service.toJSON().configs[config.id])
-  } else {
-    res.status(404).send('No such service')
-  }
-})
-
-app.get('/api/cluster/services/:id/configs/:cid', (req, res) => {
-  const service = services[req.params.id]
-  if (service) {
-    const config = service.toJSON().configs[req.params.cid]
-    if (config) res.send(config)
-    else res.status(404).send('No such config')
-  } else {
-    res.status(404).send('No such service')
-  }
-})
-
-app.post('/api/cluster/services/:id/configs/:cid', (req, res) => {
-  const service = services[req.params.id]
-  if (service) {
-    let config = service.toJSON().configs[req.params.cid]
-    if (config) {
-      // todo: validate
-      config = Object.assign({}, config, req.body)
-      config.id = req.params.cid
-      service.configs[config.id] = config
-      service.connect(service.configs)
-      res.send(service.toJSON().configs[config.id])
-    } else {
-      res.status(404).send('No such config')
-    }
-  } else {
-    res.status(404).send('No such service')
-  }
-})
-
-app.delete('/api/cluster/services/:id/configs/:cid', (req, res) => {
-  const service = services[req.params.id]
-  if (service) {
-    const config = service.toJSON().configs[req.params.cid]
-    if (config) {
-      delete service.configs[config.id]
-      res.send()
-    } else {
-      res.status(404).send('No such config')
-    }
-  } else {
-    res.status(404).send('No such service')
-  }
-})
-
-app.post('/api/cluster/services/:id/configs/:cid/launch', (req, res) => {
-  const service = services[req.params.id]
-  if (service) {
-    const config = service.configs[req.params.cid]
+    const config = service.configs[req.query.config]
     if (config) {
       const count = parseInt(req.query.count)
       if (!count || count < 0) count = 1
@@ -160,6 +120,16 @@ app.post('/api/cluster/services/:id/configs/:cid/launch', (req, res) => {
     } else {
       res.status(404).send('No such config')
     }
+  } else {
+    res.status(404).send('No such service')
+  }
+})
+
+app.delete('/api/cluster/services/:id/instances/:iid', (req, res) => {
+  const service = services[req.params.id]
+  if (service) {
+    service.terminate(req.params.iid)
+    res.send()
   } else {
     res.status(404).send('No such service')
   }
@@ -181,14 +151,14 @@ app.get('/api/experiments/:id', (req, res) => {
 app.post('/api/experiments/:id', (req, res) => {
   db.experiments[req.params.id] = req.body
   savedb()
-  res.send('ok')
+  res.send()
 })
 
 app.delete('/api/experiments/:id', (req, res) => {
   if (db.experiments[req.params.id]) {
     delete db.experiments[req.params.id]
     savedb()
-    res.send('ok')
+    res.send()
   } else {
     res.send(404, 'Not found')
   }

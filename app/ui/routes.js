@@ -21,8 +21,8 @@ export default (
       <Route path="cluster" component={Container}>
         <IndexRoute component={ClusterIndex}/>
         <Route path="configs" component={ClusterConfigs.Index}/>
-        <Route path="configs/:service/add" component={ClusterConfigs.Edit}/>
-        <Route path="configs/:service/:id" component={ClusterConfigs.Edit}/>
+        <Route path="configs/add" component={ClusterConfigs.Edit}/>
+        <Route path="configs/:id" component={ClusterConfigs.Edit}/>
       </Route>
     </Route>
   </Router>

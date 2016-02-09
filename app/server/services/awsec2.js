@@ -21,21 +21,21 @@ class AwsEc2 {
   }
 
   configHash(config) {
-    let region = config.region.substr(0, config.region.length - 1)
-    let hash = [region, config.accessKeyId.substr(0, 5), md5(config.secretAccessKey).substr(0, 5)].join('-')
+    let region = config.region ? config.region.substr(0, config.region.length - 1) : ''
+    let hash = [region, (config.accessKeyId || '').substr(0, 5), md5(config.secretAccessKey || '').substr(0, 5)].join('-')
     return hash
   }
 
-  connect(configs) {
+  connect(configs) { // todo: handle changes
     for (let id in configs) {
       let config = configs[id]
 
       if (config.service == 'awsec2') {
-        let region = config.region.substr(0, config.region.length - 1)
         let hash = this.configHash(config)
 
         if (!this.aws[hash]) {
           let AWS = require('aws-sdk') // todo: check multiple regions
+          let region = config.region ? config.region.substr(0, config.region.length - 1) : null
           AWS.config.update({ region: region, accessKeyId: config.accessKeyId, secretAccessKey: config.secretAccessKey })
           let aws = this.aws[hash] = {
             ec2: new AWS.EC2(),
@@ -197,7 +197,6 @@ class AwsEc2 {
       id: 'awsec2',
       name: 'AWS EC2',
       title: 'Amazon Web Services (AWS) Elastic Cloud Compute (EC2)',
-      configs: configs,
       instances: Object.keys(this.instances).map(key => this.instances[key].toJSON()),
       info: {
         installed: true,

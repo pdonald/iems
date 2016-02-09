@@ -9,7 +9,6 @@ class Localssh {
   }
 
   connect(configs) {
-    this.configs = {}
     for (let id in configs) {
       let config = configs[id]
       if (config.service == 'localssh') {
@@ -42,7 +41,6 @@ class Localssh {
         installed: true,
         version: require('ssh2/package.json').version
       },
-      configs: this.configs,
       instances: Object.keys(this.instances).map(key => this.instances[key]),
       ui: {
         configs: {
