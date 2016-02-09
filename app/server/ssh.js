@@ -61,7 +61,7 @@ class Connection extends events.EventEmitter {
       this.refreshStats()
 
       this.provision()
-      this.ping()
+      //this.ping()
     })
 
     ssh.once('error', err => {
@@ -178,6 +178,15 @@ class Connection extends events.EventEmitter {
         if (stdout) console.log(stdout.trim())
       })
     }, 1000)
+  }
+
+  exec(cmd, cb) {
+    console.log('executing')
+    console.log(cmd)
+    sshexec(this.ssh, cmd, (err, code, stdout, stderr) => {
+      console.log(err, code, stdout, stderr)
+      if (cb) cb(err, code, stdout, stderr)
+    })
   }
 }
 

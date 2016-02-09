@@ -65,6 +65,12 @@ class Vagrant {
     }
   }
 
+  exec(id, cmd, cb) {
+    if (this.instances[id]) {
+      this.instances[id].exec(cmd, cb)
+    }
+  }
+
   toJSON() {
     return {
       id: 'vagrant',
@@ -74,7 +80,7 @@ class Vagrant {
         installed: !!this.vagrantVersion,
         version: this.vagrantVersion
       },
-      instances: Object.keys(this.instances).map(key => this.instances[key]),
+      instances: Object.keys(this.instances).map(key => this.instances[key].toJSON()),
       ui: {
         configs: {
           columns: {
@@ -181,6 +187,12 @@ class Instance {
     destroy.on('close', (code) => console.log(`child process exited with code ${code}`))
     destroy.on('close', (code) => this.state = 'terminated')
     destroy.on('close', (code) => code == 0 && rmdir(this.dir, err => {}))
+  }
+
+  exec(cmd, cb) {
+    if (this.ssh) {
+      this.ssh.exec(cmd, cb)
+    }
   }
 
   toJSON() {

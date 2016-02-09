@@ -9,11 +9,11 @@ let api = require('./api')
 
 let buildDir = path.join(__dirname, '..', '..', 'build')
 
-let app = express();
+let app = express()
 
-app.set('json spaces', 2);
+app.set('json spaces', 2)
 
-app.use(bodyParser.json());
+app.use(bodyParser.json())
 
 app.use(api)
 

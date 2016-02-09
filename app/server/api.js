@@ -124,6 +124,46 @@ app.post('/api/cluster/services/:id/launch', (req, res) => {
   }
 })
 
+app.post('/api/cluster/services/:id/instances/:iid/exec', (req, res) => {
+  const service = services[req.params.id]
+  if (service) {
+    if (!req.body.vars.workdir) return res.status(400).send('No workdir variable')
+    if (!req.body.makefile) return res.status(400).send('No makefile')
+    let cmds = []
+    cmds.push(`rm -rf ${req.body.vars.workdir}`)
+    cmds.push(`mkdir -p ${req.body.vars.workdir}`)
+    cmds.push(`{ cat <<'EOFFF' > ${req.body.vars.workdir}/Makefile\n${req.body.makefile}EOFFF\n}`)
+    cmds.push(`cd ${req.body.vars.workdir} && make`)
+    service.exec(req.params.iid, cmds.join(' && '))
+    res.send()
+  } else {
+    res.status(404).send('No such service')
+  }
+})
+
+app.get('/api/cluster/services/:id/instances/:iid/status', (req, res) => {
+  const service = services[req.params.id]
+  if (service) {
+    if (!req.query.workdir) return res.status(400).send('No workdir variable')
+    let cmd = `cd ${req.query.workdir} && ls -1`
+    service.exec(req.params.iid, cmd, (err, code, stdout, stderr) => {
+      if (err) return res.status(500).send(err)
+      let status = {}
+      stdout.trim().split('\n')
+        .filter(f => f.indexOf('status.') === 0)
+        .map(f => f.substr('status.'.length))
+        .forEach(f => {
+          let name = f.replace('.running', '').replace('.done', '')
+          if (f.indexOf('.running') !== -1) status[name] = 'running'
+          if (f.indexOf('.done') !== -1) status[name] = 'done'
+        })
+      res.send(status)
+    })
+  } else {
+    res.status(404).send('No such service')
+  }
+})
+
 app.delete('/api/cluster/services/:id/instances/:iid', (req, res) => {
   const service = services[req.params.id]
   if (service) {

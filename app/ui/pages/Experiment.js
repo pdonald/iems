@@ -15,7 +15,7 @@ import Variables from './Experiment/Variables'
 import Toolbox from './Experiment/Toolbox'
 import Actions from './Experiment/Actions'
 
-import { clone, map, isodate, get } from '../utils'
+import { clone, map, isodate, get, post } from '../utils'
 import { apiurl } from '../settings'
 import './Experiment.less'
 
@@ -24,7 +24,7 @@ export default React.createClass({
     return {
       output: 'Makefile',
       document: null,
-      configs: []
+      instances: []
     }
   },
 
@@ -55,8 +55,16 @@ export default React.createClass({
        this.setState({ document: document })
      })
 
-     get(`${apiurl}/cluster/configs`)
-       .done(configs => this.setState({ configs: configs }))
+     get(`${apiurl}/cluster/services`)
+       .done(services => {
+         let instances = []
+         for (let sid in services) {
+           for (let instance of services[sid].instances) {
+             instances.push(instance)
+           }
+         }
+         this.setState({ instances: instances })
+       })
 
      jQuery('body').addClass('experiment')
   },
@@ -108,7 +116,7 @@ export default React.createClass({
     this.setState(this.state);
   },
 
-  onUpdateStatus: function(doc, status) {
+  onUpdateStatus: function(status) {
     this.state.document.status = status;
     this.setState(this.state);
   },
@@ -223,6 +231,27 @@ export default React.createClass({
     this.setState(this.state);
   },
 
+  runExperiment() {
+    let instance = this.state.instances[this.refs.instance.value]
+    let makefile = Output.Makefile(this.state.document.stack[0])
+
+    let data = {
+      vars: this.state.document.vars,
+      makefile: makefile
+    }
+
+    post(`${apiurl}/cluster/services/${instance.service}/instances/${instance.id}/exec`, data)
+      .then(_ => {
+        setInterval(() => this.checkStatus(), 1000)
+      })
+  },
+
+  checkStatus() {
+    let instance = this.state.instances[this.refs.instance.value]
+    get(`${apiurl}/cluster/services/${instance.service}/instances/${instance.id}/status?workdir=${this.state.document.vars.workdir}`)
+      .then(status => Actions.updateStatus(status))
+  },
+
   render: function() {
     if (!this.state.document) return <p>Loading</p>
 
@@ -238,11 +267,11 @@ export default React.createClass({
       <div id="top">
         <ul>
           {this.state.document.stack.map((g, index) => <li key={index} className="border" onClick={() => this.goTo(index)}>{(g.title || g.name || '#'+g.id)}</li>)}
-          <li className="right border">Run</li>
+          <li className="right border" onClick={e => this.runExperiment()}>Run</li>
           <li className="right">
-            <select>
+            <select ref="instance">
               <option>- Launch configurations -</option>
-              {map(this.state.configs, (id, config) => <option key={id}>{config.name}</option>)}
+              {this.state.instances.map((instance, i) => instance.state == 'running' ? <option key={i} value={i}>{`${instance.config.name} - ${instance.id} [${instance.state}]`}</option> : null)}
             </select>
           </li>
           <li className="right border" onClick={() => this.save()}>Save</li>
