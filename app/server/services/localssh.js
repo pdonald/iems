@@ -4,22 +4,10 @@ let SshConnection = require('../ssh').Connection
 
 class Localssh {
   constructor() {
-    this.configs = {}
     this.instances = {}
   }
 
-  connect(configs) {
-    for (let id in configs) {
-      let config = configs[id]
-      if (config.service == 'localssh') {
-        this.configs[id] = config
-      }
-    }
-  }
-
   launch(config) {
-    this.connect({ [config.id]: config })
-
     let id = config.id + '-' + Math.round(Math.random()*1000)
     let instance = new Instance(config, id)
     this.instances[instance.id] = instance

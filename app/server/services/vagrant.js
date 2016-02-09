@@ -36,10 +36,13 @@ class Vagrant {
       files.map(file => path.dirname(file)).forEach(dir => {
         let dirname = path.basename(dir)
         let configid = dirname.split('-')[0]
-        let id = dirname //.split('-')[1]
-        let instance = new Instance(this.configs[configid], id, dir)
-        this.instances[id] = instance
-        instance.connect()
+        let config = this.configs[configid]
+        if (config) {
+          let id = dirname //.split('-')[1]
+          let instance = new Instance(config, id, dir)
+          this.instances[id] = instance
+          instance.connect()
+        }
       })
     })
   }

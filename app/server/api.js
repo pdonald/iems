@@ -30,7 +30,6 @@ let services = {
 services.awsec2.connect(db.cluster.configs)
 services.vagrant.connect(db.cluster.configs)
 services.vagrant.scan()
-services.localssh.connect(db.cluster.configs)
 
 let app = module.exports = express.Router()
 
@@ -110,7 +109,7 @@ app.get('/api/cluster/services/:id', (req, res) => {
 app.post('/api/cluster/services/:id/launch', (req, res) => {
   const service = services[req.params.id]
   if (service) {
-    const config = service.configs[req.query.config]
+    const config = db.cluster.configs[req.query.config]
     if (config) {
       const count = parseInt(req.query.count)
       if (!count || count < 0) count = 1

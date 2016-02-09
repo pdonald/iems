@@ -3,6 +3,7 @@
 let fs = require('fs')
 let crypto = require('crypto')
 let request = require('request')
+let AWS = require('aws-sdk')
 
 let SshConnection = require('../ssh').Connection
 
@@ -34,11 +35,9 @@ class AwsEc2 {
         let hash = this.configHash(config)
 
         if (!this.aws[hash]) {
-          let AWS = require('aws-sdk') // todo: check multiple regions
           let region = config.region ? config.region.substr(0, config.region.length - 1) : null
-          AWS.config.update({ region: region, accessKeyId: config.accessKeyId, secretAccessKey: config.secretAccessKey })
           let aws = this.aws[hash] = {
-            ec2: new AWS.EC2(),
+            ec2: new AWS.EC2({ region: region, accessKeyId: config.accessKeyId, secretAccessKey: config.secretAccessKey }),
             keyName: `iEMS-${hash}`,
             keyData: null,
             keyFilename: `${__dirname}/../../../build/awsec2/iems-${hash}.pem`, // todo
@@ -264,6 +263,7 @@ class Instance {
       if (err) {
         this.state = 'error'
         this.error = err
+        console.error(err)
         return
       }
 
