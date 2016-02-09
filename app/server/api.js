@@ -6,6 +6,7 @@ let stringify = require('json-stringify-pretty-compact')
 
 let AwsEc2 = require('./services/awsec2').AwsEc2
 let Vagrant = require('./services/vagrant').Vagrant
+let Localssh = require('./services/localssh').Localssh
 
 function loaddb() {
   db = JSON.parse(fs.readFileSync(dbfile))
@@ -22,12 +23,14 @@ loaddb()
 
 let services = {
   awsec2: new AwsEc2(),
-  vagrant: new Vagrant()
+  vagrant: new Vagrant(),
+  localssh: new Localssh()
 }
 
 services.awsec2.connect(db.cluster.configs)
 services.vagrant.connect(db.cluster.configs)
 services.vagrant.scan()
+services.localssh.connect(db.cluster.configs)
 
 let app = module.exports = express.Router()
 
@@ -152,15 +155,8 @@ app.post('/api/cluster/services/:id/configs/:cid/launch', (req, res) => {
       const count = parseInt(req.query.count)
       if (!count || count < 0) count = 1
       if (count > 10) return res.status(400).send('Not starting more than 10 instances')
-      if (config.service == 'awsec2') {
-        for (let i = 0; i < count; i++) services.awsec2.launch(config)
-        res.send()
-      } else if (config.service == 'vagrant') {
-          for (let i = 0; i < count; i++) services.vagrant.launch(config)
-          res.send()
-      } else {
-        res.status(500).send('Not supported yet')
-      }
+      for (let i = 0; i < count; i++) services[config.service].launch(config)
+      res.send()
     } else {
       res.status(404).send('No such config')
     }
