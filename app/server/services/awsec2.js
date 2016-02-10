@@ -106,6 +106,12 @@ class AwsEc2 {
     }
   }
 
+  exec(id, cmd, cb) {
+    if (this.instances[id]) {
+      this.instances[id].exec(cmd, cb)
+    }
+  }
+
   refresh() {
     let params = { Filters: [ { Name: 'tag:iems', Values: [ 'true' ] } ] }
 
@@ -369,6 +375,12 @@ class Instance {
         if (err) return this.log({ tag: 'aws', msg: 'error', error: err })
         this.log({ tag: 'aws', msg: 'terminated' })
       })
+    }
+  }
+
+  exec(cmd, cb) {
+    if (this.ssh) {
+      this.ssh.exec(cmd, cb)
     }
   }
 

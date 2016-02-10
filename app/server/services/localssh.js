@@ -20,6 +20,12 @@ class Localssh {
     }
   }
 
+  exec(id, cmd, cb) {
+    if (this.instances[id]) {
+      this.instances[id].exec(cmd, cb)
+    }
+  }
+
   toJSON() {
     return {
       id: 'localssh',
@@ -92,6 +98,12 @@ class Instance {
   terminate() {
     this.state = 'terminated'
     this.disconnect()
+  }
+
+  exec(cmd, cb) {
+    if (this.ssh) {
+      this.ssh.exec(cmd, cb)
+    }
   }
 
   toJSON() {
