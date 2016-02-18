@@ -13,7 +13,7 @@
         "workdir": "/tools/train",
         "tempdir": "/tmp"
       },
-      "props": {"name": "Experiment #1 EN-LV", "created": "2016-01-09T21:00:00", "updated": "2016-01-09T21:01:00"},
+      "props": {"name": "Experiment #1 EN-LV", "created": "2016-01-09T21:00:00", "updated": "2016-02-10 06:21:33"},
       "tags": {"Source Language": "EN", "Target Language": "LV", "BLEU": "41.5", "TER": "0.64"},
       "graph": {
         "id": 0,
@@ -109,7 +109,7 @@
         "box": "ubuntu/trusty64",
         "memory": "256",
         "cores": "1",
-        "sshScript": "touch /home/vagrant/i-was-here && echo I am in!"
+        "sshScript": "dockerx || curl -sSL https://get.docker.com/ | sudo sh && sudo usermod -aG docker $USER"
       },
       "testconf1": {
         "id": "testconf1",
@@ -123,7 +123,7 @@
         "spotPrice": "0.05",
         "sshPort": 22,
         "sshUsername": "ubuntu",
-        "sshScript": "touch /home/ubuntu/i-was-here && echo I am in!"
+        "sshScript": "dockerx || curl -sSL https://get.docker.com/ | sudo sh && sudo usermod -aG docker $USER"
       },
       "testconf2": {
         "id": "testconf2",
@@ -137,7 +137,31 @@
         "spotPrice": null,
         "sshPort": 22,
         "sshUsername": "ubuntu",
-        "sshScript": "touch /home/ubuntu/i-was-here && echo I am in!"
+        "sshScript": "dockerx || curl -sSL https://get.docker.com/ | sudo sh && sudo usermod -aG docker $USER"
+      },
+      "testconf3": {
+        "id": "testconf3",
+        "service": "awsec2",
+        "name": "AWS EC2 Micro 1GB/1vCPU US",
+        "accessKeyId": "",
+        "secretAccessKey": "",
+        "region": "us-east-1c",
+        "instanceType": "t1.micro",
+        "imageId": "ami-b2e3c6d8",
+        "spotPrice": null,
+        "sshPort": 22,
+        "sshUsername": "ubuntu",
+        "sshScript": "dockerx || curl -sSL https://get.docker.com/ | sudo sh && sudo usermod -aG docker $USER"
+      },
+      "testconfx": {
+        "id": "testconfx",
+        "service": "localssh",
+        "name": "Linode",
+        "sshUsername": "",
+        "sshPort": 22,
+        "sshHost": "",
+        "sshPrivateKey": "",
+        "sshScript": "dockerx || curl -sSL https://get.docker.com/ | sudo sh && sudo usermod -aG docker $USER"
       }
     }
   }

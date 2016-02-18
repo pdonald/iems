@@ -91,7 +91,6 @@ export default {
       params: {
         order: { type: 'uint', default: '$lm-order' },
         memory: { type: 'size-unit', default: '$memory', nohash: true },
-        toolsdir: { type: 'path', default: '$toolsdir' },
         tempdir: { type: 'path', default: '$tempdir', nohash: true }
       },
       input: { in: 'file<tok>' },
@@ -101,9 +100,11 @@ export default {
       },
       toBash: (params, input, output) => {
         var args = [];
-        if (params.tempdir) args.push(`-T ${params.tempdir}`);
+        //if (params.tempdir) args.push(`-T ${params.tempdir}`); // todo
         if (params.memory) args.push(`-S ${params.memory}`);
-        return [`${params.toolsdir}/kenlm/lmplz -o ${params.order} ${args.join(' ')} < ${input.in} > ${output.out}`];
+        args.push(`-o ${params.order}`)
+        args.push('--discount_fallback')
+        return [`docker run --rm -i iems/kenlm lmplz ${args.join(' ')} < ${input.in} > ${output.out}`];
       }
     },
     binarpa: {
@@ -111,24 +112,25 @@ export default {
       params: {
         type: { type: 'string', default: 'trie' },
         memory: { type: 'size-unit', default: '$memory', nohash: true },
-        toolsdir: { type: 'path', default: '$toolsdir' },
-        tempdir: { type: 'path', default: '$tempdir', nohash: true }
+        tempdir: { type: 'path', default: '$tempdir', nohash: true },
+        workdir: { type: 'path', default: '$workdir', nohash: true }
       },
       input: { in: 'file<arpa>' },
       output: { out: 'file<lm-bin>' },
       toBash: (params, input, output) => {
         var args = [];
-        if (params.tempdir) args.push(`-T ${params.tempdir}`);
+        args.push(`${params.type}`)
+        //if (params.tempdir) args.push(`-T ${params.tempdir}`); // todo
         if (params.memory) args.push(`-S ${params.memory}`);
-        return [`${params.toolsdir}/kenlm/build_binary ${params.type} ${args.join(' ')} ${input.in} ${output.out}`];
+        return [`docker run --rm -i -v ${params.workdir}:/work iems/kenlm build_binary ${args.join(' ')} /work/${input.in} /work/${output.out}`];
       }
     },
     fastalign: {
       type: 'fastalign', title: 'Fast align', category: 'alignment', version: 1,
       params: {
         reverse: { type: 'bool', default: false },
-        toolsdir: { type: 'path', default: '$toolsdir' },
-        tempdir: { type: 'path', default: '$tempdir' },
+        tempdir: { type: 'path', default: '$tempdir', nohash: true },
+        workdir: { type: 'path', default: '$workdir', nohash: true }
       },
       input: { src: 'file<tok>', trg: 'file<tok>' },
       output: { out: 'file<align>' },
@@ -137,7 +139,7 @@ export default {
         return [
           `TEMP=$(shell mktemp --tmpdir=${params.tempdir}) && \\`,
           `paste -d" ||| " ${input.src} /dev/null /dev/null /dev/null /dev/null ${input.trg} > $$TEMP && \\`,
-          `${params.toolsdir}/fast_align/fast_align ${params.reverse ? '-r' : ''} -i $$TEMP > ${output.out} && \\`,
+          `docker run --rm -i -v ${params.tempdir}:${params.tempdir} -v ${params.workdir}:/work iems/fastalign fast_align ${params.reverse ? '-r' : ''} -i $$TEMP > ${output.out} && \\`,
           'rm $$TEMP'
         ]
       }
@@ -146,12 +148,12 @@ export default {
       type: 'symalign', title: 'Sym alignments', category: 'alignment',
       params: {
         method: { type: 'string', default: 'grow-diag-final-and' },
-        toolsdir: { type: 'path', default: '$toolsdir' },
+        workdir: { type: 'path', default: '$workdir', nohash: true }
       },
       input: { srctrg: 'file<align>', trgsrc: 'file<align>' },
       output: { out: 'file<align>' },
       toBash: (params, input, output) => {
-        return [`${params.toolsdir}/fast_align/atools -c ${params.method} -i ${input.srctrg} -j ${input.trgsrc} > ${output.out}`];
+        return [`docker run --rm -i -v ${params.workdir}:/work iems/fastalign atools -c ${params.method} -i /work/${input.srctrg} -j /work/${input.trgsrc} > ${output.out}`];
       }
     },
     extractphrases: {
