@@ -7,3 +7,5 @@ sudo apt-get install -y nodejs
 
 curl -sSL https://get.docker.com/ | sudo sh
 sudo usermod -aG docker $USER
+
+sudo apt-get install -y coreutils wget unzip
