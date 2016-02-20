@@ -1,15 +1,18 @@
-.PHONY: all fastalign kenlm mgiza cdec
+.PHONY: all fastalign kenlm mgiza cdec moses
 
-all: fastalign kenlm mgiza cdec
+all: fastalign kenlm mgiza cdec moses
 
 fastalign:
-	docker build -t iems/fastalign fastalign
+	make -C fastalign
 
 kenlm:
-	docker build -t iems/kenlm kenlm
+	make -C kenlm
 
 mgiza:
-	docker build -t iems/mgiza mgiza
+	make -C mgiza
 
 cdec:
-	docker build -t iems/cdec cdec
+	make -C cdec
+
+moses:
+	make -C moses

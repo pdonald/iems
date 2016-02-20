@@ -7,3 +7,8 @@ build/bundle.js
 build/awsec2/*.pem
 build/vagrant/*
 !build/vagrant/.gitkeep
+
+docker/moses/moses/
+docker/fastalign/fast_align/
+docker/cdec/cdec/
+docker/kenlm/kenlm
