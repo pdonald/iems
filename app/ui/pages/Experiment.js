@@ -13,6 +13,7 @@ import Group from './Experiment/graph/Group'
 import Properties from './Experiment/Properties'
 import Variables from './Experiment/Variables'
 import Toolbox from './Experiment/Toolbox'
+import Cluster from './Experiment/Cluster'
 import Actions from './Experiment/Actions'
 
 import { clone, map, isodate, get, post } from '../utils'
@@ -23,8 +24,7 @@ export default React.createClass({
   getInitialState: function() {
     return {
       output: 'Makefile',
-      document: null,
-      instances: []
+      document: null
     }
   },
 
@@ -54,17 +54,6 @@ export default React.createClass({
        document.stack = [new GroupModel(graph, null, document)]
        this.setState({ document: document })
      })
-
-     get(`${apiurl}/cluster/services`)
-       .done(services => {
-         let instances = []
-         for (let sid in services) {
-           for (let instance of services[sid].instances) {
-             instances.push(instance)
-           }
-         }
-         this.setState({ instances: instances })
-       })
 
      jQuery('body').addClass('experiment')
   },
@@ -232,27 +221,6 @@ export default React.createClass({
     this.setState(this.state);
   },
 
-  runExperiment() {
-    let instance = this.state.instances[this.refs.instance.value]
-    let makefile = Output.Makefile(this.state.document.stack[0])
-
-    let data = {
-      vars: this.state.document.vars,
-      makefile: makefile
-    }
-
-    post(`${apiurl}/cluster/services/${instance.service}/instances/${instance.id}/exec`, data)
-      .then(_ => {
-        setInterval(() => this.checkStatus(), 1000)
-      })
-  },
-
-  checkStatus() {
-    let instance = this.state.instances[this.refs.instance.value]
-    get(`${apiurl}/cluster/services/${instance.service}/instances/${instance.id}/status?workdir=${this.state.document.vars.workdir}`)
-      .then(status => Actions.updateStatus(status))
-  },
-
   render: function() {
     if (!this.state.document) return <p>Loading</p>
 
@@ -260,6 +228,7 @@ export default React.createClass({
       <div id="sidebar">
         <div className="block properties"><Properties doc={this.state.document} graph={this.currentGraph()}/></div>
         <div className="block variables"><Variables vars={this.state.document.vars}/></div>
+        <div className="block cluster"><Cluster doc={this.state.document}/></div>
         <div className="block toolbox"><Toolbox/></div>
       </div>
     )
@@ -268,13 +237,6 @@ export default React.createClass({
       <div id="top">
         <ul>
           {this.state.document.stack.map((g, index) => <li key={index} className="border" onClick={() => this.goTo(index)}>{(g.title || g.name || '#'+g.id)}</li>)}
-          <li className="right border" onClick={e => this.runExperiment()}>Run</li>
-          <li className="right">
-            <select ref="instance">
-              <option>- Launch configurations -</option>
-              {this.state.instances.map((instance, i) => instance.state == 'running' ? <option key={i} value={i}>{`${instance.config.name} - ${instance.id} [${instance.state}]`}</option> : null)}
-            </select>
-          </li>
           <li className="right border" onClick={() => this.save()}>Save</li>
         </ul>
       </div>
