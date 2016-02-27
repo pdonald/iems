@@ -35,10 +35,6 @@ npm run dev &
 npm start
 ```
 
-### Moses and other tools
-
-`setup.sh` will compile and install moses, mgiza, fast align, kenlm and cdec on Ubuntu Server 14.04.
-
 ### Vagrant
 
 If you use Vagrant with VirtualBox, just do
@@ -54,8 +50,6 @@ npm start
 ```
 
 and navigate to [http://localhost:8081/](http://localhost:8081/) in your browser.
-
-Make sure you have plenty of RAM for this or it will take forever.
 
 ## Cluster
 
