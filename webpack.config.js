@@ -1,3 +1,5 @@
+var rootpath = require('path').resolve(__dirname)
+
 module.exports = {
   entry: './app/client/main.js',
   output: { path: './build/', filename: 'bundle.js' },
@@ -13,6 +15,7 @@ module.exports = {
     ]
   },
   resolve: {
+    root: [rootpath, `${rootpath}/app`, `${rootpath}/client`],
     extensions: ['', '.js']
   },
   postcss: () => [require('autoprefixer')],

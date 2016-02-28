@@ -1,6 +1,6 @@
 import React from 'react'
 
-import GroupModel from '../model/GroupModel'
+import GroupModel from 'universal/experiment/GroupModel'
 import Process from './Process'
 import Connector from './Connector'
 

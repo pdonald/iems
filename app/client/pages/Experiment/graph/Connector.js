@@ -1,7 +1,7 @@
 import React from 'react'
 import PureRenderMixin from 'react-addons-pure-render-mixin'
 
-import ProcessModel from '../model/ProcessModel'
+import ProcessModel from 'universal/experiment/ProcessModel'
 
 export default React.createClass({
   mixins: [PureRenderMixin],

@@ -2,7 +2,7 @@ import React from 'react'
 import PureRenderMixin from 'react-addons-pure-render-mixin'
 import jQuery from 'jquery'
 
-import Tools from './model/Tools'
+import Tools from 'universal/experiment/Tools'
 import Actions from './Actions'
 
 var CategoryTitles = {

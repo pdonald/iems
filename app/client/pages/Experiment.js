@@ -3,9 +3,9 @@ import ReactDOM from 'react-dom'
 import Reflux from 'reflux'
 import jQuery from 'jquery'
 
-import GroupModel from './Experiment/model/GroupModel'
-import ProcessModel from './Experiment/model/ProcessModel'
-import Output from './Experiment/model/Output'
+import GroupModel from 'universal/experiment/GroupModel'
+import ProcessModel from 'universal/experiment/ProcessModel'
+import Output from 'universal/experiment/Output'
 
 import Graph from './Experiment/graph/Graph'
 import Group from './Experiment/graph/Group'

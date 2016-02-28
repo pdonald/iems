@@ -1,6 +1,6 @@
 import React from 'react'
 
-import Output from '../Experiment/model/Output'
+import Output from 'universal/experiment/Output'
 import Actions from '../Experiment/Actions'
 
 import { get, post, clone, map } from '../../utils'
@@ -61,7 +61,7 @@ export default class Cluster extends React.Component {
 
   run(e) {
     return
-    
+
     e.preventDefault()
 
     let instance = this.state.instances[this.refs.instance.value]
