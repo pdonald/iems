@@ -9,7 +9,6 @@
         "reordering-type": "wbe",
         "reordering-orientation": "msd",
         "reordering-model": "wbe-msd-bidirectional-fe",
-        "toolsdir": "/tools",
         "workdir": "/tools/train",
         "tempdir": "/tmp"
       },
@@ -109,7 +108,7 @@
         "box": "ubuntu/trusty64",
         "memory": "256",
         "cores": "1",
-        "sshScript": "dockerx || curl -sSL https://get.docker.com/ | sudo sh && sudo usermod -aG docker $USER"
+        "sshScript": "docker || curl -sSL https://get.docker.com/ | sudo sh && sudo usermod -aG docker $USER"
       },
       "testconf1": {
         "id": "testconf1",
@@ -123,7 +122,7 @@
         "spotPrice": "0.05",
         "sshPort": 22,
         "sshUsername": "ubuntu",
-        "sshScript": "dockerx || curl -sSL https://get.docker.com/ | sudo sh && sudo usermod -aG docker $USER"
+        "sshScript": "docker || curl -sSL https://get.docker.com/ | sudo sh && sudo usermod -aG docker $USER"
       },
       "testconf2": {
         "id": "testconf2",
@@ -137,7 +136,7 @@
         "spotPrice": null,
         "sshPort": 22,
         "sshUsername": "ubuntu",
-        "sshScript": "dockerx || curl -sSL https://get.docker.com/ | sudo sh && sudo usermod -aG docker $USER"
+        "sshScript": "docker || curl -sSL https://get.docker.com/ | sudo sh && sudo usermod -aG docker $USER"
       },
       "testconf3": {
         "id": "testconf3",
@@ -151,7 +150,7 @@
         "spotPrice": null,
         "sshPort": 22,
         "sshUsername": "ubuntu",
-        "sshScript": "dockerx || curl -sSL https://get.docker.com/ | sudo sh && sudo usermod -aG docker $USER"
+        "sshScript": "docker || curl -sSL https://get.docker.com/ | sudo sh && sudo usermod -aG docker $USER"
       },
       "testconfx": {
         "id": "testconfx",
@@ -161,7 +160,7 @@
         "sshPort": 22,
         "sshHost": "",
         "sshPrivateKey": "",
-        "sshScript": "dockerx || curl -sSL https://get.docker.com/ | sudo sh && sudo usermod -aG docker $USER"
+        "sshScript": "docker || curl -sSL https://get.docker.com/ | sudo sh && sudo usermod -aG docker $USER"
       }
     }
   }

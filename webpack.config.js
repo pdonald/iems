@@ -4,7 +4,7 @@ var autoprefixer = require('autoprefixer')
 var HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
-  entry: './app/client/main.js',
+  entry: './app/client/index.js',
   output: { path: './build/', filename: 'bundle.js' },
   module: {
     loaders: [
@@ -26,7 +26,6 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      title: 'iEMS',
       template: `${rootpath}/app/client/index.html`,
       filename: `./index.html` 
     })

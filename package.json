@@ -8,9 +8,8 @@
     "Matīss Rikters"
   ],
   "license": "Apache-2.0",
-  "main": "server.js",
   "scripts": {
-    "start": "node app/server/server.js",
+    "start": "node app/server/index.js",
     "build": "node node_modules/webpack/bin/webpack --progress --colors -p",
     "dev": "node node_modules/webpack-dev-server/bin/webpack-dev-server --hot --inline --progress --colors --content-base build/"
   },
