@@ -35,22 +35,6 @@ npm run dev &
 npm start
 ```
 
-### Vagrant
-
-If you use Vagrant with VirtualBox, just do
-
-```bash
-vagrant up     # create, boot and setup virtual machine
-vagrant ssh    # connect to VM
-cd /vagrant    # go to this directory
-
-npm install --no-bin-links
-npm run build
-npm start
-```
-
-and navigate to [http://localhost:8081/](http://localhost:8081/) in your browser.
-
 ## Cluster
 
 You can launch new virtual servers for running your experiments.
@@ -65,7 +49,7 @@ You can launch new virtual servers for running your experiments.
 
 ### Vagrant
 
-[Vagrant](https://www.vagrantup.com/) is a tool that lets you quickly launch machines in VirtualBox.
+[Vagrant](https://www.vagrantup.com/) is a tool that lets you quickly launch virtual machines in VirtualBox.
 
 #### Windows
 
