@@ -3,7 +3,7 @@ import React from 'react'
 import Output from '../Experiment/model/Output'
 import Actions from '../Experiment/Actions'
 
-import { get, post, clone } from '../../utils'
+import { get, post, clone, map } from '../../utils'
 import { apiurl } from '../../settings'
 
 export default class Cluster extends React.Component {
@@ -11,7 +11,7 @@ export default class Cluster extends React.Component {
     super(props)
 
     this.state = {
-      instances: [],
+      queues: {},
       running: null
     }
   }
@@ -37,7 +37,7 @@ export default class Cluster extends React.Component {
     if (this.state.running) {
       return (
         <div>
-          <p>Running on {this.state.running.instance.id}</p>
+          <p>Running in queue {this.state.running.queue.id}</p>
           <button onClick={e => this.cancel(e)}>Cancel</button>
         </div>
       )
@@ -45,9 +45,9 @@ export default class Cluster extends React.Component {
 
     return (
       <div>
-        <select ref="instance">
-          <option>- Launch configurations -</option>
-          {this.state.instances.map((instance, i) => instance.state == 'running' ? <option key={i} value={i}>{`${instance.config.name} - ${instance.id} [${instance.state}]`}</option> : null)}
+        <select ref="queue">
+          <option>- Queues -</option>
+          {map(this.state.queues, (id, q) => <option key={id} value={id}>{`${q.name}`}</option>)}
         </select>
         <button onClick={e => this.run(e)}>Run</button>
       </div>
@@ -55,19 +55,13 @@ export default class Cluster extends React.Component {
   }
 
   load() {
-    get(`${apiurl}/cluster/services`)
-      .done(services => {
-        let instances = []
-        for (let sid in services) {
-          for (let instance of services[sid].instances) {
-            instances.push(instance)
-          }
-        }
-        this.setState({ instances: instances })
-      })
+    get(`${apiurl}/cluster/queues`)
+      .done(queues => this.setState({ queues: queues }))
   }
 
   run(e) {
+    return
+    
     e.preventDefault()
 
     let instance = this.state.instances[this.refs.instance.value]
@@ -88,8 +82,8 @@ export default class Cluster extends React.Component {
   cancel(e) {
     e.preventDefault()
     // todo: post cancel
-    this.setState({ running: null })
-    this.stopChecking()
+    //this.setState({ running: null })
+    //this.stopChecking()
   }
 
   startChecking() {
@@ -104,8 +98,8 @@ export default class Cluster extends React.Component {
   }
 
   checkStatus() {
-    let instance = this.state.running.instance
-    get(`${apiurl}/cluster/services/${instance.service}/instances/${instance.id}/status?workdir=${this.state.running.vars.workdir}`)
-      .then(status => Actions.updateStatus(status))
+    //let instance = this.state.running.instance
+    //get(`${apiurl}/cluster/services/${instance.service}/instances/${instance.id}/status?workdir=${this.state.running.vars.workdir}`)
+      //.then(status => Actions.updateStatus(status))
   }
 }

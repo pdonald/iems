@@ -2,8 +2,10 @@ import React from 'react'
 import { Link } from 'react-router'
 
 import { Page, Loading, ErrorMessage, Table } from '../Page'
-import { map, get, post, del } from '../../utils'
+import { map, get, post, del, groupBy } from '../../utils'
 import { apiurl } from '../../settings'
+
+import './Index.less'
 
 export default class Cluster extends React.Component {
   constructor(props) {
@@ -14,7 +16,7 @@ export default class Cluster extends React.Component {
       error: null,
       configs: null,
       services: null,
-      modal: { open: false }
+      queues: null
     }
   }
 
@@ -45,6 +47,13 @@ export default class Cluster extends React.Component {
         return <ErrorMessage error={this.state.error} retry={() => this.load()}/>
     }
 
+    let instances = []
+    for (let service in this.state.services) {
+      for (let instance of this.state.services[service].instances) {
+        instances.push(instance)
+      }
+    }
+
     return (
       <div>
         <div>
@@ -58,21 +67,18 @@ export default class Cluster extends React.Component {
           <Link to="/cluster/configs">Launch configurations</Link>
         </div>
 
-        {this.renderInstances()}
-
+        {this.renderInstances(instances)}
         {/*show also if other non-iems ec2 instances are running*/}
+        {this.renderQueues(this.state.queues, instances)}
       </div>
     )
   }
 
-  renderInstances() {
-    let instances = []
-    for (let service in this.state.services) {
-      for (let instance of this.state.services[service].instances) {
-        instances.push(instance)
-      }
-    }
+  renderQueues(queues, instances) {
+    return <Queues queues={queues} instances={instances} />
+  }
 
+  renderInstances(instances) {
     if (instances.length == 0) {
       return null
     }
@@ -81,19 +87,6 @@ export default class Cluster extends React.Component {
       <div>
         <h2>Hosts</h2>
         <Instances instances={instances} onTerminate={instance => this.terminate(instance)} />
-      </div>
-    )
-  }
-
-  renderLogs() {
-    return
-    return (
-      <div className={'modal ' + (this.state.modal.open ? 'open' : 'closed')}>
-        <div className="modal-header">
-          <button onClick={() => this.setState({ modal: { open: false } })}>Close</button>
-          <h1>{this.state.modal.title}</h1>
-        </div>
-        <pre>{this.state.modal.content}</pre>
       </div>
     )
   }
@@ -109,6 +102,10 @@ export default class Cluster extends React.Component {
   refresh() {
     get(`${apiurl}/cluster/services`)
       .done(services => this.setState({ services: services }))
+      .fail(err => this.setState({ error: 'Could not load data' }))
+
+    get(`${apiurl}/cluster/queues`)
+      .done(queues => this.setState({ queues: queues }))
       .fail(err => this.setState({ error: 'Could not load data' }))
   }
 
@@ -185,5 +182,83 @@ class Instances extends React.Component {
     if (hours   < 10) hours   = "0" + hours
     if (minutes < 10) minutes = "0" + minutes
     return hours + ':' + minutes
+  }
+}
+
+class Queues extends React.Component {
+  constructor(props) {
+    super(props)
+
+    this.state = {
+      slots: {}
+    }
+  }
+
+  render() {
+    let columns = {
+      name: { title: 'Name' },
+      hosts: { title: 'Hosts/Slots', sortable: false },
+      jobs: { title: 'Jobs', sortable: false }
+    }
+
+    let rows = map(this.props.queues, (key, q) => {
+      let jobs = groupBy(q.jobs, j => j.status)
+      return {
+        queue: q,
+        name: q.name,
+        jobs: map(jobs, (status, list) => <span key={status} title={status} className={'status status-' + status}>{list.length}</span>),
+        hosts: (
+          <ul className="reset">
+            {this.props.instances.map(host => (
+              <li key={host.id}>
+                <input type="text"
+                  defaultValue={typeof this.state.slots[q.id+host.id] != 'undefined' ? this.state.slots[q.id+host.id] : (q.hosts[host.id] && q.hosts[host.id].slots || 0)}
+                  onChange={e => this.state.slots[q.id+host.id] = +e.target.value}
+                  style={{width: '20px', textAlign: 'center'}}/>
+                {' '}
+                <label>{host.id}</label>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    })
+
+    let buttons = [
+      { title: 'Save', handler: row => this.update(row.queue) },
+      { title: 'Delete', handler: row => this.delete(row.queue) },
+    ]
+
+    return (
+      <div>
+        <h2>Queues</h2>
+        <Table columns={columns} rows={rows} buttons={buttons} />
+        <input type="text" ref="queueName"/>{' '}<button onClick={e => this.add(e)}>Add queue</button>
+      </div>
+    )
+  }
+
+  add(e) {
+    e.preventDefault()
+
+    let name = this.refs.queueName.value.trim()
+    this.refs.queueName.value = ''
+
+    post(`${apiurl}/cluster/queues`, { name: name })
+  }
+
+  update(q) {
+    var hosts = {}
+
+    this.props.instances.forEach(host => {
+      hosts[host.id] = typeof this.state.slots[q.id+host.id] != 'undefined' ?
+        this.state.slots[q.id+host.id] : (q.hosts[host.id] && q.hosts[host.id].slots || 0)
+    })
+
+    post(`${apiurl}/cluster/queues/${q.id}`, hosts)
+  }
+
+  delete(queue) {
+    del(`${apiurl}/cluster/queues/${queue.id}`)
   }
 }

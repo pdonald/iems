@@ -31,6 +31,20 @@ services.awsec2.connect(db.cluster.configs)
 services.vagrant.connect(db.cluster.configs)
 services.vagrant.scan()
 
+db.cluster.queues = {
+  all: {
+    id: 'all',
+    name: "All",
+    hosts: {},
+    jobs: [
+      { id: 1, status: 'pending' },
+      { id: 2, status: 'running' },
+      { id: 3, status: 'finished' },
+      { id: 4, status: 'failed' }
+    ]
+  }
+}
+
 let app = module.exports = express.Router()
 
 app.use('/api/*', (req, res, next) => {
@@ -38,6 +52,34 @@ app.use('/api/*', (req, res, next) => {
   res.header('Access-Control-Allow-Methods', 'GET,POST,DELETE')
   res.header('Access-Control-Allow-Headers', 'Content-Type')
   next()
+})
+
+app.get('/api/cluster/queues', (req, res) => {
+  res.send(db.cluster.queues)
+})
+
+app.post('/api/cluster/queues', (req, res) => {
+  let id = 'q' + (Object.keys(db.cluster.queues).length + 1) + '-' + Math.round(Math.random()*1000)
+  db.cluster.queues[id] = { id: id, name: req.body.name, hosts: {}, jobs: [] }
+  res.send()
+})
+
+app.post('/api/cluster/queues/:id', (req, res) => {
+  let queue = db.cluster.queues[req.params.id]
+  if (queue) {
+    for (let hostid in req.body) {
+      if (!queue.hosts[hostid]) queue.hosts[hostid] = {}
+      queue.hosts[hostid].slots = req.body[hostid]
+    }
+    res.send()
+  } else {
+    res.status(404).send()
+  }
+})
+
+app.delete('/api/cluster/queues/:id', (req, res) => {
+  delete db.cluster.queues[req.params.id]
+  res.send()
 })
 
 app.get('/api/cluster/configs', (req, res) => {
