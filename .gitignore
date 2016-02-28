@@ -6,7 +6,10 @@ build/awsec2/*.pem
 build/vagrant/*
 !build/vagrant/.gitkeep
 
+docker/.vagrant
 docker/moses/moses/
 docker/fastalign/fast_align/
 docker/cdec/cdec/
 docker/kenlm/kenlm
+
+todo.txt
