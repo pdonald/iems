@@ -60,7 +60,7 @@ class Connection extends events.EventEmitter {
       this.refreshStatsTimer = setInterval(() => this.refreshStats(), 30 * 1000)
       this.refreshStats()
 
-      this.provision()
+      //this.provision()
       //this.ping()
     })
 
@@ -182,7 +182,7 @@ class Connection extends events.EventEmitter {
 
   exec(cmd, cb) {
     console.log('executing')
-    console.log(cmd)
+    //console.log(cmd)
     sshexec(this.ssh, cmd, (err, code, stdout, stderr) => {
       console.log(err, code, stdout, stderr)
       if (cb) cb(err, code, stdout, stderr)
