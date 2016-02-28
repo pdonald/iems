@@ -4,16 +4,18 @@ An Interactive Experiment Management System for machine translation.
 
 [Demo](http://pdonald.github.io/iems/) (Google Chrome recommended, should also work in Firefox, IE11 and Edge)
 
-**Warning: this is still very much work in progress, it is not stable yet**
+**Warning: this project is under heavy development**
 
 A project at the [Machine Translation Marathon 2015](http://ufal.mff.cuni.cz/mtm15).
 [Project presentation](http://www.slideshare.net/matissrikters/interactive-experiment-management-system).
 
 ## Build
 
-You will need [node.js](https://nodejs.org/en/).
+You will need [node.js](https://nodejs.org/en/) 5.x.
 
-Here is an easy way to install it:
+On Windows, [download](https://nodejs.org/dist/v5.7.0/node-v5.7.0-x64.msi) and install the latest 5.x (stable) version with the Windows Installer (.msi).
+
+On Ubuntu 14.04 LTS, here is an easy way to install node.js via apt-get
 
 ```bash
 curl -sL https://deb.nodesource.com/setup_5.x | sudo -E bash -
@@ -28,12 +30,16 @@ npm run build  # build app
 npm start      # start web server
 ```
 
+and navigate to [http://localhost:8081](http://localhost:8081) in your browser.
+
 For development
 
 ```bash
 npm run dev &
 npm start
 ```
+
+and navigate to [http://localhost:8080](http://localhost:8080) in your browser.
 
 ## Cluster
 
