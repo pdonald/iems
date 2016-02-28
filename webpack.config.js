@@ -11,7 +11,10 @@ module.exports = {
         query: { presets: ['es2015', 'react'] },
         exclude: /node_modules/
       },
-      { test: /\.less$/, loader: 'style-loader!css-loader!less-loader!postcss-loader' },
+      {
+        test: /\.less$/,
+        loader: 'style-loader!css-loader!less-loader!postcss-loader'
+      },
     ]
   },
   resolve: {
