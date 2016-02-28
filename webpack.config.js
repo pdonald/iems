@@ -1,5 +1,8 @@
 var rootpath = require('path').resolve(__dirname)
 
+var autoprefixer = require('autoprefixer')
+var HtmlWebpackPlugin = require('html-webpack-plugin')
+
 module.exports = {
   entry: './app/client/main.js',
   output: { path: './build/', filename: 'bundle.js' },
@@ -21,7 +24,14 @@ module.exports = {
     root: [rootpath, `${rootpath}/app`, `${rootpath}/client`],
     extensions: ['', '.js']
   },
-  postcss: () => [require('autoprefixer')],
+  plugins: [
+    new HtmlWebpackPlugin({
+      title: 'iEMS',
+      template: `${rootpath}/app/client/index.html`,
+      filename: `./index.html` 
+    })
+  ],
+  postcss: () => [autoprefixer],
   devtool: 'inline-source-map',
   devServer: { historyApiFallback: true }
 }
