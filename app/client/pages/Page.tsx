@@ -1,8 +1,8 @@
-import React from 'react'
+import * as React from 'react'
 
 import { map, merge } from '../utils'
 
-export class Page extends React.Component {
+export class Page extends React.Component<any, any> {
   render() {
     let heading = this.props.heading ? <h1>{this.props.heading}</h1> : null
     let loading = this.props.loading ? <p>Loading...</p> : null
@@ -17,7 +17,7 @@ export class Page extends React.Component {
   }
 }
 
-export class ErrorMessage extends React.Component {
+export class ErrorMessage extends React.Component<any, any> {
   render() {
     if (!this.props.error) {
       return null
@@ -38,7 +38,7 @@ export class ErrorMessage extends React.Component {
   }
 }
 
-export class Notifications extends React.Component {
+export class Notifications extends React.Component<any, any> {
   constructor(props) {
     super(props)
 
@@ -72,13 +72,13 @@ export class Notifications extends React.Component {
   }
 }
 
-export class Loading extends React.Component {
+export class Loading extends React.Component<any, any> {
   render() {
     return <p>Loading...</p>
   }
 }
 
-export class Table extends React.Component {
+export class Table extends React.Component<any, any> {
   constructor(props) {
     super(props)
 
@@ -157,7 +157,7 @@ export class Table extends React.Component {
   }
 }
 
-export class Form extends React.Component {
+export class Form extends React.Component<any, any> {
   constructor(props) {
     super(props)
 

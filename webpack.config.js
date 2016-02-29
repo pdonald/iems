@@ -4,14 +4,13 @@ var autoprefixer = require('autoprefixer')
 var HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
-  entry: './app/client/index.js',
+  entry: './app/client/index.tsx',
   output: { path: './build/', filename: 'bundle.js' },
   module: {
     loaders: [
       {
-        test: /\.js$/,
-        loader: 'babel-loader',
-        query: { presets: ['es2015', 'react'] },
+        test: /\.(js|tsx?)$/,
+        loader: 'ts-loader',
         exclude: /node_modules/
       },
       {
@@ -22,12 +21,12 @@ module.exports = {
   },
   resolve: {
     root: [rootpath, `${rootpath}/app`, `${rootpath}/client`],
-    extensions: ['', '.js']
+    extensions: ['', '.js', '.ts', '.tsx']
   },
   plugins: [
     new HtmlWebpackPlugin({
       template: `${rootpath}/app/client/index.html`,
-      filename: `./index.html` 
+      filename: `./index.html`
     })
   ],
   postcss: () => [autoprefixer],

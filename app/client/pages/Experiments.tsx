@@ -1,4 +1,4 @@
-import React from 'react'
+import * as React from 'react'
 import { Link, browserHistory } from 'react-router'
 
 import { Page, Table, ErrorMessage, Loading } from './Page'
@@ -7,7 +7,7 @@ import { apiurl } from '../settings'
 
 import './Experiments.less'
 
-export default class Experiments extends React.Component {
+export default class Experiments extends React.Component<any, any> {
   constructor(props) {
     super(props)
 
@@ -218,7 +218,7 @@ export default class Experiments extends React.Component {
   }
 }
 
-class Filters extends React.Component {
+class Filters extends React.Component<any, any> {
   constructor(props) {
     super(props)
   }
@@ -247,7 +247,7 @@ class Filters extends React.Component {
   }
 }
 
-class Filter extends React.Component {
+class Filter extends React.Component<any, any> {
   constructor(props) {
     super(props)
   }

@@ -1,4 +1,4 @@
-import jQuery from 'jquery'
+import * as jQuery from 'jquery'
 
 export function toArray(obj) {
   return Object.keys(obj).map(key => obj[key])
