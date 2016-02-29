@@ -2,6 +2,7 @@ node_modules/
 npm-*
 
 build/bundle.js
+build/index.html
 build/awsec2/*.pem
 build/vagrant/*
 !build/vagrant/.gitkeep
@@ -12,4 +13,5 @@ docker/fastalign/fast_align/
 docker/cdec/cdec/
 docker/kenlm/kenlm
 
+trash/
 todo.txt
