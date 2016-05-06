@@ -1,29 +1,30 @@
-import React from 'react'
-import PureRenderMixin from 'react-addons-pure-render-mixin'
+import * as React from 'react'
+//import PureRenderMixin from 'react-addons-pure-render-mixin'
 
 import Select from './Select'
 
-export default React.createClass({
-  mixins: [PureRenderMixin],
+export default class Graph extends React.Component<any, any> {
+  //mixins: [PureRenderMixin],
 
-  getInitialState: function() {
-    return { parentHeight: null };
-  },
+  constructor(props) {
+    super(props);
+    this.state = { parentHeight: null }; 
+  }
 
-  componentDidMount: function() {
+  componentDidMount() {
     window.addEventListener('resize', this.calculateContainerSize);
     this.calculateContainerSize();
-  },
+  }
 
-  componentWillUnmount: function() {
+  componentWillUnmount() {
     window.removeEventListener('resize', this.calculateContainerSize);
-  },
+  }
 
-  calculateContainerSize: function() {
+  calculateContainerSize() {
     this.setState({ parentHeight: this.refs.svg.parentNode.clientHeight });
-  },
+  }
 
-  render: function() {
+  render() {
     var size = this.props.graph.getCalculatedSize();
     var style = {
       minWidth: (size.width+25)+'px',
@@ -37,4 +38,4 @@ export default React.createClass({
       </svg>
     );
   }
-});
+}

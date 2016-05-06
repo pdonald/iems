@@ -1,16 +1,15 @@
-import React from 'react'
-import PureRenderMixin from 'react-addons-pure-render-mixin'
+import * as React from 'react'
+//import PureRenderMixin from 'react-addons-pure-render-mixin'
 
 import ProcessModel from 'universal/experiment/ProcessModel'
+import Actions from '../Actions'
 
-export default React.createClass({
-  mixins: [PureRenderMixin],
-
-  onClick: function() {
+export default class Connector extends React.Component<any, any> {
+  onClick() {
     Actions.selectManual(this.props.graph);
-  },
+  }
 
-  checkTypes: function() {
+  checkTypes() {
     if (this.props.sourceType && this.props.targetType) {
       if (!ProcessModel.isLinkValid(this.props.sourceType, this.props.targetType)) {
         // todo
@@ -33,9 +32,9 @@ export default React.createClass({
         return msg;
       }
     }
-  },
+  }
 
-  render: function() {
+  render() {
     var msg = this.checkTypes();
 
     var classes = ['connector'];
@@ -50,4 +49,4 @@ export default React.createClass({
       </g>
     );
   }
-});
+}

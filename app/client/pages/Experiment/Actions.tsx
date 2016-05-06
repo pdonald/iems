@@ -1,4 +1,4 @@
-import Reflux from 'reflux'
+import * as Reflux from 'reflux'
 
 export default {
   add: Reflux.createAction(),

@@ -1,28 +1,25 @@
-import React from 'react'
-import PureRenderMixin from 'react-addons-pure-render-mixin'
+import * as React from 'react'
+//import PureRenderMixin from 'react-addons-pure-render-mixin'
 
-export default React.createClass({
-  mixins: [PureRenderMixin],
-
-  getDefaultProps: function () {
-    return {
-      pos: { x: 0, y: 0 },
-      min: null, max: null,
-      onMove: function() {},
-      onClick: function() {}
-    };
-  },
-
-  getInitialState: function () {
-    return {
+export default class Draggable extends React.Component<any, any> {
+  //mixins: [PureRenderMixin],
+  
+  constructor(props) {
+    super(props);
+    
+    props.pos = props.pos || { x: 0, y: 0 };
+    props.onMove = props.onMove || function() {};
+    props.onClick = props.onClick || function() {};
+    
+    this.state = {
       dragging: false,
       moved: false,
       pos: { x: this.props.pos.x, y: this.props.pos.y },
       rel: null // position relative to the cursor
     };
-  },
+  }
 
-  componentDidUpdate: function (props, state) {
+  componentDidUpdate(props, state) {
     if (this.state.dragging && !state.dragging) {
       document.addEventListener('mousemove', this.onMouseMove);
       document.addEventListener('mouseup', this.onMouseUp);
@@ -30,13 +27,13 @@ export default React.createClass({
       document.removeEventListener('mousemove', this.onMouseMove);
       document.removeEventListener('mouseup', this.onMouseUp);
     }
-  },
+  }
 
-  onClick: function(e) {
+  onClick(e) {
     // handled by onMouseUp
-  },
+  }
 
-  onMouseDown: function (e) {
+  onMouseDown(e) {
     if (e.button !== 0) return; // only left mouse button
     this.setState({
       dragging: true,
@@ -47,18 +44,18 @@ export default React.createClass({
     });
     e.stopPropagation();
     e.preventDefault();
-  },
+  }
 
-  onMouseUp: function (e) {
+  onMouseUp(e) {
     if (!this.state.moved) {
       this.props.onClick(e);
     }
     this.setState({ dragging: false, moved: false });
     e.stopPropagation();
     e.preventDefault();
-  },
+  }
 
-  onMouseMove: function (e) {
+  onMouseMove(e) {
     if (!this.state.dragging) return;
     var pos = {
       x: e.pageX - this.state.rel.x,
@@ -76,9 +73,9 @@ export default React.createClass({
     this.props.onMove(pos);
     e.stopPropagation();
     e.preventDefault();
-  },
+  }
 
-  render: function () {
+  render() {
     return (
       <g {...this.props}
           transform={`translate(${this.props.pos.x},${this.props.pos.y})`}
@@ -87,4 +84,4 @@ export default React.createClass({
           onMove={this.props.onMove} />
     );
   }
-});
+}

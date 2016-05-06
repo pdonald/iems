@@ -1,11 +1,11 @@
-import React from 'react'
+import * as React from 'react'
 import { Link, browserHistory } from 'react-router'
 
 import { Page, Loading, Notifications, ErrorMessage, Table, Form } from '../Page'
 import { map, get, post, del } from '../../utils'
 import { apiurl } from '../../settings'
 
-export class Index extends React.Component {
+export class Index extends React.Component<any, any> {
   constructor(props) {
     super(props)
 
@@ -94,7 +94,7 @@ export class Index extends React.Component {
   }
 }
 
-export class Edit extends React.Component {
+export class Edit extends React.Component<any, any> {
   constructor(props) {
     super(props)
 

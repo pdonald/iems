@@ -1,20 +1,22 @@
-import React from 'react'
-import PureRenderMixin from 'react-addons-pure-render-mixin'
+import * as React from 'react'
+//import PureRenderMixin from 'react-addons-pure-render-mixin'
 
 import Actions from '../Actions'
 
-export default React.createClass({
-  mixins: [PureRenderMixin],
-
-  getInitialState: function () {
-    return {
+export default class Port extends React.Component<any, any> {
+  //mixins: [PureRenderMixin],
+  
+  constructor(props) {
+    super(props);
+    
+    this.state = {
       pos: { x: this.props.x, y: this.props.y },
       dragging: false,
       rel: null
-    };
-  },
+    }; 
+  }
 
-  componentDidUpdate: function (props, state) {
+  componentDidUpdate(props, state) {
     if (this.state.dragging && !state.dragging) {
       document.addEventListener('mousemove', this.onMouseMove);
       document.addEventListener('mouseup', this.onMouseUp);
@@ -22,9 +24,9 @@ export default React.createClass({
       document.removeEventListener('mousemove', this.onMouseMove);
       document.removeEventListener('mouseup', this.onMouseUp);
     }
-  },
+  }
 
-  onMouseDown: function (e) {
+  onMouseDown(e) {
     if (e.button !== 0) return; // only left mouse button
     this.setState({
       dragging: true,
@@ -35,16 +37,16 @@ export default React.createClass({
     });
     e.stopPropagation();
     e.preventDefault();
-  },
+  }
 
-  onMouseUp: function (e) {
+  onMouseUp(e) {
     this.setState({ dragging: false });
     e.stopPropagation();
     e.preventDefault();
     Actions.connect({ id: this.props.process.id, port: this.props.port })
-  },
+  }
 
-  onMouseMove: function (e) {
+  onMouseMove(e) {
     if (!this.state.dragging) return;
     var pos = {
       x: e.pageX - this.state.rel.x,
@@ -53,23 +55,23 @@ export default React.createClass({
     this.setState({ pos: pos });
     e.stopPropagation();
     e.preventDefault();
-  },
+  }
 
-  onMouseOver: function(e) {
+  onMouseOver(e) {
     this.setState({ on: true });
     Actions.portSelected({ id: this.props.process.id, port: this.props.port })
-  },
+  }
 
-  onMouseOut: function(e) {
+  onMouseOut(e) {
     this.setState({ on: false });
     Actions.portDeselected({ id: this.props.process.id, port: this.props.port })
-  },
+  }
 
-  onDoubleClick: function(e) {
+  onDoubleClick(e) {
     Actions.viewFile(this.props);
-  },
+  }
 
-  render: function() {
+  render() {
     var line = null;
 
     if (this.state.dragging) {
@@ -89,4 +91,4 @@ export default React.createClass({
       </g>
     );
   }
-});
+}

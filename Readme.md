@@ -11,14 +11,14 @@ A project at the [Machine Translation Marathon 2015](http://ufal.mff.cuni.cz/mtm
 
 ## Build
 
-You will need [node.js](https://nodejs.org/en/) 5.x.
+You will need [node.js](https://nodejs.org/en/) 6.x.
 
-On Windows, [download](https://nodejs.org/dist/v5.7.0/node-v5.7.0-x64.msi) and install the latest 5.x (stable) version with the Windows Installer (.msi).
+On Windows, [download](https://nodejs.org/dist/v6.1.0/node-v6.1.0-x64.msi) and install the latest 6.x (stable) version with the Windows Installer (.msi).
 
 On Ubuntu 14.04 LTS, here is an easy way to install node.js via apt-get
 
 ```bash
-curl -sL https://deb.nodesource.com/setup_5.x | sudo -E bash -
+curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
 sudo apt-get install -y nodejs
 ```
 
@@ -26,6 +26,7 @@ Run it
 
 ```bash
 npm install    # install dependencies
+tsd install
 npm run build  # build app
 npm start      # start web server
 ```

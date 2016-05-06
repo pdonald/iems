@@ -1,13 +1,13 @@
-import React from 'react'
+import * as React from 'react'
 
 import Actions from './Actions'
 
-export default React.createClass({
-  onChange: function(process, key, value) {
+export default class Properties extends React.Component<any, any> {
+  onChange(process, key, value) {
     Actions.paramChanged(process, key, value);
-  },
+  }
 
-  render: function() {
+  render() {
     var selected;
     selected = selected || this.props.graph.groups.filter(g => g.selected)[0];
     selected = selected || this.props.graph.processes.filter(p => p.selected)[0];
@@ -21,7 +21,7 @@ export default React.createClass({
         return (
           <tr key={key}>
           <th>{key}</th>
-          <td><input type="text" value={props[key]} onChange={e => this.onChange(this.props.doc, key, e.target.value)}/></td>
+          <td><input type="text" value={props[key]} onChange={e => this.onChange(this.props.doc, key, (e.target as HTMLInputElement).value)}/></td>
           </tr>
         )
       });
@@ -33,7 +33,7 @@ export default React.createClass({
         return (
           <tr key={key}>
           <th>{key}</th>
-          <td><input type="text" value={p.params[key]} onChange={e => this.onChange(p, key, e.target.value)}/></td>
+          <td><input type="text" value={p.params[key]} onChange={e => this.onChange(p, key, (e.target as HTMLInputElement).value)}/></td>
           </tr>
         )
       });
@@ -48,4 +48,4 @@ export default React.createClass({
       </div>
     );
   }
-});
+}

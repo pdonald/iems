@@ -1,4 +1,4 @@
-import React from 'react'
+import * as React from 'react'
 import { Link } from 'react-router'
 
 import { Page, Loading, ErrorMessage, Table } from '../Page'
@@ -7,7 +7,7 @@ import { apiurl } from '../../settings'
 
 import './Index.less'
 
-export default class Cluster extends React.Component {
+export default class Cluster extends React.Component<any, any> {
   constructor(props) {
     super(props)
 
@@ -123,7 +123,7 @@ export default class Cluster extends React.Component {
   }
 }
 
-class Instances extends React.Component {
+class Instances extends React.Component<any, any> {
   constructor(props) {
     super(props)
   }
@@ -185,7 +185,7 @@ class Instances extends React.Component {
   }
 }
 
-class Queues extends React.Component {
+class Queues extends React.Component<any, any> {
   constructor(props) {
     super(props)
 

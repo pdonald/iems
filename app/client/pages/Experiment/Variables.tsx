@@ -1,34 +1,34 @@
-import React from 'react'
+import * as React from 'react'
 
 import Actions from './Actions'
 
-export default React.createClass({
+export default class Variables extends React.Component<any, any> {
   //mixins: [React.addons.PureRenderMixin],
 
-  onChange: (key, value) => {
+  onChange(key, value) {
     Actions.variableChanged(key, value);
-  },
+  }
 
-  onAdd: function() {
+  onAdd() {
     let varName = this.refs.key.value
     if (!varName.length) return
     if (varName[0] == '$') varName = varName.substr(1) // remove accidental $
     this.onChange(varName, this.refs.value.value);
     this.refs.key.value = this.refs.value.value = '';
-  },
+  }
 
-  onEnter: function(e) {
+  onEnter(e) {
     if (e.keyCode == 13) {
       this.onAdd();
     }
-  },
+  }
 
-  render: function() {
+  render() {
     var children = Object.keys(this.props.vars)
       .map(key => (
         <tr key={key}>
         <th>{key}</th>
-        <td><input type="text" value={this.props.vars[key]} onChange={(e) => this.onChange(key, e.target.value)}/></td>
+        <td><input type="text" value={this.props.vars[key]} onChange={(e) => this.onChange(key, (e.target as HTMLInputElement).value)}/></td>
         </tr>
       ));
 
@@ -47,4 +47,4 @@ export default React.createClass({
       </div>
     );
   }
-});
+}

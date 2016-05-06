@@ -1,13 +1,13 @@
-import React from 'react'
+import * as React from 'react'
 
 import GroupModel from 'universal/experiment/GroupModel'
 import Process from './Process'
 import Connector from './Connector'
 
-var Group = React.createClass({
+export default class Group extends React.Component<any, any> {
   //mixins: [React.addons.PureRenderMixin],
 
-  getPortPosition: function(obj, portName, dir, self) {
+  getPortPosition(obj, portName, dir, self) {
     var size = obj.getSize();
 
     var x = self ? 0 : obj.x;
@@ -21,9 +21,9 @@ var Group = React.createClass({
     y += (dir == 'output' ? 10 : -10) * (self ? - 1 : 1);
 
     return { x: x, y: y };
-  },
+  }
 
-  render: function() {
+  render() {
     var group = this.props.group;
 
     if (this.props.blank) {
@@ -90,6 +90,4 @@ var Group = React.createClass({
       );
     }
   }
-});
-
-export default Group;
+}

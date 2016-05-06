@@ -1,26 +1,27 @@
-import React from 'react'
-import PureRenderMixin from 'react-addons-pure-render-mixin'
+import * as React from 'react'
+//import PureRenderMixin from 'react-addons-pure-render-mixin'
 
 import Actions from '../Actions'
 
-export default React.createClass({
-  mixins: [PureRenderMixin],
+export default class Select extends React.Component<any, any> {
+  //mixins: [PureRenderMixin],
 
-  getInitialState: function () {
-    return { dragging: false };
-  },
+  constructor(props) {
+    super(props);
+    this.state = { dragging: false }; 
+  }
 
-  componentDidMount: function() {
+  componentDidMount() {
     document.addEventListener('keydown', this.onKeyDown);
-  },
+  }
 
-  componentWillMount: function() {
+  componentWillMount() {
     document.removeEventListener('keydown', this.onKeyDown);
     document.removeEventListener('mousemove', this.onMouseMove);
     document.removeEventListener('mouseup', this.onMouseUp);
-  },
+  }
 
-  componentDidUpdate: function (props, state) {
+  componentDidUpdate(props, state) {
     if (this.state.dragging && !state.dragging) {
       document.addEventListener('mousemove', this.onMouseMove);
       document.addEventListener('mouseup', this.onMouseUp);
@@ -28,9 +29,9 @@ export default React.createClass({
       document.removeEventListener('mousemove', this.onMouseMove);
       document.removeEventListener('mouseup', this.onMouseUp);
     }
-  },
+  }
 
-  onMouseDown: function (e) {
+  onMouseDown(e) {
     if (e.button !== 0) return; // only left mouse button
     Actions.deselectAll();
     var parent = e.target.getBoundingClientRect();
@@ -44,9 +45,9 @@ export default React.createClass({
     });
     e.stopPropagation();
     e.preventDefault();
-  },
+  }
 
-  onMouseMove: function (e) {
+  onMouseMove(e) {
     if (!this.state.dragging) return;
     this.setState({
       end: {
@@ -57,21 +58,21 @@ export default React.createClass({
     Actions.selectArea({ start: this.state.start, end: this.state.end });
     e.stopPropagation();
     e.preventDefault();
-  },
+  }
 
-  onMouseUp: function (e) {
+  onMouseUp(e) {
     this.setState({ dragging: false });
     e.stopPropagation();
     e.preventDefault();
-  },
+  }
 
-  onKeyDown: function(e) {
+  onKeyDown(e) {
     if (e.keyCode == 46) { // delete
       Actions.delete();
     }
-  },
+  }
 
-  render: function() {
+  render() {
     // covers the whole graph but is transparent
     // handles mouse events
     // must be first in <g>
@@ -104,4 +105,4 @@ export default React.createClass({
       </g>
     );
   }
-});
+}

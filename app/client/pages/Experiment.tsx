@@ -1,7 +1,7 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
-import Reflux from 'reflux'
-import jQuery from 'jquery'
+import * as React from 'react'
+import * as ReactDOM from 'react-dom'
+import * as Reflux from 'reflux'
+import * as jQuery from 'jquery'
 
 import GroupModel from 'universal/experiment/GroupModel'
 import ProcessModel from 'universal/experiment/ProcessModel'
@@ -271,7 +271,7 @@ export default React.createClass({
   }
 })
 
-class ExperimentLayout extends React.Component {
+class ExperimentLayout extends React.Component<any, any> {
   render() {
     return (
       <div className="experiment-layout">

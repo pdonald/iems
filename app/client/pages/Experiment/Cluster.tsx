@@ -1,4 +1,4 @@
-import React from 'react'
+import * as React from 'react'
 
 import Output from 'universal/experiment/Output'
 import Actions from '../Experiment/Actions'
@@ -6,7 +6,9 @@ import Actions from '../Experiment/Actions'
 import { get, post, clone, map } from '../../utils'
 import { apiurl } from '../../settings'
 
-export default class Cluster extends React.Component {
+export default class Cluster extends React.Component<any, any> {
+  private refreshInterval: number;
+  
   constructor(props) {
     super(props)
 
@@ -62,7 +64,7 @@ export default class Cluster extends React.Component {
   run(e) {
     return
 
-    e.preventDefault()
+    /* e.preventDefault()
 
     let instance = this.state.instances[this.refs.instance.value]
     let makefile = Output.Makefile(this.props.doc.stack[0])
@@ -76,7 +78,7 @@ export default class Cluster extends React.Component {
       .then(_ => {
         this.setState({ running: { instance: instance, vars: clone(data.vars) } })
         this.startChecking()
-      })
+      }) */
   }
 
   cancel(e) {

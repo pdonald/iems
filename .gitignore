@@ -1,5 +1,6 @@
 node_modules/
 npm-*
+typings/
 
 build/bundle.js
 build/index.html
@@ -14,4 +15,5 @@ docker/cdec/cdec/
 docker/kenlm/kenlm
 
 trash/
+app/universal/
 todo.txt

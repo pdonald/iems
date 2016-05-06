@@ -79,7 +79,7 @@ export default class Experiments extends React.Component<any, any> {
             <p><input type="search" placeholder="Search"/></p>
 
             <p>Group by:{' '}
-              <select onChange={e => this.onGroupByChange(e.target.value)}>
+              <select onChange={e => this.onGroupByChange((e.target as HTMLInputElement).value)}>
                 <option value="">-- None --</option>
                 {map(this.state.filters, key => <option key={key} value={key}>{key}</option>)}
               </select>
@@ -280,7 +280,7 @@ class Filter extends React.Component<any, any> {
             <li key={name}>
               <label>
                 <input type="checkbox" checked={filter.selected}
-                      onChange={e => this.check(e, name, e.target.checked)}/>
+                      onChange={e => this.check(e, name, (e.target as HTMLInputElement).checked)}/>
                 {name}{' '}
                 <small>({filter.count})</small>
               </label>

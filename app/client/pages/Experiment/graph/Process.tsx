@@ -1,23 +1,26 @@
-import React from 'react'
-import PureRenderMixin from 'react-addons-pure-render-mixin'
+import * as React from 'react'
+//import PureRenderMixin from 'react-addons-pure-render-mixin'
 
 import Draggable from './Draggable'
 import Port from './Port'
 
 import Actions from '../Actions'
 
-export default React.createClass({
-  mixins: [PureRenderMixin],
+export default class extends React.Component<any, any> {
+  constructor(props) {
+    super(props);
+    
+    props.ports = props.ports || { input: [], output: [] };
+    props.draggable = !!props.draggable;
+    props.x = props.x || 0;
+    props.y = props.y || 0; 
+  }
 
-  getDefaultProps: function () {
-    return { ports: { input: [], output: [] }, draggable: true, x: 0, y: 0 };
-  },
-
-  onMove: function(pos) {
+  onMove(pos) {
     Actions.move(pos, this.props.graph, this.props.parent);
-  },
+  }
 
-  onDoubleClick: function(e) {
+  onDoubleClick(e) {
     if (this.props.graph.template) {
       if (!this.props.graph.selected) {
         Actions.selectManual(this.props.graph);
@@ -29,9 +32,9 @@ export default React.createClass({
     }
     e.preventDefault();
     e.stopPropagation();
-  },
+  }
 
-  portName: function(process, type, port) {
+  portName(process, type, port) {
     if (process.template) {
       var portinfo = process.getPortsInfo()[type][port];
       if (portinfo.title) {
@@ -39,9 +42,9 @@ export default React.createClass({
       }
     }
     return port;
-  },
+  }
 
-  render: function() {
+  render() {
     var width = this.props.width;
     var height = this.props.height;
 
@@ -89,4 +92,4 @@ export default React.createClass({
       </Draggable>
     );
   }
-});
+}
