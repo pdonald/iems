@@ -10,10 +10,10 @@ export default class extends React.Component<any, any> {
   constructor(props) {
     super(props);
     
-    props.ports = props.ports || { input: [], output: [] };
-    props.draggable = !!props.draggable;
-    props.x = props.x || 0;
-    props.y = props.y || 0; 
+    //if (!props.ports) props.ports = { input: [], output: [] };
+    //props.draggable = !!props.draggable;
+    //props.x = props.x || 0;
+    //props.y = props.y || 0; 
   }
 
   onMove(pos) {
@@ -78,7 +78,7 @@ export default class extends React.Component<any, any> {
     return (
       <Draggable className={classes.join(' ')}
                  pos={{x: this.props.x, y: this.props.y}} min={min}
-                 onMove={this.onMove}>
+                 onMove={this.onMove.bind(this)} onClick={(function(){})}>
         <g className={this.props.graph.collapsed?'zoom-in':''}>
           <rect className="process-rect" x={0} y={0} width={width} height={height} onDoubleClick={this.onDoubleClick}/>
           <text x="10" y="30" onDoubleClick={this.onDoubleClick}>{this.props.title}</text>

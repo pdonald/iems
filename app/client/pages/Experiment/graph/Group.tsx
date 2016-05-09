@@ -73,7 +73,7 @@ export default class Group extends React.Component<any, any> {
       return (
         <Process width={size.width} height={size.height}
                  x={group.id == 0 ? 0 : 20} y={group.id == 0 ? 0 : 50}
-                 graph={group} ports={group.ports}
+                 graph={group} ports={group.ports || { input:[], output: [] }}
                  blank={true} main={group.id == 0}>
           {groups}
           {processes}

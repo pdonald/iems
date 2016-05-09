@@ -7,9 +7,9 @@ export default class Draggable extends React.Component<any, any> {
   constructor(props) {
     super(props);
     
-    props.pos = props.pos || { x: 0, y: 0 };
-    props.onMove = props.onMove || function() {};
-    props.onClick = props.onClick || function() {};
+    //props.pos = props.pos || { x: 0, y: 0 };
+    //props.onMove = props.onMove || function() {};
+    //props.onClick = props.onClick || function() {};
     
     this.state = {
       dragging: false,
@@ -21,11 +21,11 @@ export default class Draggable extends React.Component<any, any> {
 
   componentDidUpdate(props, state) {
     if (this.state.dragging && !state.dragging) {
-      document.addEventListener('mousemove', this.onMouseMove);
-      document.addEventListener('mouseup', this.onMouseUp);
+      document.addEventListener('mousemove', this.onMouseMove.bind(this));
+      document.addEventListener('mouseup', this.onMouseUp.bind(this));
     } else if (!this.state.dragging && state.dragging) {
-      document.removeEventListener('mousemove', this.onMouseMove);
-      document.removeEventListener('mouseup', this.onMouseUp);
+      document.removeEventListener('mousemove', this.onMouseMove.bind(this));
+      document.removeEventListener('mouseup', this.onMouseUp.bind(this));
     }
   }
 
@@ -79,9 +79,9 @@ export default class Draggable extends React.Component<any, any> {
     return (
       <g {...this.props}
           transform={`translate(${this.props.pos.x},${this.props.pos.y})`}
-          onClick={this.onClick}
-          onMouseDown={this.onMouseDown}
-          onMove={this.props.onMove} />
+          onClick={e => this.onClick(e)}
+          onMouseDown={e => this.onMouseDown(e)}
+          onMove={e => this.props.onMove(e)} />
     );
   }
 }

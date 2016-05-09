@@ -5,7 +5,7 @@ var HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
   entry: './app/client/index.tsx',
-  output: { path: './build/', filename: 'bundle.js' },
+  output: { path: './build/', filename: 'bundle.js', publicPath: '/' },
   module: {
     loaders: [
       {

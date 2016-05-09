@@ -18,11 +18,11 @@ export default class Port extends React.Component<any, any> {
 
   componentDidUpdate(props, state) {
     if (this.state.dragging && !state.dragging) {
-      document.addEventListener('mousemove', this.onMouseMove);
-      document.addEventListener('mouseup', this.onMouseUp);
+      document.addEventListener('mousemove', this.onMouseMove.bind(this));
+      document.addEventListener('mouseup', this.onMouseUp.bind(this));
     } else if (!this.state.dragging && state.dragging) {
-      document.removeEventListener('mousemove', this.onMouseMove);
-      document.removeEventListener('mouseup', this.onMouseUp);
+      document.removeEventListener('mousemove', this.onMouseMove.bind(this));
+      document.removeEventListener('mouseup', this.onMouseUp.bind(this));
     }
   }
 
@@ -83,10 +83,10 @@ export default class Port extends React.Component<any, any> {
       <g className={`port port-${this.props.type} ${this.state.on ? 'port-on' : ''}`}>
         <text x={+this.props.x-(this.props.label.length*2)} y={+this.props.y+(this.props.type == 'input' ? -20 : 30)}>{this.props.label}</text>
         <circle cx={this.props.x} cy={this.props.y} r="10"
-                onMouseDown={this.onMouseDown}
-                onMouseOver={this.onMouseOver}
-                onMouseOut={this.onMouseOut}
-                onDoubleClick={this.onDoubleClick} />
+                onMouseDown={this.onMouseDown.bind(this)}
+                onMouseOver={this.onMouseOver.bind(this)}
+                onMouseOut={this.onMouseOut.bind(this)}
+                onDoubleClick={this.onDoubleClick.bind(this)} />
         {line}
       </g>
     );
