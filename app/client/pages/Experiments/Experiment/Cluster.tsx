@@ -3,8 +3,8 @@ import * as React from 'react'
 import Output from 'universal/experiment/Output'
 import Actions from '../Experiment/Actions'
 
-import { get, post, clone, map } from '../../utils'
-import { apiurl } from '../../settings'
+import { get, post, clone, map } from '../../../utils'
+import { apiurl } from '../../../settings'
 
 export default class Cluster extends React.Component<any, any> {
   private refreshInterval: number;

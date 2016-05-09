@@ -1,11 +1,11 @@
 import * as React from 'react'
 import { Link, browserHistory } from 'react-router'
 
-import { Page, Table, ErrorMessage, Loading } from './Page'
-import { get, post, del, toArray, groupBy, clone, map, isodate } from '../utils'
-import { apiurl } from '../settings'
+import { Page, Table, ErrorMessage, Loading } from '../Page'
+import { get, post, del, toArray, groupBy, clone, map, isodate } from '../../utils'
+import { apiurl } from '../../settings'
 
-import './Experiments.less'
+import './Index.less'
 
 export default class Experiments extends React.Component<any, any> {
   constructor(props) {

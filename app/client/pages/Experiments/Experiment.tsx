@@ -16,8 +16,8 @@ import Toolbox from './Experiment/Toolbox'
 import Cluster from './Experiment/Cluster'
 import Actions from './Experiment/Actions'
 
-import { clone, map, isodate, get, post } from '../utils'
-import { apiurl } from '../settings'
+import { clone, map, isodate, get, post } from '../../utils'
+import { apiurl } from '../../settings'
 import './Experiment.less'
 
 export default React.createClass({

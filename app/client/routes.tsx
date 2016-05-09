@@ -2,10 +2,10 @@ import * as React from 'react'
 import { Router, Route, IndexRoute, browserHistory } from 'react-router'
 
 import App from './pages/App'
-import Dashboard from './pages/Dashboard'
+import Dashboard from './pages/Dashboard/'
 
 import Experiments from './pages/Experiments'
-import Experiment from './pages/Experiment'
+import Experiment from './pages/Experiments/Experiment'
 
 import ClusterIndex from './pages/Cluster/Index'
 import * as ClusterConfigs from './pages/Cluster/Configs'

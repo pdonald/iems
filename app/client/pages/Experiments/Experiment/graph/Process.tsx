@@ -80,8 +80,8 @@ export default class extends React.Component<any, any> {
                  pos={{x: this.props.x, y: this.props.y}} min={min}
                  onMove={this.onMove.bind(this)} onClick={(function(){})}>
         <g className={this.props.graph.collapsed?'zoom-in':''}>
-          <rect className="process-rect" x={0} y={0} width={width} height={height} onDoubleClick={this.onDoubleClick}/>
-          <text x="10" y="30" onDoubleClick={this.onDoubleClick}>{this.props.title}</text>
+          <rect className="process-rect" x={0} y={0} width={width} height={height} onDoubleClick={this.onDoubleClick.bind(this)}/>
+          <text x="10" y="30" onDoubleClick={this.onDoubleClick.bind(this)}>{this.props.title}</text>
           {resize}
           <g>{ports.input.map((port, index) => <Port process={this.props.graph} group={this.props.group} key={port} port={port} label={this.portName(this.props.graph, 'input', port)} type="input" x={(index+1)*offset.x} y={0}/>)}</g>
           <g>{ports.output.map((port, index) => <Port process={this.props.graph} group={this.props.group} key={port} port={port} label={this.portName(this.props.graph, 'output', port)} type="output" x={(index+1)*offset.y} y={height}/>)}</g>
