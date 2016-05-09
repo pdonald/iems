@@ -1,7 +1,10 @@
 import * as React from 'react'
 import { Link, browserHistory } from 'react-router'
 
-import { Page, Table, ErrorMessage, Loading } from '../Page'
+import Page from '../../components/Page'
+import Table from '../../components/Table'
+import ErrorMessage from '../../components/ErrorMessage'
+import Loading from '../../components/Loading'
 import { get, post, del, toArray, groupBy, clone, map, isodate } from '../../utils'
 import { apiurl } from '../../settings'
 

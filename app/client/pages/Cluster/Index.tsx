@@ -1,7 +1,10 @@
 import * as React from 'react'
 import { Link } from 'react-router'
 
-import { Page, Loading, ErrorMessage, Table } from '../Page'
+import Page from '../../components/Page'
+import Table from '../../components/Table'
+import ErrorMessage from '../../components/ErrorMessage'
+import Loading from '../../components/Loading'
 import { map, get, post, del, groupBy } from '../../utils'
 import { apiurl } from '../../settings'
 

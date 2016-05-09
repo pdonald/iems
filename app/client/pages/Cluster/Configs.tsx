@@ -1,7 +1,12 @@
 import * as React from 'react'
 import { Link, browserHistory } from 'react-router'
 
-import { Page, Loading, Notifications, ErrorMessage, Table, Form } from '../Page'
+import Page from '../../components/Page'
+import Table from '../../components/Table'
+import Form from '../../components/Form'
+import ErrorMessage from '../../components/ErrorMessage'
+import Loading from '../../components/Loading'
+import Notifications from '../../components/Notifications'
 import { map, get, post, del } from '../../utils'
 import { apiurl } from '../../settings'
 
