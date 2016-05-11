@@ -2,8 +2,9 @@ import * as React from 'react'
 import * as PureRenderMixin from 'react-addons-pure-render-mixin'
 import * as jQuery from 'jquery'
 
-import Tools from '../../../universal/experiment/Tools'
-import Actions from './actions'
+import Tools from '../../../../universal/experiment/Tools'
+import Actions from '../actions'
+import Block from './block'
 
 var CategoryTitles = {
   'lm': 'Language models',
@@ -15,19 +16,27 @@ var CategoryTitles = {
   'tuning': 'Tuning'
 };
 
-export default React.createClass({
-  mixins: [PureRenderMixin],
+export default class Toolbox extends React.Component<any, any> {
+  constructor(props) {
+    super(props)
+    
+    this.state = { dragging: null }
+    
+    this.dragStart = this.dragStart.bind(this)
+    this.drag = this.drag.bind(this)
+    this.dragEnd = this.dragEnd.bind(this)
+  }
 
-  getInitialState: function() {
-    return { dragging: null };
-  },
-
-  componentWillMount: function() {
+  componentWillMount() {
     document.removeEventListener('mousemove', this.drag);
     document.removeEventListener('mouseup', this.dragEnd);
-  },
+  }
+  
+  shouldComponentUpdate() {
+    return PureRenderMixin.shouldComponentUpdate.apply(this, arguments);
+  }
 
-  dragStart: function(e, obj) {
+  dragStart(e, obj) {
     var $dragdiv = jQuery(`<div class="dragobj">${obj.title || obj.type}</div>`).appendTo('body');
 
     this.setState({
@@ -37,13 +46,13 @@ export default React.createClass({
 
     document.addEventListener('mousemove', this.drag);
     document.addEventListener('mouseup', this.dragEnd);
-  },
+  }
 
-  drag: function(e) {
+  drag(e) {
     this.state.$dragdiv.offset({ left: e.pageX-20, top: e.pageY-20 })
-  },
+  }
 
-  dragEnd: function(e) {
+  dragEnd(e) {
     document.removeEventListener('mousemove', this.drag);
     document.removeEventListener('mouseup', this.dragEnd);
 
@@ -52,9 +61,9 @@ export default React.createClass({
       Actions.add(this.state.dragging, e.pageX-20, e.pageY-20)
       this.setState({ dragging: null });
     }
-  },
+  }
 
-  render: function() {
+  render() {
     var all = [];
     for (var i in Tools.processes) all.push(Tools.processes[i]);
     for (var i in Tools.groups) all.push(Tools.groups[i]);
@@ -76,10 +85,9 @@ export default React.createClass({
       ));
 
     return (
-      <div>
-        <h2>Toolbox</h2>
+      <Block name="toolbox" title="Toolbox">
         {children}
-      </div>
+      </Block>
     );
   }
-});
+}

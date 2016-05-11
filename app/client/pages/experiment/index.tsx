@@ -10,14 +10,16 @@ import Output from '../../../universal/experiment/Output'
 import Graph from './graph/graph'
 import Group from './graph/group'
 
-import Properties from './properties'
-import Variables from './variables'
-import Toolbox from './toolbox'
-import Cluster from './cluster'
+import Properties from './sidebar/properties'
+import Variables from './sidebar/variables'
+import Toolbox from './sidebar/toolbox'
+import Cluster from './sidebar/cluster'
+
 import Actions from './actions'
 
 import { clone, map, isodate, get, post } from '../../utils'
 import { apiurl } from '../../settings'
+
 import './index.less'
 
 export default React.createClass({
@@ -227,10 +229,10 @@ export default React.createClass({
     let sidebar = (
       <div id="sidebar">
         <button onClick={() => this.save()}>Save</button>
-        <div className="block properties"><Properties doc={this.state.document} graph={this.currentGraph()}/></div>
-        <div className="block variables"><Variables vars={this.state.document.vars}/></div>
-        <div className="block cluster"><Cluster doc={this.state.document}/></div>
-        <div className="block toolbox"><Toolbox/></div>
+        <Properties doc={this.state.document} graph={this.currentGraph()}/>
+        <Variables vars={this.state.document.vars}/>
+        <Cluster doc={this.state.document}/>
+        <Toolbox/>
       </div>
     )
 
@@ -290,3 +292,4 @@ class ExperimentLayout extends React.Component<any, any> {
     )
   }
 }
+

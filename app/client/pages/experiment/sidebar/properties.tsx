@@ -1,7 +1,8 @@
 import * as React from 'react'
 import * as PureRenderMixin from 'react-addons-pure-render-mixin'
 
-import Actions from './actions'
+import Block from './block'
+import Actions from '../actions'
 
 export default class Properties extends React.Component<any, any> {
   /* shouldComponentUpdate() {
@@ -47,10 +48,9 @@ export default class Properties extends React.Component<any, any> {
     }
 
     return (
-      <div>
-        <h2>{heading}</h2>
+      <Block name="properties" title={heading}>
         {body}
-      </div>
+      </Block>
     );
   }
 }

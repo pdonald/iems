@@ -1,7 +1,8 @@
 import * as React from 'react'
 import * as PureRenderMixin from 'react-addons-pure-render-mixin'
 
-import Actions from './actions'
+import Block from './block'
+import Actions from '../actions'
 
 export default class Variables extends React.Component<any, any> {
   /* shouldComponentUpdate() {
@@ -38,8 +39,7 @@ export default class Variables extends React.Component<any, any> {
       ));
 
     return (
-      <div>
-        <h2>Variables</h2>
+      <Block name="variables" title="Variables">
         <table>
         <tbody>
           {children}
@@ -49,7 +49,7 @@ export default class Variables extends React.Component<any, any> {
           </tr>
         </tbody>
         </table>
-      </div>
+      </Block>
     );
   }
 }

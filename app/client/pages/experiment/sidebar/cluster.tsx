@@ -1,11 +1,12 @@
 import * as React from 'react'
 import * as PureRenderMixin from 'react-addons-pure-render-mixin'
 
-import Output from '../../../universal/experiment/Output'
-import Actions from './actions'
+import Output from '../../../../universal/experiment/Output'
+import Actions from '../actions'
+import Block from './block'
 
-import { get, post, clone, map } from '../../utils'
-import { apiurl } from '../../settings'
+import { get, post, clone, map } from '../../../utils'
+import { apiurl } from '../../../settings'
 
 export default class Cluster extends React.Component<any, any> {
   private refreshInterval: any;
@@ -33,10 +34,9 @@ export default class Cluster extends React.Component<any, any> {
 
   render() {
     return (
-      <div>
-        <h2>Cluster</h2>
+      <Block name="cluster" title="Cluster">
         {this.renderChildren()}
-      </div>
+      </Block>
     )
   }
 
