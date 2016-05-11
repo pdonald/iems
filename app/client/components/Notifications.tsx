@@ -9,13 +9,13 @@ export default class Notifications extends React.Component<any, any> {
     }
   }
 
-  success(msg) {
+  success(msg, ...params) {
     this.setState({
       messages: [...this.state.messages, { type: 'success', text: msg }]
     })
   }
 
-  error(msg) {
+  error(msg, ...params) {
     this.setState({
       messages: [...this.state.messages, { type: 'error', text: msg }]
     })

@@ -9,7 +9,6 @@
   "rootDir": "app",
   "exclude": [
     "node_modules",
-    "app/universal/ts",
-    "app/client/pages/cluster-launch-configs"
+    "app/universal/ts"
   ]
 }

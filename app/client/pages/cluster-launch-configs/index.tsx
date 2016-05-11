@@ -10,7 +10,7 @@ import Notifications from '../../components/Notifications'
 import { map, get, post, del } from '../../utils'
 import { apiurl } from '../../settings'
 
-export class Index extends React.Component<any, any> {
+export default class Index extends React.Component<any, any> {
   constructor(props) {
     super(props)
 
@@ -86,103 +86,17 @@ export class Index extends React.Component<any, any> {
   }
 
   clone(config) {
+    let notifications = this.refs['notifications'] as Notifications
     post(`${apiurl}/cluster/configs/${config.id}/clone`, config)
       .done(config => browserHistory.push(`/cluster/configs/${config.id}`))
-      .fail(err => this.refs.notifications.error(`Could not clone ${config.name}`, config.id))
+      .fail(err => notifications.error(`Could not clone ${config.name}`, config.id))
   }
 
   delete(config) {
+    let notifications = this.refs['notifications'] as Notifications
     del(`${apiurl}/cluster/configs/${config.id}`)
-      .then(_ => this.refs.notifications.success(`Deleted ${config.name}`, config.id))
+      .then(_ => notifications.success(`Deleted ${config.name}`, config.id))
       .done(_ => this.load())
-      .fail(err => this.refs.notifications.error(`Could not delete ${config.name}`, config.id))
-  }
-}
-
-export class Edit extends React.Component<any, any> {
-  constructor(props) {
-    super(props)
-
-    this.state = {
-      loading: true,
-      loadingError: null,
-      service: null,
-      config: null
-    }
-  }
-
-  componentDidMount() {
-    this.load()
-  }
-
-  render() {
-    return (
-      <Page heading="Launch Configurations">
-        {this.renderContent()}
-      </Page>
-    )
-  }
-
-  renderContent() {
-    if (this.state.loading) {
-      return <Loading/>
-    }
-
-    if (this.state.loadingError) {
-        return <ErrorMessage error={this.state.loadingError} retry={() => this.load()}/>
-    }
-
-    return (
-      <div>
-        <Notifications ref="notifications"/>
-        <Form form={this.state.service.ui.configs.form} values={this.state.config}
-              onSave={config => this.save(config)}
-              onDelete={() => this.delete()}
-              onCancel={() => this.cancel()} />
-      </div>
-    )
-  }
-
-  load() {
-    this.setState({ loading: true, loadingError: null })
-
-    if (!this.props.routeParams.id) {
-      get(`${apiurl}/cluster/services/${this.props.location.query.service}`)
-        .then(service => this.setState({ loading: false, service: service, config: { service: service.id } }))
-    } else {
-      get(`${apiurl}/cluster/configs/${this.props.routeParams.id}`)
-        .then(config => { this.setState({ config: config }); return config })
-        .then(config => get(`${apiurl}/cluster/services/${config.service}`).then(service => this.setState({ service: service })))
-        .done(_ => this.setState({ loading: false }))
-        .fail(err => this.setState({ loading: false, loadingError: 'Could not load data' }))
-    }
-  }
-
-  save(config) {
-    if (config.id) {
-      post(`${apiurl}/cluster/configs/${config.id}`, config)
-        .then(config => this.setState({ config: config }))
-        .done(_ => this.refs.notifications.success(`Changes saved`, config.id))
-        .fail(err => this.refs.notifications.error(`Could not save changes`, config.id))
-    } else {
-      post(`${apiurl}/cluster/configs`, config)
-        .then(config => browserHistory.push(`/cluster/configs/${config.id}`))
-        .fail(err => this.refs.notifications.error(`Could not save changes`, config.id))
-    }
-  }
-
-  delete() {
-    let config = this.state.config
-    if (config.id) {
-      del(`${apiurl}/cluster/configs/${config.id}`)
-        .done(_ => browserHistory.push('/cluster/configs'))
-        .fail(err => this.refs.notifications.error(`Could not delete launch configuration`, config.id))
-    } else {
-      browserHistory.push('/cluster/configs')
-    }
-  }
-
-  cancel() {
-    browserHistory.push('/cluster/configs')
+      .fail(err => notifications.error(`Could not delete ${config.name}`, config.id))
   }
 }

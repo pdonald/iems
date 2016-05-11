@@ -3,12 +3,11 @@ import { Router, Route, IndexRoute, browserHistory } from 'react-router'
 
 import App from './pages/app'
 import Dashboard from './pages/dashboard/'
-
 import Experiments from './pages/experiments'
 import Experiment from './pages/experiment'
-
 import Cluster from './pages/cluster'
-//import * as ClusterConfigs from './pages/cluster-launch-configs'
+import ClusterConfigs from './pages/cluster-launch-configs'
+import ClusterConfigsEdit from './pages/cluster-launch-configs/edit'
 
 export default (
   <Router history={browserHistory}>
@@ -20,9 +19,9 @@ export default (
       </Route>
       <Route path="cluster" component={props => props.children}>
         <IndexRoute component={Cluster}/>
-        {/*<Route path="configs" component={ClusterConfigs.Index}/>
-        <Route path="configs/add" component={ClusterConfigs.Edit}/>
-        <Route path="configs/:id" component={ClusterConfigs.Edit}/>*/}
+        <Route path="configs" component={ClusterConfigs}/>
+        <Route path="configs/add" component={ClusterConfigsEdit}/>
+        <Route path="configs/:id" component={ClusterConfigsEdit}/>
       </Route>
     </Route>
   </Router>
