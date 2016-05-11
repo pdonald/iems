@@ -97,6 +97,59 @@
           }
         ]
       }
+    },
+    "exp-331": {
+      "id": "exp-331",
+      "props": {"name": "New Experiment", "created": "2016-05-11 08:30:35", "updated": "2016-05-11 08:35:42"},
+      "tags": {"name": "New Experimen"},
+      "vars": {"srclang": "lv", "trglang": "en"},
+      "graph": {
+        "id": 0,
+        "title": "Main",
+        "type": "main",
+        "category": "undefined",
+        "x": 0,
+        "y": 0,
+        "collapsed": false,
+        "processes": [
+          {"id": 1, "x": 135.390625, "y": 98, "type": "wget", "params": {}},
+          {"id": 2, "x": 135.390625, "y": 347, "type": "tokenizer", "params": {"lang": "$srclang"}},
+          {"id": 3, "x": 399.390625, "y": 337, "type": "tokenizer", "params": {"lang": "$trglang"}},
+          {"id": 4, "x": 367.390625, "y": 133, "type": "wget", "params": {}}
+        ],
+        "links": [
+          {"from": {"id": 1, "port": "out"}, "to": {"id": 2, "port": "in"}},
+          {"from": {"id": 4, "port": "out"}, "to": {"id": 3, "port": "in"}},
+          {"from": {"id": 2, "port": "out"}, "to": {"id": 5, "port": "src"}},
+          {"from": {"id": 3, "port": "out"}, "to": {"id": 5, "port": "trg"}}
+        ],
+        "groups": [
+          {
+            "id": 5,
+            "title": "Word alignment",
+            "type": "word-alignment",
+            "category": "alignment",
+            "x": 255.390625,
+            "y": 517,
+            "collapsed": true,
+            "ports": {"input": ["src", "trg"], "output": ["algn"]},
+            "processes": [
+              {"id": 601, "x": 20, "y": 50, "type": "fastalign", "params": {"tempdir": "$tempdir", "workdir": "$workdir"}},
+              {"id": 602, "x": 200, "y": 50, "type": "fastalign", "params": {"reverse": "true", "tempdir": "$tempdir", "workdir": "$workdir"}},
+              {"id": 603, "x": 120, "y": 200, "type": "symalign", "params": {"method": "grow-diag-final-and", "workdir": "$workdir"}}
+            ],
+            "links": [
+              {"from": {"id": 5, "port": "src"}, "to": {"id": 601, "port": "src"}},
+              {"from": {"id": 5, "port": "trg"}, "to": {"id": 602, "port": "trg"}},
+              {"from": {"id": 5, "port": "src"}, "to": {"id": 602, "port": "src"}},
+              {"from": {"id": 5, "port": "trg"}, "to": {"id": 601, "port": "trg"}},
+              {"from": {"id": 601, "port": "out"}, "to": {"id": 603, "port": "srctrg"}},
+              {"from": {"id": 602, "port": "out"}, "to": {"id": 603, "port": "trgsrc"}},
+              {"from": {"id": 603, "port": "out"}, "to": {"id": 5, "port": "algn"}}
+            ]
+          }
+        ]
+      }
     }
   },
   "cluster": {
@@ -161,6 +214,14 @@
         "sshHost": "",
         "sshPrivateKey": "",
         "sshScript": "docker || curl -sSL https://get.docker.com/ | sudo sh && sudo usermod -aG docker $USER"
+      }
+    },
+    "queues": {
+      "all": {
+        "id": "all",
+        "name": "All",
+        "hosts": {},
+        "jobs": [{"id": 1, "status": "pending"}, {"id": 2, "status": "running"}, {"id": 3, "status": "finished"}, {"id": 4, "status": "failed"}]
       }
     }
   }

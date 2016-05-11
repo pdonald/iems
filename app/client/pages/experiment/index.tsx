@@ -83,7 +83,7 @@ export default React.createClass({
       data: JSON.stringify(data),
       contentType: 'application/json',
       success: (res) => {
-        console.log(res)
+        if (res) console.log(res)
       },
     })
   },

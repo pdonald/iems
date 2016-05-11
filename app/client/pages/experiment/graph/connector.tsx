@@ -46,7 +46,7 @@ export default class Connector extends React.Component<Props, any> {
     if (msg) classes.push('incompatible-types');
 
     return (
-      <g className={classes.join(' ')} onClick={this.onClick}>
+      <g className={classes.join(' ')} onClick={this.onClick.bind(this)}>
         <line x1={this.props.source.x} y1={this.props.source.y}
               x2={this.props.target.x} y2={this.props.target.y} />
         {msg}

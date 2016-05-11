@@ -44,8 +44,8 @@ export default class Variables extends React.Component<any, any> {
         <tbody>
           {children}
           <tr>
-            <th><input type="text" ref="key" onKeyUp={this.onEnter} /></th>
-            <td><input type="text" ref="value" onKeyUp={this.onEnter}/></td>
+            <th><input type="text" ref="key" onKeyUp={this.onEnter.bind(this)} /></th>
+            <td><input type="text" ref="value" onKeyUp={this.onEnter.bind(this)}/></td>
           </tr>
         </tbody>
         </table>
