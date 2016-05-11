@@ -1,4 +1,5 @@
 @import '../app.less';
+@import 'sidebar/sidebar.less';
 
 body.experiment {
   overflow: hidden;
@@ -46,94 +47,6 @@ body.experiment {
     opacity: 0.5;
     z-index: 9999;
     cursor: pointer;
-  }
-
-  #sidebar {
-    padding: 10px 15px;
-
-    h2 {
-      font-size: 14px;
-      color: #fff;
-      margin-bottom: 15px;
-      cursor: pointer;
-    }
-
-    h3 {
-      font-size: 11px;
-      color: #fff;
-      margin-bottom: 15px;
-    }
-
-    br {
-    	clear:both;
-    }
-
-    th {
-    	color: lightgrey;
-    	padding-right: 3px;
-    }
-
-    .toolbox {
-      .user-select(none);
-
-      ul {
-        margin: 0;
-        padding: 0;
-        list-style-type: none;
-      }
-
-      li {
-        display: inline-block;
-        border: 2px solid black;
-        background: rgb(90,90,90);
-        color: white;
-        cursor: pointer;
-        padding: 10px 10px;
-        background: #2ECC71;
-        color: black;
-        border: 1px solid black;
-        font-size: 10px;
-        margin: 5px 5px;
-        margin-left: 0;
-      }
-
-      .toolbox-group {
-        clear: both;
-        h3 {
-          margin: 0;
-          padding: 0;
-          margin-bottom: 5px;
-        }
-      }
-    }
-
-    .properties {
-      th input[type="text"] {
-        width: 100%;
-      }
-      td input {
-        width: 100%;
-      }
-    }
-
-    .variables {
-      th {
-        text-align: left;
-      }
-      th input[type="text"] {
-        width: 100%;
-      }
-      td input {
-        width: 100%;
-      }
-    }
-
-    .cluster {
-      select {
-        width: 100%;
-        margin-bottom: 8px;
-      }
-    }
   }
 
   #grid {

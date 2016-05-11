@@ -1,0 +1,81 @@
+#sidebar {
+  padding: 10px 15px;
+
+  h2 {
+    font-size: 14px;
+    color: #fff;
+    margin-bottom: 15px;
+    cursor: pointer;
+  }
+
+  h3 {
+    font-size: 11px;
+    color: #fff;
+    margin-bottom: 15px;
+  }
+
+  br {
+    clear: both;
+  }
+
+  th {
+    color: lightgrey;
+    padding-right: 3px;
+    text-align: left;
+  }
+  
+  .properties, .variables {
+    input {
+      width: 100%;
+      border: none;
+      border-bottom: 1px solid #999;
+      background: transparent;
+      color: #fff;
+      
+      &:hover {
+        border-bottom-color: lightgray;
+      }
+    }
+  }
+  
+  .cluster {
+    select {
+      width: 100%;
+      margin-bottom: 8px;
+    }
+  }
+
+  .toolbox {
+    .user-select(none);
+
+    ul {
+      margin: 0;
+      padding: 0;
+      list-style-type: none;
+    }
+
+    li {
+      display: inline-block;
+      border: 2px solid black;
+      background: rgb(90,90,90);
+      color: white;
+      cursor: pointer;
+      padding: 10px 10px;
+      background: #2ECC71;
+      color: black;
+      border: 1px solid black;
+      font-size: 10px;
+      margin: 5px 5px;
+      margin-left: 0;
+    }
+
+    .toolbox-group {
+      clear: both;
+      h3 {
+        margin: 0;
+        padding: 0;
+        margin-bottom: 5px;
+      }
+    }
+  }
+}
