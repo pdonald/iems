@@ -1,5 +1,6 @@
 @import '../app.less';
 @import 'sidebar/sidebar.less';
+@import 'svg.less';
 
 body.experiment {
   overflow: hidden;
@@ -18,6 +19,7 @@ body.experiment {
     max-width: 300px;
     overflow-y: auto;
     background: @sidebar-background;
+    border-right: 1px solid #ccc; 
     padding-top: 5px;
   }
 
@@ -111,88 +113,6 @@ body.experiment {
       .inner {
         padding: 10px;
       }
-    }
-  }
-
-  svg {
-    width: 100%;
-    height: 100%;
-
-    rect.select {
-      fill: rgba(173,216,230,0.5);
-      stroke: navy;
-    }
-    rect.blank {
-      fill: rgba(0,0,0,0);
-      stroke: none;
-    }
-
-    .process .process-rect {
-      cursor: move;
-      fill: #2ECC71;
-      stroke: #000;
-    }
-    .process text {
-      color: black;
-    }
-    .process .port-input circle {
-      fill: lightblue;
-      stroke: #000;
-    }
-    .process .port-output circle {
-      fill: hotpink;
-      stroke: #000;
-    }
-    .connector:hover line {
-      stroke: yellow;
-      stroke-width: 6px;
-    }
-    .connector line, .port-line {
-      stroke: #000;
-      stroke-width: 1px;
-      cursor: pointer;
-    }
-    .connector.incompatible-types line {
-      stroke: red;
-    }
-    .connector.incompatible-types rect {
-      fill: yellow;
-      stroke: red;
-    }
-    .connector.incompatible-types text {
-      fill: red;
-    }
-    .connector.selected line {
-      stroke: red;
-    }
-    .process .port-on circle {
-      fill: yellow;
-    }
-
-    .process.error .process-rect {
-      stroke: red;
-    }
-    .process.selected .process-rect {
-      stroke: red !important;
-      fill: yellow !important;
-    }
-    .process.blank > g > .process-rect {
-      fill: none !important;
-    }
-    .process.main.blank > g > .process-rect {
-      stroke: none;
-    }
-    .process.running > g > .process-rect {
-      stroke: black;
-      fill: purple;
-    }
-    .process.done > g > .process-rect {
-      stroke: black;
-      fill: lime;
-    }
-
-    .zoom-in {
-      cursor: zoom-in;
     }
   }
 }

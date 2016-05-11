@@ -35,7 +35,7 @@ export default class Graph extends React.Component<any, any> {
       minHeight: Math.max(size.height+100, this.state.parentHeight-5)+'px'
     };
     return (
-      <svg style={style} ref="svg">
+      <svg style={style} ref="svg" id="svg">
         <Select width={size.width+25} height={size.height+100}>
           {this.props.children}
         </Select>

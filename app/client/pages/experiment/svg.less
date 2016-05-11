@@ -1,0 +1,83 @@
+#svg {
+  width: 100%;
+  height: 100%;
+
+  rect.select {
+    //fill: fade(@accent-color, 50%);
+    //stroke: @accent-color;
+    fill: fade(#47b8e0, 50%);
+    stroke: navy;
+  }
+  rect.blank {
+    fill: rgba(0,0,0,0);
+    stroke: none;
+  }
+
+  .process .process-rect {
+    cursor: move;
+    fill: @block-color;
+    stroke: #000;
+  }
+  .process text {
+    color: black;
+  }
+  .process .port-input circle {
+    fill: @port-input;
+    stroke: #000;
+  }
+  .process .port-output circle {
+    fill: @port-output;
+    stroke: #000;
+  }
+  .connector:hover line {
+    stroke: @accent-color;
+    stroke-width: 6px;
+  }
+  .connector line, .port-line {
+    stroke: #000;
+    stroke-width: 1px;
+    cursor: pointer;
+  }
+  .connector.incompatible-types line {
+    stroke: red;
+  }
+  .connector.incompatible-types rect {
+    fill: yellow;
+    stroke: red;
+  }
+  .connector.incompatible-types text {
+    fill: red;
+  }
+  .connector.selected line {
+    stroke: red;
+  }
+  .process .port-on circle {
+    fill: yellow;
+  }
+
+  .process.error .process-rect {
+    stroke: red;
+  }
+  .process.selected .process-rect {
+    stroke: @accent-color !important;
+    fill: yellow !important;
+  }
+  .process.blank > g > .process-rect {
+    fill: none !important;
+  }
+  .process.main.blank > g > .process-rect {
+    stroke: none;
+  }
+  .process.running > g > .process-rect {
+    stroke: black;
+    fill: purple;
+  }
+  .process.done > g > .process-rect {
+    stroke: black;
+    fill: lime;
+  }
+
+  .zoom-in {
+    cursor: zoom-in;
+  }
+}
