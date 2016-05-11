@@ -7,7 +7,7 @@ import Dashboard from './pages/dashboard/'
 import Experiments from './pages/experiments'
 import Experiment from './pages/experiment'
 
-//import Cluster from './pages/cluster'
+import Cluster from './pages/cluster'
 //import * as ClusterConfigs from './pages/cluster-launch-configs'
 
 export default (
@@ -18,12 +18,12 @@ export default (
         <IndexRoute component={Experiments}/>
         <Route path=":id" component={Experiment}/>
       </Route>
-      {/*<Route path="cluster" component={props => props.children}>
+      <Route path="cluster" component={props => props.children}>
         <IndexRoute component={Cluster}/>
-        <Route path="configs" component={ClusterConfigs.Index}/>
+        {/*<Route path="configs" component={ClusterConfigs.Index}/>
         <Route path="configs/add" component={ClusterConfigs.Edit}/>
-        <Route path="configs/:id" component={ClusterConfigs.Edit}/>
-      </Route>*/}
+        <Route path="configs/:id" component={ClusterConfigs.Edit}/>*/}
+      </Route>
     </Route>
   </Router>
 )

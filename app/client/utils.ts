@@ -38,20 +38,20 @@ export function deepmerge(obj, changes) {
   return jQuery.extend(true, {}, obj, changes)
 }
 
-export function get(url) {
+export function get(url: string) {
   return jQuery.get(url)
 }
 
-export function post(url, json) {
+export function post(url: string, json?: any) {
   return jQuery.ajax({
     type: 'POST',
     url: url,
-    data: JSON.stringify(json),
+    data: json ? JSON.stringify(json) : null,
     contentType: 'application/json'
   })
 }
 
-export function del(url) {
+export function del(url: string) {
   return jQuery.ajax({
     type: 'DELETE',
     url: url

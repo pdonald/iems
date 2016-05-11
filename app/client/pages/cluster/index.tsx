@@ -11,6 +11,8 @@ import { apiurl } from '../../settings'
 import './index.less'
 
 export default class Cluster extends React.Component<any, any> {
+  private timer: any;
+  
   constructor(props) {
     super(props)
 
@@ -113,8 +115,10 @@ export default class Cluster extends React.Component<any, any> {
   }
 
   launch() {
-    let config = this.state.configs[this.refs.config.value]
-    let count = parseInt(this.refs.count.value)
+    let configRef = this.refs['config'] as any
+    let countRef = this.refs['count'] as any
+    let config = this.state.configs[configRef.value]
+    let count = parseInt(countRef.value)
 
     post(`${apiurl}/cluster/services/${config.service}/launch?config=${config.id}&count=${count}`)
       .fail(err => this.setState({ error: 'Could not launch' }))
@@ -182,9 +186,7 @@ class Instances extends React.Component<any, any> {
     let hours   = Math.floor(sec_num / 3600)
     let minutes = Math.floor((sec_num - (hours * 3600)) / 60)
     let seconds = sec_num - (hours * 3600) - (minutes * 60)
-    if (hours   < 10) hours   = "0" + hours
-    if (minutes < 10) minutes = "0" + minutes
-    return hours + ':' + minutes
+    return (hours < 10 ? "0" + hours : hours) + ':' + (minutes < 10 ? "0" + minutes : minutes)
   }
 }
 
@@ -216,7 +218,7 @@ class Queues extends React.Component<any, any> {
               <li key={host.id}>
                 <input type="text"
                   defaultValue={typeof this.state.slots[q.id+host.id] != 'undefined' ? this.state.slots[q.id+host.id] : (q.hosts[host.id] && q.hosts[host.id].slots || 0)}
-                  onChange={e => this.state.slots[q.id+host.id] = +e.target.value}
+                  onChange={e => this.state.slots[q.id+host.id] = +(e.target as HTMLInputElement).value}
                   style={{width: '20px', textAlign: 'center'}}/>
                 {' '}
                 <label>{host.id}</label>
@@ -244,8 +246,9 @@ class Queues extends React.Component<any, any> {
   add(e) {
     e.preventDefault()
 
-    let name = this.refs.queueName.value.trim()
-    this.refs.queueName.value = ''
+    let queueRef = this.refs['queueName'] as HTMLInputElement
+    let name = queueRef.value.trim()
+    queueRef.value = ''
 
     post(`${apiurl}/cluster/queues`, { name: name })
   }
