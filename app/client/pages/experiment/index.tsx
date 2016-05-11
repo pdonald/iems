@@ -250,7 +250,7 @@ export default React.createClass({
       </div>
     )
 
-    let preview = (
+    /* let preview = (
       <div id="preview">
         <div className="options">
           {map(Output, key => (
@@ -265,9 +265,9 @@ export default React.createClass({
           </div>
         </pre>
       </div>
-    )
+    ) */
 
-    return <ExperimentLayout sidebar={sidebar} mainTop={top} mainMiddle={grid} mainBottom={preview} />
+    return <ExperimentLayout sidebar={sidebar} mainTop={top} mainMiddle={grid} />
   }
 })
 
@@ -284,9 +284,6 @@ class ExperimentLayout extends React.Component<any, any> {
           </div>
           <div className="experiment-main-middle">
             {this.props.mainMiddle}
-          </div>
-          <div className="experiment-main-bottom">
-            {this.props.mainBottom}
           </div>
         </div>
       </div>
