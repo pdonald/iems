@@ -3,14 +3,14 @@
 
   h2 {
     font-size: 14px;
-    color: #fff;
+    color: @sidebar-foreground-title;
     margin-bottom: 15px;
     cursor: pointer;
   }
 
   h3 {
     font-size: 11px;
-    color: #fff;
+    color: @sidebar-foreground-title;
     margin-bottom: 15px;
   }
 
@@ -19,7 +19,7 @@
   }
 
   th {
-    color: lightgrey;
+    color: @sidebar-foreground;
     padding-right: 3px;
     text-align: left;
   }
@@ -28,12 +28,12 @@
     input {
       width: 100%;
       border: none;
-      border-bottom: 1px solid #999;
+      border-bottom: 1px solid @sidebar-foreground;
       background: transparent;
-      color: #fff;
+      color: @sidebar-foreground;
       
       &:hover {
-        border-bottom-color: lightgray;
+        border-bottom-color: lighten(@sidebar-foreground, 60%);
       }
     }
   }

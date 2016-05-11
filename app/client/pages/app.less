@@ -9,34 +9,30 @@ body {
   font-size: 12px;
 }
 
-*:focus {
-  outline: none;
-}
-
 @header-height: 50px;
+@accent-color: orange;
+@header-background: @accent-color;
+@header-foreground: white;
+@sidebar-background: #F3F3F3;
+@sidebar-foreground-title: #634242;
+@sidebar-foreground: #1E1616; 
 
 #header {
-  @color: #fff;
+  @color: @header-foreground;
 
-  background: #101010;
+  background: @header-background;
   height: @header-height;
   display: flex;
   padding: 0 20px;
   align-items: center;
-
-  a, a:visited {
-    color: @color;
-    text-decoration: none;
-
-    &:hover {
-      color: #ccc;
-    }
-  }
+  
+  box-shadow: 0px 0px 10px 0px #333;
+  position: relative;
 
   h1 {
     color: @color;
     margin: 0;
-    margin-right: 5px;
+    margin-right: 20px;
     font-size: 24px;
   }
 
@@ -51,12 +47,22 @@ body {
       font-size: 16px;
 
       a {
-        padding: 5px 15px;
+        padding: 5px 5px;
       }
 
       .active {
-        background: #666;
+        font-weight: bold;
+        text-shadow: 0px 0px 5px #999;
       }
+    }
+  }
+  
+  a, a:visited {
+    color: @color;
+    text-decoration: none;
+
+    &:hover {
+      text-shadow: 0px 0px 5px #333 !important;
     }
   }
 }
@@ -218,4 +224,8 @@ ul.reset {
   -moz-tab-size:    @val;
   -o-tab-size:      @val;
   tab-size:         @val;
+}
+
+*:focus {
+  outline: none;
 }
