@@ -1,14 +1,16 @@
 import * as React from 'react'
-//import PureRenderMixin from 'react-addons-pure-render-mixin'
+import * as PureRenderMixin from 'react-addons-pure-render-mixin'
 
 import Select from './Select'
 
 export default class Graph extends React.Component<any, any> {
-  //mixins: [PureRenderMixin],
-
   constructor(props) {
     super(props);
     this.state = { parentHeight: null }; 
+  }
+  
+  shouldComponentUpdate() {
+    return PureRenderMixin.shouldComponentUpdate.apply(this, arguments);
   }
 
   componentDidMount() {

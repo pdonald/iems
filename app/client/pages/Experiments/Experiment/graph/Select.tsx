@@ -1,11 +1,9 @@
 import * as React from 'react'
-//import PureRenderMixin from 'react-addons-pure-render-mixin'
+import * as PureRenderMixin from 'react-addons-pure-render-mixin'
 
 import Actions from '../Actions'
 
 export default class Select extends React.Component<any, any> {
-  //mixins: [PureRenderMixin],
-
   constructor(props) {
     super(props);
     this.state = { dragging: false }; 
@@ -19,6 +17,10 @@ export default class Select extends React.Component<any, any> {
     document.removeEventListener('keydown', this.onKeyDown);
     document.removeEventListener('mousemove', this.onMouseMove);
     document.removeEventListener('mouseup', this.onMouseUp);
+  }
+  
+  shouldComponentUpdate() {
+    return PureRenderMixin.shouldComponentUpdate.apply(this, arguments);
   }
 
   componentDidUpdate(props, state) {

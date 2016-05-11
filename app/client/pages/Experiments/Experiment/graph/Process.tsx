@@ -1,5 +1,5 @@
 import * as React from 'react'
-//import PureRenderMixin from 'react-addons-pure-render-mixin'
+import * as PureRenderMixin from 'react-addons-pure-render-mixin'
 
 import Draggable from './Draggable'
 import Port from './Port'
@@ -14,6 +14,10 @@ export default class extends React.Component<any, any> {
     //props.draggable = !!props.draggable;
     //props.x = props.x || 0;
     //props.y = props.y || 0; 
+  }
+  
+  shouldComponentUpdate() {
+    return PureRenderMixin.shouldComponentUpdate.apply(this, arguments);
   }
 
   onMove(pos) {

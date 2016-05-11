@@ -1,5 +1,5 @@
 import * as React from 'react'
-//import PureRenderMixin from 'react-addons-pure-render-mixin'
+import * as PureRenderMixin from 'react-addons-pure-render-mixin'
 import * as jQuery from 'jquery'
 
 import Tools from 'universal/experiment/Tools'
@@ -16,7 +16,7 @@ var CategoryTitles = {
 };
 
 export default React.createClass({
-  //mixins: [PureRenderMixin],
+  mixins: [PureRenderMixin],
 
   getInitialState: function() {
     return { dragging: null };

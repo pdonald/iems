@@ -1,11 +1,9 @@
 import * as React from 'react'
-//import PureRenderMixin from 'react-addons-pure-render-mixin'
+import * as PureRenderMixin from 'react-addons-pure-render-mixin'
 
 import Actions from '../Actions'
 
-export default class Port extends React.Component<any, any> {
-  //mixins: [PureRenderMixin],
-  
+export default class Port extends React.Component<Props, any> {
   constructor(props) {
     super(props);
     
@@ -14,6 +12,10 @@ export default class Port extends React.Component<any, any> {
       dragging: false,
       rel: null
     }; 
+  }
+  
+  shouldComponentUpdate() {
+    return PureRenderMixin.shouldComponentUpdate.apply(this, arguments);
   }
 
   componentDidUpdate(props, state) {
@@ -91,4 +93,13 @@ export default class Port extends React.Component<any, any> {
       </g>
     );
   }
+}
+
+interface Props {
+  x: number;
+  y: number;
+  port: string;
+  type: string;
+  label: string;
+  process: any;
 }

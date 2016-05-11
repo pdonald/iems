@@ -1,8 +1,13 @@
 import * as React from 'react'
+import * as PureRenderMixin from 'react-addons-pure-render-mixin'
 
 import Actions from './Actions'
 
 export default class Properties extends React.Component<any, any> {
+  /* shouldComponentUpdate() {
+    return PureRenderMixin.shouldComponentUpdate.apply(this, arguments);
+  } */
+  
   onChange(process, key, value) {
     Actions.paramChanged(process, key, value);
   }

@@ -226,6 +226,7 @@ export default React.createClass({
 
     let sidebar = (
       <div id="sidebar">
+        <button onClick={() => this.save()}>Save</button>
         <div className="block properties"><Properties doc={this.state.document} graph={this.currentGraph()}/></div>
         <div className="block variables"><Variables vars={this.state.document.vars}/></div>
         <div className="block cluster"><Cluster doc={this.state.document}/></div>
@@ -237,7 +238,6 @@ export default React.createClass({
       <div id="top">
         <ul>
           {this.state.document.stack.map((g, index) => <li key={index} className="border" onClick={() => this.goTo(index)}>{(g.title || g.name || '#'+g.id)}</li>)}
-          <li className="right border" onClick={() => this.save()}>Save</li>
         </ul>
       </div>
     )

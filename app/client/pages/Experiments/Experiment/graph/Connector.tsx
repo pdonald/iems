@@ -1,10 +1,14 @@
 import * as React from 'react'
-//import PureRenderMixin from 'react-addons-pure-render-mixin'
+import * as PureRenderMixin from 'react-addons-pure-render-mixin'
 
 import ProcessModel from 'universal/experiment/ProcessModel'
 import Actions from '../Actions'
 
-export default class Connector extends React.Component<any, any> {
+export default class Connector extends React.Component<Props, any> {
+  shouldComponentUpdate() {
+    return PureRenderMixin.shouldComponentUpdate.apply(this, arguments);
+  }
+  
   onClick() {
     Actions.selectManual(this.props.graph);
   }
@@ -13,8 +17,8 @@ export default class Connector extends React.Component<any, any> {
     if (this.props.sourceType && this.props.targetType) {
       if (!ProcessModel.isLinkValid(this.props.sourceType, this.props.targetType)) {
         // todo
-        var stype = (this.props.sourceType || {}).type || this.props.sourceType || '';
-        var ttype = (this.props.targetType || {}).type || this.props.targetType || '';
+        var stype = (this.props.sourceType || { type: null }).type || this.props.sourceType || '';
+        var ttype = (this.props.targetType || { type: null }).type || this.props.targetType || '';
 
         var midx = (this.props.source.x+this.props.target.x)/2 - stype.length*3;
         var midy = (this.props.source.y+this.props.target.y)/2;
@@ -49,4 +53,13 @@ export default class Connector extends React.Component<any, any> {
       </g>
     );
   }
+}
+
+interface Props {
+  graph: any;
+  selected: boolean;
+  source: { x: number; y: number };
+  target: { x: number; y: number };
+  sourceType?: { type: string; length: number };
+  targetType?: { type: string; length: number; };
 }

@@ -1,15 +1,9 @@
 import * as React from 'react'
-//import PureRenderMixin from 'react-addons-pure-render-mixin'
+import * as PureRenderMixin from 'react-addons-pure-render-mixin'
 
-export default class Draggable extends React.Component<any, any> {
-  //mixins: [PureRenderMixin],
-  
+export default class Draggable extends React.Component<Props, any> {
   constructor(props) {
     super(props);
-    
-    //props.pos = props.pos || { x: 0, y: 0 };
-    //props.onMove = props.onMove || function() {};
-    //props.onClick = props.onClick || function() {};
     
     this.state = {
       dragging: false,
@@ -17,6 +11,10 @@ export default class Draggable extends React.Component<any, any> {
       pos: { x: this.props.pos.x, y: this.props.pos.y },
       rel: null // position relative to the cursor
     };
+  }
+  
+  shouldComponentUpdate() {
+    return PureRenderMixin.shouldComponentUpdate.apply(this, arguments);
   }
 
   componentDidUpdate(props, state) {
@@ -48,7 +46,7 @@ export default class Draggable extends React.Component<any, any> {
 
   onMouseUp(e) {
     if (!this.state.moved) {
-      this.props.onClick(e);
+      if (this.props.onClick) this.props.onClick(e);
     }
     this.setState({ dragging: false, moved: false });
     e.stopPropagation();
@@ -70,7 +68,7 @@ export default class Draggable extends React.Component<any, any> {
       if (pos.y > this.props.max.y) pos.y = this.props.max.y;
     }
     this.setState({ pos: pos, moved: true });
-    this.props.onMove(pos);
+    if (this.props.onMove) this.props.onMove(pos);
     e.stopPropagation();
     e.preventDefault();
   }
@@ -78,10 +76,19 @@ export default class Draggable extends React.Component<any, any> {
   render() {
     return (
       <g {...this.props}
-          transform={`translate(${this.props.pos.x},${this.props.pos.y})`}
-          onClick={e => this.onClick(e)}
-          onMouseDown={e => this.onMouseDown(e)}
-          onMove={e => this.props.onMove(e)} />
+         transform={`translate(${this.props.pos.x},${this.props.pos.y})`}
+         onClick={e => this.onClick(e)}
+         onMouseDown={e => this.onMouseDown(e)}
+         onMove={e => this.props.onMove && this.props.onMove(e)} />
     );
   }
+}
+
+interface Props {
+  className?: string;
+  pos: { x: number, y: number };
+  min?: { x: number, y: number };
+  max?: { x: number, y: number };
+  onClick?: (e) => void;
+  onMove?: (e) => void;
 }

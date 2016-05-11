@@ -1,11 +1,14 @@
 import * as React from 'react'
+import * as PureRenderMixin from 'react-addons-pure-render-mixin'
 
 import GroupModel from 'universal/experiment/GroupModel'
 import Process from './Process'
 import Connector from './Connector'
 
 export default class Group extends React.Component<any, any> {
-  //mixins: [React.addons.PureRenderMixin],
+  /* shouldComponentUpdate() {
+    return PureRenderMixin.shouldComponentUpdate.apply(this, arguments);
+  } */
 
   getPortPosition(obj, portName, dir, self) {
     var size = obj.getSize();

@@ -1,20 +1,25 @@
 import * as React from 'react'
+import * as PureRenderMixin from 'react-addons-pure-render-mixin'
 
 import Actions from './Actions'
 
 export default class Variables extends React.Component<any, any> {
-  //mixins: [React.addons.PureRenderMixin],
+  /* shouldComponentUpdate() {
+    return PureRenderMixin.shouldComponentUpdate.apply(this, arguments);
+  } */
 
   onChange(key, value) {
     Actions.variableChanged(key, value);
   }
 
   onAdd() {
-    let varName = this.refs.key.value
+    let keyElement = this.refs['key'] as HTMLInputElement;
+    let valueElement = this.refs['value'] as HTMLInputElement;
+    let varName = keyElement.value
     if (!varName.length) return
     if (varName[0] == '$') varName = varName.substr(1) // remove accidental $
-    this.onChange(varName, this.refs.value.value);
-    this.refs.key.value = this.refs.value.value = '';
+    this.onChange(varName, valueElement.value);
+    keyElement.value = valueElement.value = '';
   }
 
   onEnter(e) {

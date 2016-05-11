@@ -1,4 +1,5 @@
 import * as React from 'react'
+import * as PureRenderMixin from 'react-addons-pure-render-mixin'
 
 import Output from 'universal/experiment/Output'
 import Actions from '../Experiment/Actions'
@@ -17,6 +18,10 @@ export default class Cluster extends React.Component<any, any> {
       running: null
     }
   }
+  
+  /* shouldComponentUpdate() {
+    return PureRenderMixin.shouldComponentUpdate.apply(this, arguments);
+  } */
 
   componentDidMount() {
     this.load()
