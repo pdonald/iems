@@ -72,9 +72,9 @@ export default class Cluster extends React.Component<any, any> {
           <Link to="/cluster/configs">Launch configurations</Link>
         </div>
 
+        {this.renderQueues(this.state.queues, instances)}
         {this.renderInstances(instances)}
         {/*show also if other non-iems ec2 instances are running*/}
-        {this.renderQueues(this.state.queues, instances)}
       </div>
     )
   }
@@ -250,7 +250,9 @@ class Queues extends React.Component<any, any> {
     let name = queueRef.value.trim()
     queueRef.value = ''
 
-    post(`${apiurl}/cluster/queues`, { name: name })
+    if (name.length) {
+      post(`${apiurl}/cluster/queues`, { name: name })
+    }
   }
 
   update(q) {
