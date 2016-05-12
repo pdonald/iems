@@ -31,7 +31,7 @@ export function map(obj, fn) {
 }
 
 export function merge(obj, changed) {
-  return Object.assign({}, obj, changed)
+  return jQuery.extend(obj, changed)
 }
 
 export function deepmerge(obj, changes) {

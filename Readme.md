@@ -25,12 +25,14 @@ sudo apt-get install -y nodejs
 Run it
 
 ```bash
-npm install      # install dependencies
-npm run build    # build app
-npm start        # start web server
+npm install    # install dependencies
+npm run build  # build app
+npm start      # start web server
 ```
 
 and navigate to [http://localhost:8081](http://localhost:8081) in your browser.
+
+(You can ignore errors as long as `build/bundle.js` is created)
 
 For development
 
@@ -40,6 +42,8 @@ npm start
 ```
 
 and navigate to [http://localhost:8080](http://localhost:8080) in your browser.
+
+(Note that designer performance in development mode is a lot worse)
 
 ## Cluster
 

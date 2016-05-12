@@ -3,6 +3,7 @@ npm-*
 typings/
 
 build/bundle.js
+build/bundle.js.map
 build/index.html
 build/awsec2/*.pem
 build/vagrant/*
