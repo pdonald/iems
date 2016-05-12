@@ -1,0 +1,15 @@
+{
+  "name": "iems",
+  "version": false,
+  "ambientDependencies": {
+    "history": "github:DefinitelyTyped/DefinitelyTyped/react-router/history.d.ts#c0d876601e0f8236fd6b57626eb62c4e485f1563",
+    "jquery": "github:DefinitelyTyped/DefinitelyTyped/jquery/jquery.d.ts#c0d876601e0f8236fd6b57626eb62c4e485f1563",
+    "node": "github:DefinitelyTyped/DefinitelyTyped/node/node.d.ts#1ec3d510e0c4d7c50e708ca7cb0765c7e06fa2ed",
+    "react": "github:DefinitelyTyped/DefinitelyTyped/react/react.d.ts#c0d876601e0f8236fd6b57626eb62c4e485f1563",
+    "react-addons-pure-render-mixin": "registry:dt/react-addons-pure-render-mixin#0.14.0+20160316155526",
+    "react-dom": "github:DefinitelyTyped/DefinitelyTyped/react/react-dom.d.ts#c0d876601e0f8236fd6b57626eb62c4e485f1563",
+    "react-router": "github:DefinitelyTyped/DefinitelyTyped/react-router/react-router.d.ts#c0d876601e0f8236fd6b57626eb62c4e485f1563",
+    "reflux": "registry:dt/reflux#0.0.0+20160316155526",
+    "ssh2": "github:DefinitelyTyped/DefinitelyTyped/ssh2/ssh2.d.ts#1ec3d510e0c4d7c50e708ca7cb0765c7e06fa2ed"
+  }
+}

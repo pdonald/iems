@@ -4,11 +4,11 @@
     "target": "es6",
     "module": "commonjs",
     "jsx": "react",
-    "sourceMap": true
+    "sourceMap": true,
+    "noImplicitAny": false
   },
   "rootDir": "app",
-  "exclude": [
-    "node_modules",
-    "app/universal/ts"
+  "files": [
+    "typings/main.d.ts"
   ]
 }

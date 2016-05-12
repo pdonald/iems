@@ -25,10 +25,9 @@ sudo apt-get install -y nodejs
 Run it
 
 ```bash
-npm install    # install dependencies
-tsd install
-npm run build  # build app
-npm start      # start web server
+npm install      # install dependencies
+npm run build    # build app
+npm start        # start web server
 ```
 
 and navigate to [http://localhost:8081](http://localhost:8081) in your browser.
