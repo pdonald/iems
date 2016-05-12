@@ -1,8 +1,10 @@
-var rootpath = require('path').resolve(__dirname)
-
 var webpack = require('webpack')
 var autoprefixer = require('autoprefixer')
 var HtmlWebpackPlugin = require('html-webpack-plugin')
+
+var rootpath = require('path').resolve(__dirname)
+var isDev = process.env.npm_lifecycle_event === 'dev'
+var isProd = !isDev
 
 module.exports = {
   entry: './app/client/index.tsx',
@@ -25,16 +27,8 @@ module.exports = {
     extensions: ['', '.js', '.ts', '.tsx']
   },
   plugins: [
-    new webpack.DefinePlugin({
-      'process.env': {
-        'NODE_ENV': "'production'"
-      }
-    }),
-    new webpack.optimize.UglifyJsPlugin({
-      compress: {
-        warnings: false
-      }
-    }),
+    isProd ? new webpack.DefinePlugin({ 'process.env': { 'NODE_ENV': "'production'" } }) : function() {},
+    isProd ? new webpack.optimize.UglifyJsPlugin({ compress: { warnings: false } }) : function() {},
     new HtmlWebpackPlugin({
       template: `${rootpath}/app/client/index.html`,
       filename: `./index.html`
