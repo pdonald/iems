@@ -32,8 +32,6 @@ npm start      # start web server
 
 and navigate to [http://localhost:8081](http://localhost:8081) in your browser.
 
-(You can ignore errors as long as `build/bundle.js` is created)
-
 For development
 
 ```bash

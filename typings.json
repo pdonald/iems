@@ -9,7 +9,7 @@
     "react-addons-pure-render-mixin": "registry:dt/react-addons-pure-render-mixin#0.14.0+20160316155526",
     "react-dom": "github:DefinitelyTyped/DefinitelyTyped/react/react-dom.d.ts#c0d876601e0f8236fd6b57626eb62c4e485f1563",
     "react-router": "github:DefinitelyTyped/DefinitelyTyped/react-router/react-router.d.ts#c0d876601e0f8236fd6b57626eb62c4e485f1563",
-    "reflux": "registry:dt/reflux#0.0.0+20160316155526",
-    "ssh2": "github:DefinitelyTyped/DefinitelyTyped/ssh2/ssh2.d.ts#1ec3d510e0c4d7c50e708ca7cb0765c7e06fa2ed"
+    "reflux": "github:pdonald/DefinitelyTyped/reflux/reflux.d.ts#e1583b124085c327cadeba9f4b21b2c2af6b9dee",
+    "ssh2": "github:pdonald/DefinitelyTyped/ssh2/ssh2.d.ts#0c0af5e7ce370afabdb8f99d862912b809ed2adc"
   }
 }
