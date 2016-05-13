@@ -27,11 +27,14 @@
     "rimraf": "^2.5.2",
     "ssh2": "^0.4.15",
     "ts-node": "^0.7.2",
-    "typings": "^0.8.1"
+    "typings": "^0.8.1",
+    "whatwg-fetch": "^1.0.0"
   },
   "devDependencies": {
     "autoprefixer": "^6.3.6",
     "css-loader": "^0.23.1",
+    "es6-promise": "^3.2.1",
+    "extend": "^3.0.0",
     "history": "^1.17.0",
     "html-webpack-plugin": "^2.16.1",
     "jquery": "^2.2.3",

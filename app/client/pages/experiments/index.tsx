@@ -134,14 +134,14 @@ export default class Experiments extends React.Component<any, any> {
     this.setState({ init: { loading: true, error: null }})
 
     get(`${apiurl}/experiments`)
-      .done(exps => {
+      .then(exps => {
         this.setState({
           init: { loading: false, error: null },
           experiments: exps,
           filters: this.makeFilters(toArray(exps))
         })
       })
-      .fail(err => {
+      .catch(err => {
         this.setState({ init: { loading: false, error: 'Could not load experiments' } })
       })
   }
@@ -196,7 +196,7 @@ export default class Experiments extends React.Component<any, any> {
         })
         browserHistory.push(`/experiments/${clonedexp.id}`)
       })
-      .fail(msg => {
+      .catch(msg => {
         console.error(msg)
         this.setState({ save: { saving: false, error: `Could not clone experiment ${exp.name}` } })
       })
@@ -214,7 +214,7 @@ export default class Experiments extends React.Component<any, any> {
           filters: this.makeFilters(toArray(this.state.experiments))
         })
       })
-      .fail(msg => {
+      .catch(msg => {
         console.error(msg)
         this.setState({ save: { saving: false, error: `Could not clone experiment ${exp.name}` } })
       })

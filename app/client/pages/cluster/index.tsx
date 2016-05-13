@@ -100,18 +100,18 @@ export default class Cluster extends React.Component<any, any> {
     this.setState({ loading: true, error: null })
 
     get(`${apiurl}/cluster/configs`)
-      .done(configs => this.setState({ loading: false, configs: configs }))
-      .fail(err => this.setState({ loading: false, error: 'Could not load data' }))
+      .then(configs => this.setState({ loading: false, configs: configs }))
+      .catch(err => this.setState({ loading: false, error: 'Could not load data' }))
   }
 
   refresh() {
     get(`${apiurl}/cluster/services`)
-      .done(services => this.setState({ services: services }))
-      .fail(err => this.setState({ error: 'Could not load data' }))
+      .then(services => this.setState({ services: services }))
+      .catch(err => this.setState({ error: 'Could not load data' }))
 
     get(`${apiurl}/cluster/queues`)
-      .done(queues => this.setState({ queues: queues }))
-      .fail(err => this.setState({ error: 'Could not load data' }))
+      .then(queues => this.setState({ queues: queues }))
+      .catch(err => this.setState({ error: 'Could not load data' }))
   }
 
   launch() {
@@ -121,12 +121,12 @@ export default class Cluster extends React.Component<any, any> {
     let count = parseInt(countRef.value)
 
     post(`${apiurl}/cluster/services/${config.service}/launch?config=${config.id}&count=${count}`)
-      .fail(err => this.setState({ error: 'Could not launch' }))
+      .catch(err => this.setState({ error: 'Could not launch' }))
   }
 
   terminate(instance) {
     del(`${apiurl}/cluster/services/${instance.service}/instances/${instance.id}`)
-      .fail(err => this.setState({ error: 'Could not terminate instance' }))
+      .catch(err => this.setState({ error: 'Could not terminate instance' }))
   }
 }
 

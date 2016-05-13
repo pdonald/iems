@@ -77,8 +77,8 @@ export default class Index extends React.Component<any, any> {
     get(`${apiurl}/cluster/services`)
       .then(services => this.setState({ services: services }))
       .then(_ =>get(`${apiurl}/cluster/configs`).then(configs => this.setState({ configs: configs })))
-      .done(_ => this.setState({ loading: false }))
-      .fail(err => this.setState({ loading: false, loadingError: 'Could not load launch configurations' }))
+      .then(_ => this.setState({ loading: false }))
+      .catch(err => this.setState({ loading: false, loadingError: 'Could not load launch configurations' }))
   }
 
   edit(config) {
@@ -88,15 +88,15 @@ export default class Index extends React.Component<any, any> {
   clone(config) {
     let notifications = this.refs['notifications'] as Notifications
     post(`${apiurl}/cluster/configs/${config.id}/clone`, config)
-      .done(config => browserHistory.push(`/cluster/configs/${config.id}`))
-      .fail(err => notifications.error(`Could not clone ${config.name}`, config.id))
+      .then(config => browserHistory.push(`/cluster/configs/${config.id}`))
+      .catch(err => notifications.error(`Could not clone ${config.name}`, config.id))
   }
 
   delete(config) {
     let notifications = this.refs['notifications'] as Notifications
     del(`${apiurl}/cluster/configs/${config.id}`)
       .then(_ => notifications.success(`Deleted ${config.name}`, config.id))
-      .done(_ => this.load())
-      .fail(err => notifications.error(`Could not delete ${config.name}`, config.id))
+      .then(_ => this.load())
+      .catch(err => notifications.error(`Could not delete ${config.name}`, config.id))
   }
 }

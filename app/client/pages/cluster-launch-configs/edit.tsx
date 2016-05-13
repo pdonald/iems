@@ -64,8 +64,8 @@ export default class Edit extends React.Component<any, any> {
       get(`${apiurl}/cluster/configs/${this.props.routeParams.id}`)
         .then(config => { this.setState({ config: config }); return config })
         .then(config => get(`${apiurl}/cluster/services/${config.service}`).then(service => this.setState({ service: service })))
-        .done(_ => this.setState({ loading: false }))
-        .fail(err => this.setState({ loading: false, loadingError: 'Could not load data' }))
+        .then(_ => this.setState({ loading: false }))
+        .catch(err => this.setState({ loading: false, loadingError: 'Could not load data' }))
     }
   }
 
@@ -74,12 +74,12 @@ export default class Edit extends React.Component<any, any> {
     if (config.id) {
       post(`${apiurl}/cluster/configs/${config.id}`, config)
         .then(config => this.setState({ config: config }))
-        .done(_ => notifications.success(`Changes saved`, config.id))
-        .fail(err => notifications.error(`Could not save changes`, config.id))
+        .then(_ => notifications.success(`Changes saved`, config.id))
+        .catch(err => notifications.error(`Could not save changes`, config.id))
     } else {
       post(`${apiurl}/cluster/configs`, config)
         .then(config => browserHistory.push(`/cluster/configs/${config.id}`))
-        .fail(err => notifications.error(`Could not save changes`, config.id))
+        .catch(err => notifications.error(`Could not save changes`, config.id))
     }
   }
 
@@ -88,8 +88,8 @@ export default class Edit extends React.Component<any, any> {
     if (config.id) {
       let notifications = this.refs['notifications'] as Notifications
       del(`${apiurl}/cluster/configs/${config.id}`)
-        .done(_ => browserHistory.push('/cluster/configs'))
-        .fail(err => notifications.error(`Could not delete launch configuration`, config.id))
+        .then(_ => browserHistory.push('/cluster/configs'))
+        .catch(err => notifications.error(`Could not delete launch configuration`, config.id))
     } else {
       browserHistory.push('/cluster/configs')
     }

@@ -63,7 +63,7 @@ export default class Cluster extends React.Component<any, any> {
 
   load() {
     get(`${apiurl}/cluster/queues`)
-      .done(queues => this.setState({ queues: queues }))
+      .then(queues => this.setState({ queues: queues }))
   }
 
   run(e) {
