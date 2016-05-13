@@ -1,6 +1,5 @@
 import * as React from 'react'
 import * as PureRenderMixin from 'react-addons-pure-render-mixin'
-import * as jQuery from 'jquery'
 
 import Tools from '../../../../universal/experiment/Tools'
 import Actions from '../actions'
@@ -14,13 +13,13 @@ var CategoryTitles = {
   'evaluation': 'Evaluation',
   'phrases': 'Phrase based tools',
   'tuning': 'Tuning'
-};
+}
 
-export default class Toolbox extends React.Component<any, any> {
+export default class Toolbox extends React.Component<any, State> {
   constructor(props) {
     super(props)
     
-    this.state = { dragging: null }
+    this.state = { dragging: null, dragdiv: null }
     
     this.dragStart = this.dragStart.bind(this)
     this.drag = this.drag.bind(this)
@@ -28,45 +27,50 @@ export default class Toolbox extends React.Component<any, any> {
   }
 
   componentWillMount() {
-    document.removeEventListener('mousemove', this.drag);
-    document.removeEventListener('mouseup', this.dragEnd);
+    document.removeEventListener('mousemove', this.drag)
+    document.removeEventListener('mouseup', this.dragEnd)
   }
   
   shouldComponentUpdate() {
-    return PureRenderMixin.shouldComponentUpdate.apply(this, arguments);
+    return PureRenderMixin.shouldComponentUpdate.apply(this, arguments)
   }
 
   dragStart(e, obj) {
-    var $dragdiv = jQuery(`<div class="dragobj">${obj.title || obj.type}</div>`).appendTo('body');
+    var dragdiv = document.createElement('div')
+    dragdiv.classList.add('dragobj')
+    dragdiv.textContent = obj.title || obj.type
+    dragdiv.style.position = 'absolute'
+    document.body.appendChild(dragdiv)
 
     this.setState({
       dragging: obj,
-      $dragdiv: $dragdiv,
-    });
+      dragdiv: dragdiv,
+    })
 
-    document.addEventListener('mousemove', this.drag);
-    document.addEventListener('mouseup', this.dragEnd);
+    document.addEventListener('mousemove', this.drag)
+    document.addEventListener('mouseup', this.dragEnd)
   }
 
   drag(e) {
-    this.state.$dragdiv.offset({ left: e.pageX-20, top: e.pageY-20 })
+    this.state.dragdiv.style.left = (e.pageX - 20) + 'px'
+    this.state.dragdiv.style.top = (e.pageY - 20) + 'px'
   }
 
   dragEnd(e) {
-    document.removeEventListener('mousemove', this.drag);
-    document.removeEventListener('mouseup', this.dragEnd);
+    document.removeEventListener('mousemove', this.drag)
+    document.removeEventListener('mouseup', this.dragEnd)
 
     if (this.state.dragging) {
-      this.state.$dragdiv.remove();
+      this.state.dragdiv.parentNode.removeChild(this.state.dragdiv)
       Actions.add(this.state.dragging, e.pageX-20, e.pageY-20)
-      this.setState({ dragging: null });
+      this.setState({ dragging: null })
     }
   }
 
   render() {
-    var all = [];
-    for (var i in Tools.processes) all.push(Tools.processes[i]);
-    for (var i in Tools.groups) all.push(Tools.groups[i]);
+    var all = []
+    for (var i in Tools.processes) all.push(Tools.processes[i])
+    for (var i in Tools.groups) all.push(Tools.groups[i])
 
     var children = all
       .map(p => p.category)
@@ -82,12 +86,17 @@ export default class Toolbox extends React.Component<any, any> {
             ))}
           </ul>
         </div>
-      ));
+      ))
 
     return (
       <Block name="toolbox" title="Toolbox">
         {children}
       </Block>
-    );
+    )
   }
+}
+
+interface State {
+  dragging: boolean
+  dragdiv?: HTMLElement
 }

@@ -1,7 +1,6 @@
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import * as Reflux from 'reflux'
-import * as jQuery from 'jquery'
 
 import GroupModel from '../../../universal/experiment/GroupModel'
 import ProcessModel from '../../../universal/experiment/ProcessModel'
@@ -57,11 +56,11 @@ export default React.createClass({
        this.setState({ document: document })
      })
 
-     jQuery('body').addClass('experiment')
+     document.body.classList.add('experiment')
   },
 
   componentWillUnmount() {
-    jQuery('body').removeClass('experiment')
+    document.body.classList.remove('experiment')
   },
 
   save: function() {
@@ -79,15 +78,7 @@ export default React.createClass({
 
     this.state.document.stack = stack
 
-    jQuery.ajax({
-      type: 'POST',
-      url: `${apiurl}/experiments/${this.props.routeParams.id}`,
-      data: JSON.stringify(data),
-      contentType: 'application/json',
-      success: (res) => {
-        if (res) console.log(res)
-      },
-    })
+    post(`${apiurl}/experiments/${this.props.routeParams.id}`, data) // todo: handle error
   },
 
   onParamChanged: function(process, key, value) {

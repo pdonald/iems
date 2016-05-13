@@ -42,7 +42,8 @@ export function get(url: string) {
   return jQuery.get(url)
 }
 
-export function post(url: string, json?: any) {
+export function post(url: string, json?: any, cb?: Function) {
+  // todo: cb()
   return jQuery.ajax({
     type: 'POST',
     url: url,
