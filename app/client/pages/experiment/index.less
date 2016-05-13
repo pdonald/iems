@@ -42,6 +42,8 @@ body.experiment {
 }
 
 body.experiment {
+  user-select: none;
+  
   .dragobj {
     position: absolute;
     width: 150px;
@@ -107,8 +109,8 @@ body.experiment {
       overflow: auto;
 
       white-space: pre;
-      .tab-size(2);
-      .user-select(text);
+      tab-size: 2;
+      user-select: text;
 
       .inner {
         padding: 10px;

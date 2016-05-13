@@ -172,7 +172,7 @@ main {
   margin-bottom: 8px;
 
   th {
-    .user-select(none);
+    user-select: none;
     text-align: left;
 
     &.sortable {
@@ -208,14 +208,6 @@ ul.reset {
   list-style-type: none;
   margin: 0;
   padding: 0;
-}
-
-.user-select(@val) {
-  user-select: @val;
-}
-
-.tab-size(@val) {
-  tab-size: @val;
 }
 
 *:focus {
