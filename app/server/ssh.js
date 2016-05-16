@@ -1,5 +1,3 @@
-"use strict"
-
 let events = require('events')
 let SshClient = require('ssh2').Client
 

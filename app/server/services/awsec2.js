@@ -1,5 +1,3 @@
-"use strict"
-
 let fs = require('fs')
 let crypto = require('crypto')
 let request = require('request')

@@ -1,5 +1,3 @@
-"use strict"
-
 let fs = require('fs')
 let express = require('express')
 let stringify = require('json-stringify-pretty-compact')
@@ -16,7 +14,7 @@ function savedb() {
   fs.writeFileSync(dbfile, stringify(db, { maxLength: 160 }))
 }
 
-let db = {}
+let db: any = {}
 let dbfile = __dirname + '/../../build/db.json'
 
 loaddb()
@@ -27,15 +25,10 @@ let services = {
   localssh: new Localssh()
 }
 
-services.awsec2.connect(db.cluster.configs)
-services.vagrant.connect(db.cluster.configs)
-services.vagrant.scan()
-
-db.cluster.queues = {
+let queues = {
   all: {
     id: 'all',
     name: "All",
-    hosts: {},
     jobs: [
       { id: 1, status: 'pending' },
       { id: 2, status: 'running' },
@@ -45,7 +38,13 @@ db.cluster.queues = {
   }
 }
 
-let app = module.exports = express.Router()
+services.awsec2.connect(db.cluster.configs)
+services.vagrant.connect(db.cluster.configs)
+services.vagrant.scan()
+
+let app = express.Router()
+
+export default app
 
 app.use('/api/*', (req, res, next) => {
   res.header('Access-Control-Allow-Origin', 'http://localhost:8080') // todo
@@ -55,31 +54,31 @@ app.use('/api/*', (req, res, next) => {
 })
 
 app.get('/api/cluster/queues', (req, res) => {
-  res.send(db.cluster.queues)
+  res.send(queues)
 })
 
 app.post('/api/cluster/queues', (req, res) => {
-  let id = 'q' + (Object.keys(db.cluster.queues).length + 1) + '-' + Math.round(Math.random()*1000)
-  db.cluster.queues[id] = { id: id, name: req.body.name, hosts: {}, jobs: [] }
-  res.send()
+  let id = 'q' + (Object.keys(queues).length + 1) + '-' + Math.round(Math.random()*1000)
+  queues[id] = { id: id, name: req.body.name, hosts: {}, jobs: [] }
+  res.send('')
 })
 
 app.post('/api/cluster/queues/:id', (req, res) => {
-  let queue = db.cluster.queues[req.params.id]
+  let queue = queues[req.params.id]
   if (queue) {
     for (let hostid in req.body) {
       if (!queue.hosts[hostid]) queue.hosts[hostid] = {}
-      queue.hosts[hostid].slots = req.body[hostid]
+        queue.hosts[hostid].slots = req.body[hostid]
     }
-    res.send()
+    res.send('')
   } else {
-    res.status(404).send()
+    res.status(404).send('')
   }
 })
 
 app.delete('/api/cluster/queues/:id', (req, res) => {
-  delete db.cluster.queues[req.params.id]
-  res.send()
+  delete queues[req.params.id]
+  res.send('')
 })
 
 app.get('/api/cluster/configs', (req, res) => {
@@ -114,7 +113,7 @@ app.post('/api/cluster/configs/:id', (req, res) => {
 
 app.post('/api/cluster/configs/:id/clone', (req, res) => {
   if (db.cluster.configs[req.params.id]) {
-    let config = Object.assign({}, db.cluster.configs[req.params.id])
+    let config = JSON.parse(JSON.stringify(db.cluster.configs[req.params.id])) //Object.assign({}, db.cluster.configs[req.params.id])
     config.id = `c-${config.service}-` + Object.keys(db.cluster.configs).length + 1
     db.cluster.configs[config.id] = config
     res.send(config) // todo: secret keys
@@ -153,7 +152,7 @@ app.post('/api/cluster/services/:id/launch', (req, res) => {
   if (service) {
     const config = db.cluster.configs[req.query.config]
     if (config) {
-      const count = parseInt(req.query.count)
+      let count = parseInt(req.query.count)
       if (!count || count < 0) count = 1
       if (count > 10) return res.status(400).send('Not starting more than 10 instances')
       for (let i = 0; i < count; i++) services[config.service].launch(config)

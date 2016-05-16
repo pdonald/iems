@@ -1,11 +1,11 @@
-"use strict"
+/// <reference path="../../typings/main.d.ts" />
 
 let fs = require('fs')
 let path = require('path')
 let express = require('express')
 let bodyParser = require('body-parser')
 
-let api = require('./api')
+import api from './api'
 
 let buildDir = path.join(__dirname, '..', '..', 'build')
 

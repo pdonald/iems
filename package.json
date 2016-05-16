@@ -10,7 +10,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "postinstall": "typings install",
-    "start": "node app/server/index.js",
+    "start": "node node_modules/ts-node/dist/bin/ts-node.js -P app/server app/server/index.ts",
     "build": "node node_modules/webpack/bin/webpack --progress --colors -p",
     "dev": "node node_modules/webpack-dev-server/bin/webpack-dev-server --hot --inline --progress --colors --content-base build/"
   },
@@ -42,7 +42,7 @@
     "ssh2": "^0.4.15",
     "style-loader": "^0.13.1",
     "ts-loader": "^0.8.2",
-    "ts-node": "^0.7.2",
+    "ts-node": "^0.7.3",
     "typescript": "^1.8.10",
     "typings": "^0.8.1",
     "webpack": "^1.13.0",

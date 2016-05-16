@@ -1,5 +1,3 @@
-"use strict"
-
 let SshConnection = require('../ssh').Connection
 
 class Localssh {
