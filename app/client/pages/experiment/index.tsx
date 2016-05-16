@@ -24,7 +24,7 @@ import './index.less'
 export default React.createClass({
   getInitialState: function() {
     return {
-      output: 'Makefile',
+      output: 'JobSpec',
       document: null
     }
   },
@@ -226,24 +226,8 @@ export default React.createClass({
         <Toolbox/>
       </div>
     )
-
-    let top = (
-      <div id="top">
-        <ul>
-          {this.state.document.stack.map((g, index) => <li key={index} className="border" onClick={() => this.goTo(index)}>{(g.title || g.name || '#'+g.id)}</li>)}
-        </ul>
-      </div>
-    )
-
-    let grid = (
-      <div id="grid">
-        <Graph ref="graph" graph={this.currentGraph()}>
-          <Group group={this.currentGraph()} blank={true} main={true}/>
-        </Graph>
-      </div>
-    )
-
-    /* let preview = (
+    
+    let preview = (
       <div id="preview">
         <div className="options">
           {map(Output, key => (
@@ -258,7 +242,29 @@ export default React.createClass({
           </div>
         </pre>
       </div>
-    ) */
+    )
+
+    let top = (
+      <div id="top">
+        <ul>
+          {this.state.document.stack.map((g, index) => <li key={index} className="border" onClick={() => this.goTo(index)}>{(g.title || g.name || '#'+g.id)}</li>)}
+          <li className="dropdown right">
+            <span className="doprdown-text">Object graph</span>
+            <div className="dropdown-content">
+              {preview}
+            </div>
+          </li>
+        </ul>
+      </div>
+    )
+
+    let grid = (
+      <div id="grid">
+        <Graph ref="graph" graph={this.currentGraph()}>
+          <Group group={this.currentGraph()} blank={true} main={true}/>
+        </Graph>
+      </div>
+    )
 
     return <ExperimentLayout sidebar={sidebar} mainTop={top} mainMiddle={grid} />
   }

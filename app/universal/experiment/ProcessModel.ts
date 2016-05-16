@@ -1,4 +1,5 @@
 import Tools from './Tools'
+import GroupModel from './GroupModel'
 
 export default class ProcessModel {
   public id: string;
@@ -8,7 +9,7 @@ export default class ProcessModel {
   public x: any;
   public y: any;
   public selected: any;
-  public group: any;
+  public group: GroupModel;
   public params: any;
   public width: any;
   public height: any;
@@ -80,11 +81,21 @@ export default class ProcessModel {
     }
   }
 
-  getInput() {
-    var link = this.group.links.filter(l => l.to.id == this.id)[0];
-    if (link) {
-      return this.group.resolveLinkInput(link);
+  getInputs(): { process: ProcessModel, port: string }[] {
+    var result = []
+    for (let link of this.group.links.filter(l => l.to.id == this.id)) {
+      result = result.concat(this.group.resolveLinkInput(link));
     }
+    return result;
+  }
+  
+  dependsOn(p: ProcessModel): boolean {
+    for (let input of this.getInputs()) {
+      if (input.process == p) {
+        return true;
+      }
+    }
+    return false;
   }
 
   getKey(): string {
@@ -103,8 +114,11 @@ export default class ProcessModel {
         key.push(`param:${name}=${params[name]}`);
       }
     }
-    var prev = this.getInput();
-    return (prev ? prev.process.getHashKey() + '/' + prev.port : '<root>') + ' -> ' + key.join(';');
+    var prev = [];
+    for (let input of this.getInputs()) {
+      prev.push(input.process.getHashKey() + '/' + input.port);
+    }
+    return prev.join('->') + key.join(';');
   }
 
   getMakefileKey(port?: string): string {

@@ -134,7 +134,7 @@ export default class GroupModel {
     return this.processes.filter(p => p.id == id)[0] || this.groups.filter(g => g.id == id)[0];
   }
 
-  resolveLinkInput(link) {
+  resolveLinkInput(link): { process: ProcessModel, port: string } {
     if (link.from) {
       if (link.from.id == this.id) {
         return this.parent.resolveLinkInput({ to: link.from });
@@ -168,5 +168,19 @@ export default class GroupModel {
   getStatus() {
     if (this.processes.filter(p => p.getStatus() == 'running').length > 0) return 'running';
     if (this.processes.filter(p => p.getStatus() == 'done').length == this.processes.length) return 'done';
+  }
+  
+  getAllProcesses(): ProcessModel[] {
+    let proceses = [];
+    
+    for (let process of this.processes) {
+      proceses.push(process);
+    }
+    
+    for (let group of this.groups) {
+      proceses = proceses.concat(group.getAllProcesses());
+    }
+    
+    return proceses;
   }
 }

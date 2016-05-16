@@ -6,6 +6,11 @@ export interface JobSpec {
   depends?: JobSpec[]
 }
 
+export interface JobTree {
+  cmd: string
+  children: JobTree[]
+}
+
 export class Job {
   id: string
   state: string

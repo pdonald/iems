@@ -1,7 +1,36 @@
+import GroupModel from './GroupModel';
+import ProcessModel from './ProcessModel';
+
+interface Job {
+  name: string;
+  cmd: string;
+  process: ProcessModel;
+  input: { [key: string]: string };
+  output: { [key: string]: string };
+}
+
+function joblist(graph: GroupModel): Job[] {
+  return graph.getAllProcesses().map(p => {
+    var input: { [key: string]: string } = {};
+    var output: { [key: string]: string } = {};
+
+    p.getInputs().forEach(i => input[i.port] = i.process.getMakefileKey(i.port));
+    p.getPorts().output.forEach(key => output[key] = p.getMakefileKey(key));
+    
+    return {
+      name: p.getTitle(),
+      cmd: p.template.toBash(p.getParamValues(), input, output).join('\n'),
+      process: p,
+      input: input,
+      output: output
+    };
+  });
+}
+
 var Output = {
   Nothing: () => '',
 
-  JSON: (graph, depth?) => {
+  JSON: (graph, depth?: number): string => {
     function params2str(params) {
       var arr = [];
       for (var key in params) {
@@ -60,60 +89,54 @@ var Output = {
     return json;
   },
 
-  Makefile: (graph, all, cache) => {
-    var text = '';
-
-    var root = !all;
-    if (root) all = [];
-
-    graph.processes.forEach(p => {
-      var input = {};
-      var output = {};
-      var noOutput = null;
-
-      var ports = p.getPorts();
-
-      ports.output.forEach(key => {
-        output[key] = p.getMakefileKey(key);
-        all.push(output[key]);
-      });
-
-      if (ports.output.length == 0) {
-        noOutput = p.getMakefileKey( 'done');
-        all.push(noOutput);
+  Makefile: (graph: GroupModel): string => {
+    let jobs = joblist(graph);
+    
+    let alloutputs: string[] = [];
+    for (let job of jobs) {
+      alloutputs = alloutputs.concat(Object.keys(job.output).map(k => job.output[k]));
+      if (Object.keys(job.output).length == 0) {
+        alloutputs.push(job.process.getMakefileKey('done'));
       }
-
-      graph.links.filter(l => l.to.id == p.id).forEach(l => {
-        var result = graph.resolveLinkInput(l);
-        if (result) {
-          input[l.to.port] = result.process.getMakefileKey(result.port);
-        } else {
-          //console.error(`Missing link for ${p.type}`);
-        }
-      });
-
-      text += noOutput || Object.keys(output).map(key => output[key]).join(' ');
-      text += ': '
-      text += Object.keys(input).map(key => input[key]).join(' ')
-      text += '\n'
-      text += '\t' + `touch status.${p.getMakefileKey('running')}` + '\n';
-      text += '\t' + p.template.toBash(p.getParamValues(), input, output).join('\n\t') + '\n';
-      if (noOutput) text += '\ttouch ' + noOutput + '\n';
-      text += '\t' + `mv status.${p.getMakefileKey('running')} status.${p.getMakefileKey('done')}` + '\n';
-      text += '\n'
-    });
-
-    graph.groups.forEach(g => text += Output.Makefile(g, all, cache) + '\n');
-
-    if (root) {
-      text =
+    }
+    alloutputs = alloutputs.filter((e, i, arr) => arr.lastIndexOf(e) === i);
+    
+    let text =
         '.PHONY: all clean\n\n' +
-        'all: ' + all.join(' ') + '\n\n' +
-        'clean:\n\trm -rf status.* ' + all.join(' ') + '\n\n' +
-        text;
+        'all: ' + alloutputs.join(' ') + '\n\n' +
+        'clean:\n\trm -rf status.* ' + alloutputs.join(' ') + '\n\n';
+    
+    for (let job of jobs) {
+      let noOutput = Object.keys(job.output).length === 0;
+      text += noOutput || Object.keys(job.output).map(k => job.output[k]).join(' ');
+      text += ': '
+      text += Object.keys(job.input).map(k => job.input[k]).join(' ')
+      text += '\n'
+      text += '\t' + `touch status.${job.process.getMakefileKey('running')}` + '\n';
+      text += '\t' + job.process.template.toBash(job.process.getParamValues(), job.input, job.output).join('\n\t') + '\n';
+      if (noOutput) text += '\ttouch ' + noOutput + '\n';
+      text += '\t' + `mv status.${job.process.getMakefileKey('running')} status.${job.process.getMakefileKey('done')}` + '\n';
+      text += '\n'
     }
 
     return text;
+  },
+  
+  JobSpec: (graph: GroupModel): string => {
+    let jobs = joblist(graph);
+        
+    let formatted = jobs.map(j => {
+      return {
+        id: j.process.id,
+        name: j.name,
+        cmd: j.cmd,
+        depends: jobs.filter(jj => j.process.dependsOn(jj.process)).map(jj => jj.process.id),
+        //input: Object.keys(j.input).map(k => j.input[k]),
+        //output: Object.keys(j.output).map(k => j.output[k]),
+      }
+    });
+    
+    return JSON.stringify(formatted, null, 2);
   }
 };
 

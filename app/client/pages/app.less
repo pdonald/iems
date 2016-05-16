@@ -200,6 +200,20 @@ main {
   }
 }
 
+.dropdown {
+  .dropdown-content {
+    display: none;
+  }
+  
+  &:hover, &.dropdown-content:hover {
+    .dropdown-content {
+      display: block;
+      position: relative;
+      z-index: 999;
+    }
+  }
+}
+
 .flex {
   display: flex;
 }
