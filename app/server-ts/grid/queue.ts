@@ -1,4 +1,5 @@
-import { Job, JobSpec } from './job'
+import { Job } from './job'
+import { JobSpec } from '../../universal/grid/JobSpec'
 import { Host } from '../cluster'
 
 export interface HostParams {
@@ -64,7 +65,8 @@ export class Queue {
 
     if (spec.depends) {
       for (let dep of spec.depends) {
-        this.submitJobReal(dep, [job])
+        //this.submitJobReal(dep, [job])
+        throw 'Not implemented'
       }
     }
 

@@ -1,6 +1,8 @@
 import GroupModel from './GroupModel';
 import ProcessModel from './ProcessModel';
 
+import { JobSpec } from '../grid/JobSpec';
+
 interface Job {
   name: string;
   cmd: string;

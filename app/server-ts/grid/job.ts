@@ -1,15 +1,5 @@
 import { Host } from '../cluster'
-
-export interface JobSpec {
-  cmd: string
-  exitCode?: number
-  depends?: JobSpec[]
-}
-
-export interface JobTree {
-  cmd: string
-  children: JobTree[]
-}
+import { JobSpec } from '../../universal/grid/JobSpec'
 
 export class Job {
   id: string
@@ -21,7 +11,7 @@ export class Job {
   constructor(id: string, spec: JobSpec, deps: Job[]) {
     this.id = id
     this.cmd = spec.cmd
-    this.exitCode = spec.exitCode || 0
+    this.exitCode = 0
     this.depends = deps
     this.state = 'pending'
   }
