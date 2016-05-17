@@ -6,8 +6,8 @@ export function toArray(obj) {
   return Object.keys(obj).map(key => obj[key])
 }
 
-export function groupBy(array, key) {
-  let groups = {}
+export function groupBy<T>(array: T[], key: (item: T) => string): { [key: string]: T[] } {
+  let groups: { [key: string]: T[] } = {}
   if (key) {
     for (let item of array) {
       let value = key(item)
@@ -20,8 +20,8 @@ export function groupBy(array, key) {
   return groups
 }
 
-export function map(obj, fn) {
-  let result = []
+export function map<T, V>(obj: { [key: string]: T }, fn: (key: string, obj: T) => V): V[] {
+  let result: V[] = []
   for (let key in obj) {
     result.push(fn(key, obj[key]))
   }

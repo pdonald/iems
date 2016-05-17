@@ -230,7 +230,7 @@ export default React.createClass({
     let preview = (
       <div id="preview">
         <div className="options">
-          {map(Output, key => (
+          {map(Output as any, key => (
             <span key={key}>
               <label><input type="radio" readOnly name="outtype" checked={this.state.output == key ? 'checked' : ''} onClick={e => this.changeOutputType(key)}/> {key}</label>
             </span>

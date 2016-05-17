@@ -30,7 +30,7 @@ export default class Table extends React.Component<any, any> {
       <table className="cool-table">
       <thead>
       <tr>
-        {map(columns, (key, col) => (
+        {map(columns, (key, col: any) => (
           <th key={key} onClick={() => col.sortable !== false && this.sortby(key)}
               className={key + ' ' + (col.sortable !== false ? 'sortable' : '')}>
             {col.title}{' '}

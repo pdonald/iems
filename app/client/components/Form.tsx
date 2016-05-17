@@ -30,7 +30,7 @@ export default class Form extends React.Component<any, any> {
         } else {
           input = (
             <select value={this.state.values[key]} onChange={e => this.handleChange(e, key)}>
-              {map(field.options, (key, group) => (
+              {map(field.options, (key, group: any) => (
                 <optgroup label={group.title} key={key}>
                   {group.options.map((o, index) => <option key={index} value={o}>{o}</option>)}
                 </optgroup>

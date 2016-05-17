@@ -279,7 +279,7 @@ class Filter extends React.Component<any, any> {
           <a href onClick={e => this.checkAll(e, false)}>Clear all</a>
         </p>
         <ul>
-          {map(this.props.filters, (name, filter) => (
+          {map(this.props.filters, (name, filter: any) => (
             <li key={name}>
               <label>
                 <input type="checkbox" checked={filter.selected}

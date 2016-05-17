@@ -8,6 +8,8 @@ import Loading from '../../components/Loading'
 import { map, get, post, del, groupBy } from '../../utils'
 import { apiurl } from '../../settings'
 
+import { QueueSummary } from '../../../universal/grid/QueueSummary'
+
 import './index.less'
 
 export default class Cluster extends React.Component<any, any> {
@@ -63,7 +65,7 @@ export default class Cluster extends React.Component<any, any> {
       <div>
         <div>
           <select ref="config">
-            {map(this.state.configs, (id, config) => (
+            {map(this.state.configs, (id, config: any) => (
               <option key={id} value={id}>{config.name}</option>
             ))}
           </select>{' '}
@@ -101,17 +103,17 @@ export default class Cluster extends React.Component<any, any> {
 
     get(`${apiurl}/cluster/configs`)
       .then(configs => this.setState({ loading: false, configs: configs }))
-      .catch(err => this.setState({ loading: false, error: 'Could not load data' }))
+      .catch(err => this.setState({ loading: false, error: 'Could not load data: configs' }))
   }
 
   refresh() {
     get(`${apiurl}/cluster/services`)
       .then(services => this.setState({ services: services }))
-      .catch(err => this.setState({ error: 'Could not load data' }))
+      .catch(err => this.setState({ error: 'Could not load data: services' }))
 
     get(`${apiurl}/cluster/queues`)
       .then(queues => this.setState({ queues: queues }))
-      .catch(err => this.setState({ error: 'Could not load data' }))
+      .catch(err => this.setState({ error: 'Could not load data: queues, ' + err }))
   }
 
   launch() {
@@ -206,13 +208,20 @@ class Queues extends React.Component<any, any> {
       jobs: { title: 'Jobs', sortable: false }
     }
 
-    let rows = map(this.props.queues, (key, q) => {
-      let jobs = groupBy(q.jobs, j => j.status)
+    let rows = map(this.props.queues, (key: string, q: QueueSummary) => {
+      let jobs = groupBy(Object.keys(q.jobs).map(k => q.jobs[k]), j => j.state)
       return {
         queue: q,
         name: q.name,
-        jobs: map(jobs, (status, list) => <span key={status} title={status} className={'status status-' + status}>{list.length}</span>),
-        hosts: (
+        jobs: (
+          <div>
+            {map(jobs, (status, list) => <span key={status} title={status} className={'status status-' + status}>{list.length}</span>)}
+            <ul>
+              {map(q.jobs, (id, j) => <li key={id}><pre>{j.cmd}</pre></li>)}
+            </ul>
+          </div>
+        ),
+        hosts: <div/> /* (
           <ul className="reset">
             {this.props.instances.map(host => (
               <li key={host.id}>
@@ -225,7 +234,7 @@ class Queues extends React.Component<any, any> {
               </li>
             ))}
           </ul>
-        )
+        ) */
       }
     })
 

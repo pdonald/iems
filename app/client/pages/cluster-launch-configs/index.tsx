@@ -57,13 +57,13 @@ export default class Index extends React.Component<any, any> {
       { title: 'Delete', handler: config => this.delete(config) },
     ]
 
-    return map(this.state.services, (key, service) => (
+    return map(this.state.services, (key, service: any) => (
       <section key={key} className={'service-' + key}>
         <h2>{service.title}</h2>
         {!service.info.installed && <p className="alert alert-warning">{service.title} is not available.
                                         Please read the setup instructions in the Readme file.</p>}
         <Table columns={service.ui.configs.columns}
-               rows={map(this.state.configs, (key, config) => config).filter(config => config.service == key)}
+               rows={map(this.state.configs, (key, config: any) => config).filter(config => config.service == key)}
                buttons={buttons}
                emptyText={<span>No configurations created yet.</span>} />
        <Link to={`/cluster/configs/add?service=${key}`}><button className="button-create">Create</button></Link>

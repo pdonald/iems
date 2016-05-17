@@ -2,6 +2,7 @@ import * as React from 'react'
 import * as PureRenderMixin from 'react-addons-pure-render-mixin'
 
 import Output from '../../../../universal/experiment/Output'
+import { QueueSummary } from '../../../../universal/grid/QueueSummary'
 import Actions from '../actions'
 import Block from './block'
 
@@ -54,7 +55,7 @@ export default class Cluster extends React.Component<any, any> {
       <div>
         <select ref="queue">
           <option value="">- Queues -</option>
-          {map(this.state.queues, (id, q) => <option key={id} value={id}>{`${q.name}`}</option>)}
+          {map(this.state.queues, (id, q: QueueSummary) => <option key={id} value={id}>{`${q.name}`}</option>)}
         </select>
         <button onClick={e => this.run(e)}>Run</button>
       </div>
