@@ -53,6 +53,12 @@ app.get('/api/cluster/queues', (req, res) => {
   res.send(result)
 })
 
+app.post('/api/cluster/queues', (req, res) => {
+  let id = 'q' + (Object.keys(queues).length + 1) + '-' + Math.round(Math.random()*1000)
+  queues[id] = new Queue({ id: id, name: req.body.name })
+  res.send('OK')
+})
+
 app.post('/api/cluster/queues/:id/submit', (req, res) => {
   let queue = queues[req.params.id]
   if (queue) {
@@ -70,13 +76,7 @@ app.post('/api/cluster/queues/:id/submit', (req, res) => {
   }
 })
 
-/* app.post('/api/cluster/queues', (req, res) => {
-  let id = 'q' + (Object.keys(queues).length + 1) + '-' + Math.round(Math.random()*1000)
-  queues[id] = { id: id, name: req.body.name, hosts: {}, jobs: [] }
-  res.send('')
-})
-
-app.post('/api/cluster/queues/:id', (req, res) => {
+/* app.post('/api/cluster/queues/:id', (req, res) => {
   let queue = queues[req.params.id]
   if (queue) {
     for (let hostid in req.body) {
