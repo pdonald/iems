@@ -127,15 +127,22 @@ var Output = {
   JobSpec: (graph: GroupModel): string => {
     let jobs = joblist(graph);
         
-    let formatted = jobs.map(j => {
+    let formatted: JobSpec[] = jobs.map(j => {
       return {
-        id: j.process.id,
+        id: j.process.getFullId(),
         name: j.name,
         cmd: j.cmd,
-        depends: jobs.filter(jj => j.process.dependsOn(jj.process)).map(jj => jj.process.id),
+        dependencies: [graph.doc.id, ...jobs.filter(jj => j.process.dependsOn(jj.process)).map(jj => jj.process.getFullId())],
         //input: Object.keys(j.input).map(k => j.input[k]),
         //output: Object.keys(j.output).map(k => j.output[k]),
       }
+    });
+    
+    formatted.unshift({
+      id: graph.doc.id,
+      name: graph.doc.name,
+      cmd: 'echo Lets go',
+      dependencies: []
     });
     
     return JSON.stringify(formatted, null, 2);

@@ -1,25 +1,32 @@
-import { Host } from '../cluster'
 import { JobSpec } from '../../universal/grid/JobSpec'
+import { JobSummary } from '../../universal/grid/JobSummary'
 
 export class Job {
   id: string
   state: string
-  depends: Job[]
+  dependencies: Job[]
   cmd: string
-  exitCode: number
 
   constructor(id: string, spec: JobSpec, deps: Job[]) {
     this.id = id
     this.cmd = spec.cmd
-    this.exitCode = 0
-    this.depends = deps
+    this.dependencies = deps
     this.state = 'pending'
+  }
+  
+  toSummary() : JobSummary {
+    return {
+      id: this.id,
+      cmd: this.cmd,
+      state: this.state,
+      dependencies: this.dependencies.map(j => j.id)
+    }
   }
 
   canRun(): boolean {
     if (this.state == 'pending') {
-      for (let dep of this.depends) {
-        if (!dep.isFinished()) {
+      for (let dependency of this.dependencies) {
+        if (!dependency.isFinished()) {
           return false
         }
       }
@@ -30,27 +37,6 @@ export class Job {
 
   isFinished(): boolean {
     return this.state == 'finished'
-  }
-
-  run(host: Host) {
-    try {
-      this.state = 'running'
-
-      let timer = setTimeout(() => {
-        this.state = 'failed'
-        console.log(`Failed ${this.id} with timeout`)
-      }, 10000)
-
-      host.exec(this.cmd, () => {
-        clearTimeout(timer)
-        this.state = 'finished'
-        console.log(`Finished ${this.id}`)
-      })
-
-      console.log(`Running ${this.id}`)
-    } catch (e) {
-      this.state = 'pending'
-    }
   }
 
   cancel() {

@@ -32,6 +32,22 @@ export default class ProcessModel {
       }
     }
   }
+  
+  getFullId() : string {
+    let ids = [];
+    ids.push(this.id);
+    let group = this.group;
+    while (group) {
+      ids.push(group.id);
+      if (group.parent) {
+        group = group.parent;
+      } else {
+        ids.push(group.doc.id);
+        break;
+      }
+    }
+    return ids.reverse().join('/');
+  }
 
   getParamValues() {
     function resolveParams(params, vars) {

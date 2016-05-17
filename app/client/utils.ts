@@ -58,6 +58,7 @@ export function get(url: string) {
 
 export function post(url: string, json?: any) {
   return fetch(url, {
+    cache: 'no-cache',
     method: 'POST',
     body: json ? JSON.stringify(json) : null,
     headers: {

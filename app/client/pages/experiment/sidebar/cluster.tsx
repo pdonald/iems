@@ -53,7 +53,7 @@ export default class Cluster extends React.Component<any, any> {
     return (
       <div>
         <select ref="queue">
-          <option>- Queues -</option>
+          <option value="">- Queues -</option>
           {map(this.state.queues, (id, q) => <option key={id} value={id}>{`${q.name}`}</option>)}
         </select>
         <button onClick={e => this.run(e)}>Run</button>
@@ -67,23 +67,13 @@ export default class Cluster extends React.Component<any, any> {
   }
 
   run(e) {
-    return
+    e.preventDefault()
 
-    /* e.preventDefault()
-
-    let instance = this.state.instances[this.refs.instance.value]
-    let makefile = Output.Makefile(this.props.doc.stack[0])
-
-    let data = {
-      vars: this.props.doc.vars,
-      makefile: makefile
+    let queueID = (this.refs['queue'] as HTMLSelectElement).value
+    if (queueID) {
+      let jobs = JSON.parse(Output.JobSpec(this.props.doc.stack[0]))
+      post(`${apiurl}/cluster/queues/${queueID}/submit`, jobs)
     }
-
-    post(`${apiurl}/cluster/services/${instance.service}/instances/${instance.id}/exec`, data)
-      .then(_ => {
-        this.setState({ running: { instance: instance, vars: clone(data.vars) } })
-        this.startChecking()
-      }) */
   }
 
   cancel(e) {

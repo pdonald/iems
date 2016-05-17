@@ -6,6 +6,9 @@ let AwsEc2 = require('./services/awsec2').AwsEc2
 let Vagrant = require('./services/vagrant').Vagrant
 let Localssh = require('./services/localssh').Localssh
 
+import { Queue } from './grid/queue'
+import { JobSpec } from '../universal/grid/JobSpec'
+
 function loaddb() {
   db = JSON.parse(fs.readFileSync(dbfile))
 }
@@ -25,17 +28,8 @@ let services = {
   localssh: new Localssh()
 }
 
-let queues = {
-  all: {
-    id: 'all',
-    name: "All",
-    jobs: [
-      { id: 1, status: 'pending' },
-      { id: 2, status: 'running' },
-      { id: 3, status: 'finished' },
-      { id: 4, status: 'failed' }
-    ]
-  }
+let queues: { [id: string]: Queue } = {
+  all: new Queue({ id: 'all', name: 'All' }),
 }
 
 services.awsec2.connect(db.cluster.configs)
@@ -48,16 +42,35 @@ export default app
 
 app.use('/api/*', (req, res, next) => {
   res.header('Access-Control-Allow-Origin', 'http://localhost:8080') // todo
-  res.header('Access-Control-Allow-Methods', 'GET,POST,DELETE')
+  res.header('Access-Control-Allow-Methods', 'GET,POST,DELETE,OPTIONS')
   res.header('Access-Control-Allow-Headers', 'Content-Type')
   next()
 })
 
 app.get('/api/cluster/queues', (req, res) => {
-  res.send(queues)
+  var result = {}
+  Object.keys(queues).forEach(key => result[key] = queues[key].toSummary())
+  res.send(result)
 })
 
-app.post('/api/cluster/queues', (req, res) => {
+app.post('/api/cluster/queues/:id/submit', (req, res) => {
+  let queue = queues[req.params.id]
+  if (queue) {
+    let jobs: JobSpec[] = req.body
+    try {
+      queue.submitJobs(jobs)
+    } catch (e) {
+      console.log(e)
+      res.status(500).send(e.message)
+      return
+    }
+    res.send('OK')
+  } else {
+    res.status(404).send('Queue not found')
+  }
+})
+
+/* app.post('/api/cluster/queues', (req, res) => {
   let id = 'q' + (Object.keys(queues).length + 1) + '-' + Math.round(Math.random()*1000)
   queues[id] = { id: id, name: req.body.name, hosts: {}, jobs: [] }
   res.send('')
@@ -79,7 +92,7 @@ app.post('/api/cluster/queues/:id', (req, res) => {
 app.delete('/api/cluster/queues/:id', (req, res) => {
   delete queues[req.params.id]
   res.send('')
-})
+}) */
 
 app.get('/api/cluster/configs', (req, res) => {
   res.send(db.cluster.configs) // todo: secret keys
