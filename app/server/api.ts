@@ -2,11 +2,12 @@ let fs = require('fs')
 let express = require('express')
 let stringify = require('json-stringify-pretty-compact')
 
-let AwsEc2 = require('./services/awsec2').AwsEc2
-let Vagrant = require('./services/vagrant').Vagrant
-let Localssh = require('./services/localssh').Localssh
+let AwsEc2 = require('./cluster/services/awsec2').AwsEc2
+let Vagrant = require('./cluster/services/vagrant').Vagrant
+let Localssh = require('./cluster/services/localssh').Localssh
 
-import { Queue } from './grid/queue'
+import { Queue, HostInQueueParams } from './cluster/grid/queue'
+import { Host } from './cluster/grid/host'
 import { JobSpec } from '../universal/grid/JobSpec'
 
 function loaddb() {
@@ -76,12 +77,14 @@ app.post('/api/cluster/queues/:id/submit', (req, res) => {
   }
 })
 
-/* app.post('/api/cluster/queues/:id', (req, res) => {
+app.post('/api/cluster/queues/:id', (req, res) => {
   let queue = queues[req.params.id]
   if (queue) {
     for (let hostid in req.body) {
-      if (!queue.hosts[hostid]) queue.hosts[hostid] = {}
-        queue.hosts[hostid].slots = req.body[hostid]
+      let instance = services.vagrant.instances[hostid]
+      let host: Host = new Host(instance)
+      let params: HostInQueueParams = { slots: req.body[hostid] }
+      queue.addOrUpdateHost(host, params)
     }
     res.send('')
   } else {
@@ -90,9 +93,15 @@ app.post('/api/cluster/queues/:id/submit', (req, res) => {
 })
 
 app.delete('/api/cluster/queues/:id', (req, res) => {
-  delete queues[req.params.id]
-  res.send('')
-}) */
+  let queue = queues[req.params.id]
+  if (queue) {
+    queue.destroy()
+    delete queues[req.params.id]
+    res.send('')
+  } else {
+    res.status(404).send('')
+  }
+})
 
 app.get('/api/cluster/configs', (req, res) => {
   res.send(db.cluster.configs) // todo: secret keys

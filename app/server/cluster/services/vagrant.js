@@ -11,7 +11,7 @@ class Vagrant {
   constructor() {
     this.configs = {}
     this.instances = {}
-    this.basedir = __dirname + '/../../../build/vagrant/'
+    this.basedir = __dirname + '/../../../../build/vagrant/'
     this.vagrantVersion = null
   }
 

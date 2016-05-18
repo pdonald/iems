@@ -1,14 +1,16 @@
-import { JobSpec } from '../../universal/grid/JobSpec'
-import { JobSummary } from '../../universal/grid/JobSummary'
+import { JobSpec } from '../../../universal/grid/JobSpec'
+import { JobSummary } from '../../../universal/grid/JobSummary'
 
 export class Job {
   id: string
+  name: string
   state: string
   dependencies: Job[]
   cmd: string
 
   constructor(id: string, spec: JobSpec, deps: Job[]) {
     this.id = id
+    this.name = spec.name
     this.cmd = spec.cmd
     this.dependencies = deps
     this.state = 'pending'
@@ -17,6 +19,7 @@ export class Job {
   toSummary() : JobSummary {
     return {
       id: this.id,
+      name: this.name,
       cmd: this.cmd,
       state: this.state,
       dependencies: this.dependencies.map(j => j.id)

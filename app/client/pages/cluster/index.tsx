@@ -217,11 +217,11 @@ class Queues extends React.Component<any, any> {
           <div>
             {map(jobs, (status, list) => <span key={status} title={status} className={'status status-' + status}>{list.length}</span>)}
             <ul>
-              {map(q.jobs, (id, j) => <li key={id}><pre>{j.cmd}</pre></li>)}
+              {map(q.jobs, (id, j) => <li key={id}>{j.name}</li>)}
             </ul>
           </div>
         ),
-        hosts: <div/> /* (
+        hosts: (
           <ul className="reset">
             {this.props.instances.map(host => (
               <li key={host.id}>
@@ -234,7 +234,7 @@ class Queues extends React.Component<any, any> {
               </li>
             ))}
           </ul>
-        ) */
+        )
       }
     })
 
