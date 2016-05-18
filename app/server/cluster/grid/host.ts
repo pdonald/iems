@@ -1,5 +1,3 @@
-import { HostSummary } from '../../../universal/grid/HostSummary'
-
 interface Instance {
   id: string
   state: string
@@ -13,14 +11,18 @@ export class Host {
     this.instance = instance
   }
   
-  get id() { return this.instance.id }
-  get state() { return this.instance.state }
+  get id(): string { return this.instance.id }
+  get state(): string { return this.instance.state }
   
-  exec(cmd, cb) {
-      
-  }
-  
-  toSummary() : HostSummary {
-      return null
+  exec(cmd: string, cb: Function) {
+    if (this.instance && this.instance.ssh && this.instance.ssh.exec) {
+      try {
+        this.instance.ssh.exec(cmd, cb)
+      } catch (e) {
+        cb(e)
+      }
+    } else {
+      cb(`Can't exec, not connected?`)
+    }
   }
 }

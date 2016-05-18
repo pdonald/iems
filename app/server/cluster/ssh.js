@@ -179,7 +179,7 @@ class Connection extends events.EventEmitter {
   }
 
   exec(cmd, cb) {
-    console.log('executing')
+    console.log('executing: ' + cmd)
     //console.log(cmd)
     sshexec(this.ssh, cmd, (err, code, stdout, stderr) => {
       console.log(err, code, stdout, stderr)

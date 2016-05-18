@@ -1,5 +1,6 @@
 import { Job } from './job'
 import { Host } from './host'
+import { Scheduler } from './Scheduler'
 import { JobSpec } from '../../../universal/grid/JobSpec'
 import { QueueSummary } from '../../../universal/grid/QueueSummary'
 import { JobSummary } from '../../../universal/grid/JobSummary'
@@ -13,7 +14,7 @@ function arr2obj<T>(array: T[], key: (obj: any) => string): { [key: string]: T }
   return obj
 }
 
-interface HostInQueue {
+export interface HostInQueue {
   host: Host
   params: HostInQueueParams
 }
@@ -27,10 +28,13 @@ export class Queue {
   private name: string
   private jobs: { [id: string]: Job } = {}
   private hosts: { [id: string]: HostInQueue } = {}
+  private scheduler: Scheduler
   
   constructor(options: { id: string, name: string }) {
     this.id = options.id
     this.name = options.name
+    this.scheduler = new Scheduler(this.hosts, this.jobs)
+    this.scheduler.start()
   }
   
   submitJobs(specs: JobSpec[]): Job[] {
@@ -107,6 +111,7 @@ export class Queue {
   }
   
   destroy() {
+    this.scheduler.stop()
     for (let id in this.jobs) this.cancelJob(this.jobs[id])
     for (let id in this.hosts) this.removeHost(this.hosts[id].host)
   }

@@ -3,5 +3,6 @@ export interface JobSummary {
   name: string
   cmd: string
   state: string
+  globalState: string
   dependencies: string[]
 }

@@ -16,20 +16,22 @@ export class Job {
     this.state = 'pending'
   }
   
-  toSummary() : JobSummary {
-    return {
-      id: this.id,
-      name: this.name,
-      cmd: this.cmd,
-      state: this.state,
-      dependencies: this.dependencies.map(j => j.id)
+  get globalState(): string {
+    if (this.state != 'pending') return this.state
+    
+    for (let dependency of this.dependencies) {
+      let depstate = dependency.globalState
+      if (depstate == 'error') return 'error'
+      if (depstate == 'canceled') return 'canceled'
     }
+
+    return 'pending'
   }
 
-  canRun(): boolean {
+  get isRunnable(): boolean {
     if (this.state == 'pending') {
       for (let dependency of this.dependencies) {
-        if (!dependency.isFinished()) {
+        if (!dependency.isFinished) {
           return false
         }
       }
@@ -38,11 +40,34 @@ export class Job {
     return false
   }
 
-  isFinished(): boolean {
+  get isFinished(): boolean {
     return this.state == 'finished'
+  }
+  
+  startRuning() {
+    this.state = 'running'
+  }
+  
+  finishRunning(err: any, exitCode: number, stdout: string, stderr: string) {
+    if (!err && exitCode == 0) {
+      this.state = 'finished'
+    } else {
+      this.state = 'error'
+    }
   }
 
   cancel() {
     this.state = 'canceled'
+  }
+  
+  toSummary(): JobSummary {
+    return {
+      id: this.id,
+      name: this.name,
+      cmd: this.cmd,
+      state: this.state,
+      globalState: this.globalState,
+      dependencies: this.dependencies.map(j => j.id)
+    }
   }
 }
