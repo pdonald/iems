@@ -27,7 +27,7 @@ export default class Table extends React.Component<any, any> {
     let sortby = this.state.sort.by
 
     return (
-      <table className="cool-table">
+      <table className={'cool-table' + (this.props.className ? ' ' + this.props.className : '')}>
       <thead>
       <tr>
         {map(columns, (key, col: any) => (
@@ -43,7 +43,7 @@ export default class Table extends React.Component<any, any> {
       <tbody>
       {(this.state.sort.rows || rows).map((row, index) => (
         <tr key={this.props.id ? this.props.id(row) : index}>
-          {map(columns, key => <td key={key}>{row[key]}</td>)}
+          {map(columns, key => <td key={key} className={key}>{row[key]}</td>)}
           {this.props.buttons && <td className="actions">{this.props.buttons.map(b => <button key={b.title} onClick={e => b.handler(row)}>{b.title}</button>)}</td>}
         </tr>
       ))}

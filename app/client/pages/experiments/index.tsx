@@ -66,13 +66,27 @@ export default class Experiments extends React.Component<any, any> {
               <div key={key}>
                 {this.state.groupby ? <h2>{this.state.groupby + ': ' + key}</h2> : null}
 
-                <Table columns={{ name: { title: 'Name' } }}
-                       rows={group.map(e => { return { name: e.props.name, exp: e } })}
-                       buttons={[
-                         { title: 'Edit', handler: row => browserHistory.push(`/experiments/${row.exp.id}`) },
-                         { title: 'Clone', handler: row => this.cloneExperiment(row.exp) },
-                         { title: 'Delete', handler: row => this.deleteExperiment(row.exp) }
-                       ]}/>
+                <Table columns={{ name: { title: 'Name' }, progress: { title: 'Progress' }, lastModified: { title: 'Last modified' } }}
+                       rows={group.map(e => { 
+                         return { 
+                           name: (
+                              <div>
+                                <a href="" onClick={ev => ev.preventDefault() || browserHistory.push(`/experiments/${e.id}`)}>{e.props.name}</a>
+                                <span className="pull-right">
+                                  <a onClick={_ => this.cloneExperiment(e)}><i className="fa fa-clone"></i></a>
+                                  {' '}
+                                  <a onClick={_ => this.deleteExperiment(e)}><i className="fa fa-remove"></i></a>
+                                </span>
+                              </div>
+                           ),
+                           progress: (
+                             <div>
+                                <div style={{'width': '50%', height: '5px', 'background': 'green', 'borderRadius': '5px'}}></div>
+                             </div>
+                           ),
+                           lastModified: (e.props.updated || 'n/a').substr(0, 16)
+                         } 
+                        })} />
               </div>
             ))}
           </section>

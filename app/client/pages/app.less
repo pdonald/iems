@@ -113,7 +113,25 @@ main {
 }
 
 .page {
-  thead th, tbody td { border: 1px solid #ccc; padding: 5px 10px; }
+  a, a:visited {
+    color: blue;
+    text-decoration: none;
+  }
+  a:hover {
+    color: red;
+    text-decoration: underline;
+  }
+  
+  table {
+    border-spacing: 0;
+    border-collapse: collapse;
+  }
+  
+  thead th, tbody td { 
+    border: 1px solid #ccc; 
+    padding: 5px 10px; 
+  }
+    
   tfoot td { text-align: right; }
   form {
     label {
@@ -226,4 +244,8 @@ ul.reset {
 
 *:focus {
   outline: none;
+}
+
+.pull-right {
+  float: right;
 }
