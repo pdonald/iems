@@ -52,11 +52,11 @@ export default {
       },
       toBash: (params, input, output) => {
         return [
-          `TEMP=$(shell mktemp --tmpdir=${params.tempdir}) && \\`,
-          `wget http://opus.lingfil.uu.se/${params.corpus}/${params.srclang}-${params.trglang}.txt.zip -O $$TEMP && \\`,
-          `unzip -p $$TEMP ${params.corpus}.${params.srclang}-${params.trglang}.${params.srclang} > ${output.src} && \\`,
-          `unzip -p $$TEMP ${params.corpus}.${params.srclang}-${params.trglang}.${params.trglang} > ${output.trg} && \\`,
-          'rm $$TEMP'
+          `TEMP=$(mktemp --tmpdir=${params.tempdir}) && \\`,
+          `wget http://opus.lingfil.uu.se/${params.corpus}/${params.srclang}-${params.trglang}.txt.zip -O $TEMP && \\`,
+          `unzip -p $TEMP ${params.corpus}.${params.srclang}-${params.trglang}.${params.srclang} > ${output.src} && \\`,
+          `unzip -p $TEMP ${params.corpus}.${params.srclang}-${params.trglang}.${params.trglang} > ${output.trg} && \\`,
+          'rm $TEMP'
         ];
       }
     },
@@ -135,10 +135,10 @@ export default {
       toTitle: (p, params) => 'fast align' + (params.reverse === true || params.reverse == 'true' ? ' (reverse)' : ''),
       toBash: (params, input, output) => {
         return [
-          `TEMP=$(shell mktemp --tmpdir=${params.tempdir}) && \\`,
-          `paste -d" ||| " ${input.src} /dev/null /dev/null /dev/null /dev/null ${input.trg} > $$TEMP && \\`,
-          `docker run --rm -i -v ${params.tempdir}:${params.tempdir} -v ${params.workdir}:/work iems/fastalign fast_align ${params.reverse ? '-r' : ''} -i $$TEMP > ${output.out} && \\`,
-          'rm $$TEMP'
+          `TEMP=$(mktemp --tmpdir=${params.tempdir}) && \\`,
+          `paste -d" ||| " ${input.src} /dev/null /dev/null /dev/null /dev/null ${input.trg} > $TEMP && \\`,
+          `docker run --rm -i -v ${params.tempdir}:${params.tempdir} -v ${params.workdir}:/work iems/fastalign fast_align ${params.reverse ? '-r' : ''} -i $TEMP > ${output.out} && \\`,
+          'rm $TEMP'
         ]
       }
     },
@@ -172,12 +172,12 @@ export default {
       toBash: (params, input, output) => {
         var model = params.type && params.orientation ? `--model ${params.type}-${params.orientation}` : '';
         return [
-          `TEMP=$(shell mktemp -d --tmpdir=${params.tempdir}) && \\`,
-          `docker run --rm -i -v ${params.tempdir}:${params.tempdir} -v ${params.workdir}:/work iems/moses extract /work/${input.trg} /work/${input.src} /work/${input.algn} $$TEMP/extract ${params.maxLength} orientation ${model} && \\`,
-          `LC_ALL=C sort $$TEMP/extract -T $$TEMP > ${output.out} && \\`,
-          `LC_ALL=C sort $$TEMP/extract.inv -T $$TEMP > ${output.inv} && \\`,
-          `LC_ALL=C sort $$TEMP/extract.o -T $$TEMP > ${output.o} && \\`,
-          'rm -r $$TEMP'
+          `TEMP=$(mktemp -d --tmpdir=${params.tempdir}) && \\`,
+          `docker run --rm -i -v ${params.tempdir}:${params.tempdir} -v ${params.workdir}:/work iems/moses extract /work/${input.trg} /work/${input.src} /work/${input.algn} $TEMP/extract ${params.maxLength} orientation ${model} && \\`,
+          `LC_ALL=C sort $TEMP/extract -T $TEMP > ${output.out} && \\`,
+          `LC_ALL=C sort $TEMP/extract.inv -T $TEMP > ${output.inv} && \\`,
+          `LC_ALL=C sort $TEMP/extract.o -T $TEMP > ${output.o} && \\`,
+          'rm -r $TEMP'
         ];
       }
     },
@@ -192,13 +192,13 @@ export default {
       output: { ptable: 'file<phrase-table>' },
       toBash: (params, input, output) => {
         return [
-          `TEMP=$(shell mktemp -d --tmpdir=${params.tempdir}) && \\`,
-          `docker run --rm -i -v ${params.workdir}:/work iems/moses score /work/${input.phr} /work/${input.trgsrc} /dev/stdout > $$TEMP/trgsrc && \\`,
-          `docker run --rm -i -v ${params.workdir}:/work iems/moses score /work/${input.phrinv} /work/${input.srctrg} /dev/stdout --Inverse > $$TEMP/srctrg && \\`,
-          `LC_ALL=C sort $$TEMP/srctrg -T $$TEMP | gzip > $$TEMP/srctrg.sorted.gz && \\`,
-          `LC_ALL=C sort $$TEMP/trgsrc -T $$TEMP | gzip > $$TEMP/trgsrc.sorted.gz && \\`,
-          `docker run --rm -i -v ${params.tempdir}:${params.tempdir} -v ${params.workdir}:/work iems/moses consolidate $$TEMP/trgsrc.sorted.gz $$TEMP/srctrg.sorted.gz /work/${output.ptable} && \\`,
-          'rm -r $$TEMP'
+          `TEMP=$(mktemp -d --tmpdir=${params.tempdir}) && \\`,
+          `docker run --rm -i -v ${params.workdir}:/work iems/moses score /work/${input.phr} /work/${input.trgsrc} /dev/stdout > $TEMP/trgsrc && \\`,
+          `docker run --rm -i -v ${params.workdir}:/work iems/moses score /work/${input.phrinv} /work/${input.srctrg} /dev/stdout --Inverse > $TEMP/srctrg && \\`,
+          `LC_ALL=C sort $TEMP/srctrg -T $TEMP | gzip > $TEMP/srctrg.sorted.gz && \\`,
+          `LC_ALL=C sort $TEMP/trgsrc -T $TEMP | gzip > $TEMP/trgsrc.sorted.gz && \\`,
+          `docker run --rm -i -v ${params.tempdir}:${params.tempdir} -v ${params.workdir}:/work iems/moses consolidate $TEMP/trgsrc.sorted.gz $TEMP/srctrg.sorted.gz /work/${output.ptable} && \\`,
+          'rm -r $TEMP'
         ];
       }
     },
@@ -227,11 +227,11 @@ export default {
       output: { srctrg: 'file<lex>', trgsrc: 'file<lex>' },
       toBash: (params, input, output) => {
         return [
-          `TEMP=$(shell mktemp -d --tmpdir=${params.tempdir}) && \\`,
-          `docker run --rm -i -v ${params.tempdir}:${params.tempdir} -v ${params.workdir}:/work iems/moses perl /scripts/training/get-lexical.perl /work/${input.src} /work/${input.trg} /work/${input.algn} $$TEMP/lex && \\`,
-          `mv $$TEMP/lex.e2f ${output.srctrg} && \\`,
-          `mv $$TEMP/lex.f2e ${output.trgsrc} && \\`,
-          'rm -r $$TEMP'
+          `TEMP=$(mktemp -d --tmpdir=${params.tempdir}) && \\`,
+          `docker run --rm -i -v ${params.tempdir}:${params.tempdir} -v ${params.workdir}:/work iems/moses perl /scripts/training/get-lexical.perl /work/${input.src} /work/${input.trg} /work/${input.algn} $TEMP/lex && \\`,
+          `mv $TEMP/lex.e2f ${output.srctrg} && \\`,
+          `mv $TEMP/lex.f2e ${output.trgsrc} && \\`,
+          'rm -r $TEMP'
         ];
       }
     },
@@ -249,10 +249,10 @@ export default {
       output: { reord: 'file<reordering>' },
       toBash: (params, input, output) => {
         return [
-          `TEMP=$(shell mktemp -d --tmpdir=${params.tempdir}) && \\`,
-          `docker run --rm -i -v ${params.tempdir}:${params.tempdir} -v ${params.workdir}:/work iems/moses lexical-reordering-score /work/${input.phr} ${params.smoothing} $$TEMP/output. --model "${params.type} ${params.orientation} ${params.model}" && \\`,
-          `zcat $$TEMP/output.${params.model}.gz > ${output.reord} && \\`,
-          'rm -r $$TEMP'
+          `TEMP=$(mktemp -d --tmpdir=${params.tempdir}) && \\`,
+          `docker run --rm -i -v ${params.tempdir}:${params.tempdir} -v ${params.workdir}:/work iems/moses lexical-reordering-score /work/${input.phr} ${params.smoothing} $TEMP/output. --model "${params.type} ${params.orientation} ${params.model}" && \\`,
+          `zcat $TEMP/output.${params.model}.gz > ${output.reord} && \\`,
+          'rm -r $TEMP'
         ];
       }
     },
@@ -358,13 +358,13 @@ export default {
       },
       toBash: (params, input, output) => {
         return [
-          `TEMP=$(shell mktemp -d --tmpdir=${params.tempdir}) && \\`,
-          `docker run --rm -i iems/moses perl /scripts/wrap-sgm.perl ref ${params.srclang} ${params.trglang} < ${input.ref} > $$TEMP/ref.sgm && \\`,
-          `docker run --rm -i iems/moses perl /scripts/wrap-sgm.perl src ${params.srclang} < ${input.src} > $$TEMP/src.sgm && \\`,
-          `docker run --rm -i -v ${params.tempdir}:${params.tempdir} iems/moses perl /scripts/ems/support/wrap-xml.perl ${params.trglang} $$TEMP/src.sgm < ${input.trans} > $$TEMP/trans.sgm && \\`,
-          `docker run --rm -i -v ${params.tempdir}:${params.tempdir} iems/moses perl /scripts/generic/mteval-v13a.pl -s $$TEMP/src.sgm -r $$TEMP/ref.sgm -t $$TEMP/trans.sgm -b -d 3 ${params.case ? '-c' : ''} > ${output.out} && \\`,
+          `TEMP=$(mktemp -d --tmpdir=${params.tempdir}) && \\`,
+          `docker run --rm -i iems/moses perl /scripts/wrap-sgm.perl ref ${params.srclang} ${params.trglang} < ${input.ref} > $TEMP/ref.sgm && \\`,
+          `docker run --rm -i iems/moses perl /scripts/wrap-sgm.perl src ${params.srclang} < ${input.src} > $TEMP/src.sgm && \\`,
+          `docker run --rm -i -v ${params.tempdir}:${params.tempdir} iems/moses perl /scripts/ems/support/wrap-xml.perl ${params.trglang} $TEMP/src.sgm < ${input.trans} > $TEMP/trans.sgm && \\`,
+          `docker run --rm -i -v ${params.tempdir}:${params.tempdir} iems/moses perl /scripts/generic/mteval-v13a.pl -s $TEMP/src.sgm -r $TEMP/ref.sgm -t $TEMP/trans.sgm -b -d 3 ${params.case ? '-c' : ''} > ${output.out} && \\`,
           `cat ${output.out} && \\`,
-          'rm -r $$TEMP'
+          'rm -r $TEMP'
         ];
       }
     },
@@ -400,16 +400,16 @@ export default {
       },
       toBash: (params, input, output) => {
         return [
-          `TEMP=$(shell mktemp -d) && \\`,
-          `ln -s \`readlink -f ${input.src}/corpus.mct\` $$TEMP/corpus.src.mct && \\`,
-          `ln -s \`readlink -f ${input.src}/corpus.sfa\` $$TEMP/corpus.src.sfa && \\`,
-          `ln -s \`readlink -f ${input.src}/corpus.tdx\` $$TEMP/corpus.src.tdx && \\`,
-          `ln -s \`readlink -f ${input.trg}/corpus.mct\` $$TEMP/corpus.trg.mct && \\`,
-          `ln -s \`readlink -f ${input.trg}/corpus.sfa\` $$TEMP/corpus.trg.sfa && \\`,
-          `ln -s \`readlink -f ${input.trg}/corpus.tdx\` $$TEMP/corpus.trg.tdx && \\`,
-          `ln -s \`readlink -f ${input.algn}\` $$TEMP/corpus.src-trg.mam && \\`,
-          `docker run --rm -i -v ${params.tempdir}:${params.tempdir} -v ${params.workdir}:/work iems/moses mmlex-build $$TEMP/corpus. src trg -o /work/${output.out} && \\`,
-          'rm -rf $$TEMP'
+          `TEMP=$(mktemp -d) && \\`,
+          `ln -s \`readlink -f ${input.src}/corpus.mct\` $TEMP/corpus.src.mct && \\`,
+          `ln -s \`readlink -f ${input.src}/corpus.sfa\` $TEMP/corpus.src.sfa && \\`,
+          `ln -s \`readlink -f ${input.src}/corpus.tdx\` $TEMP/corpus.src.tdx && \\`,
+          `ln -s \`readlink -f ${input.trg}/corpus.mct\` $TEMP/corpus.trg.mct && \\`,
+          `ln -s \`readlink -f ${input.trg}/corpus.sfa\` $TEMP/corpus.trg.sfa && \\`,
+          `ln -s \`readlink -f ${input.trg}/corpus.tdx\` $TEMP/corpus.trg.tdx && \\`,
+          `ln -s \`readlink -f ${input.algn}\` $TEMP/corpus.src-trg.mam && \\`,
+          `docker run --rm -i -v ${params.tempdir}:${params.tempdir} -v ${params.workdir}:/work iems/moses mmlex-build $TEMP/corpus. src trg -o /work/${output.out} && \\`,
+          'rm -rf $TEMP'
         ];
       }
     },
@@ -449,10 +449,10 @@ export default {
       params: { },
       toBash: (params, input, output) => {
         return [
-          `TEMP=$(shell mktemp -d) && \\`,
-          `perl /tools/scripts/training/mert-moses.pl ${input.src} ${input.ref} /tools/moses ${input.ini} --no-filter-phrase-table --mertdir /tools/ --working-dir $$TEMP && \\`,
-          `cp $$TEMP/moses.ini ${output.ini} && \\`,
-          'rm -rf $$TEMP'
+          `TEMP=$(mktemp -d) && \\`,
+          `perl /tools/scripts/training/mert-moses.pl ${input.src} ${input.ref} /tools/moses ${input.ini} --no-filter-phrase-table --mertdir /tools/ --working-dir $TEMP && \\`,
+          `cp $TEMP/moses.ini ${output.ini} && \\`,
+          'rm -rf $TEMP'
         ];
       }
     },
@@ -466,10 +466,10 @@ export default {
       },
       toBash: (params, input, output) => {
         return [
-          `TEMP=$(shell mktemp --tmpdir=${params.tempdir}) && \\`,
-          `paste -d" ||| " ${input.src} /dev/null /dev/null /dev/null /dev/null ${input.trg} > $$TEMP && \\`,
-          `docker run --rm -i -v ${params.tempdir}:${params.tempdir} -v ${params.workdir}:/work iems/cdec sacompile -b $$TEMP -a /work/${input.algn} -c /work/${output.out}/sa.ini -o /work/${output.out} && \\`,
-          'rm -f $$TEMP'
+          `TEMP=$(mktemp --tmpdir=${params.tempdir}) && \\`,
+          `paste -d" ||| " ${input.src} /dev/null /dev/null /dev/null /dev/null ${input.trg} > $TEMP && \\`,
+          `docker run --rm -i -v ${params.tempdir}:${params.tempdir} -v ${params.workdir}:/work iems/cdec sacompile -b $TEMP -a /work/${input.algn} -c /work/${output.out}/sa.ini -o /work/${output.out} && \\`,
+          'rm -f $TEMP'
         ];
       }
     },
@@ -518,10 +518,10 @@ export default {
       },
       toBash: (params, input, output) => {
         return [
-          `TEMP=$(shell mktemp --tmpdir=${params.tempdir}) && \\`,
-          `paste -d" ||| " ${input.src} /dev/null /dev/null /dev/null /dev/null ${input.trg} > $$TEMP && \\`,
-          `docker run --rm -i -v ${params.tempdir}:${params.tempdir} -v ${params.workdir}:/work iems/cdec extract -c /work/${input.ini} -g /work/${output.gram} -t ${params.threads || 1} < $$TEMP > /work/${output.sgm} && \\`,
-          'rm -f $$TEMP'
+          `TEMP=$(mktemp --tmpdir=${params.tempdir}) && \\`,
+          `paste -d" ||| " ${input.src} /dev/null /dev/null /dev/null /dev/null ${input.trg} > $TEMP && \\`,
+          `docker run --rm -i -v ${params.tempdir}:${params.tempdir} -v ${params.workdir}:/work iems/cdec extract -c /work/${input.ini} -g /work/${output.gram} -t ${params.threads || 1} < $TEMP > /work/${output.sgm} && \\`,
+          'rm -f $TEMP'
         ];
       }
     }
