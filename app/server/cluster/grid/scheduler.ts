@@ -75,6 +75,11 @@ export class Scheduler {
     
     job.startRuning()
     host.exec(job.cmd, (err, exitCode, stdout, stderr) => {
+      if (!this.timer) return // scheduler was stopped
+      if (!this.hosts[host.id]) return // host was removed
+      if (!this.active[host.id]) return // host was removed 
+      if (this.active[host.id].indexOf(job) === -1) return // job was canceled
+      
       job.finishRunning(err, exitCode, stdout, stderr)
       this.active[host.id].splice(this.active[host.id].indexOf(job), 1)
       console.log(`Job ${job.name} finished, err: ${err}, code: ${exitCode}, stdout: ${stdout}, stderr: ${stderr}`)

@@ -46,7 +46,7 @@ export default class ProcessModel {
         break;
       }
     }
-    return ids.reverse().join('/');
+    return ids.reverse().join('.');
   }
 
   getParamValues() {

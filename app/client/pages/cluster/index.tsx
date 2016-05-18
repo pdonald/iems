@@ -9,6 +9,7 @@ import { map, get, post, del, groupBy } from '../../utils'
 import { apiurl } from '../../settings'
 
 import { QueueSummary } from '../../../universal/grid/QueueSummary'
+import { JobSummary } from '../../../universal/grid/JobSummary'
 
 import './index.less'
 
@@ -217,7 +218,7 @@ class Queues extends React.Component<any, any> {
           <div>
             {map(jobs, (state, list) => <span key={state} title={state} className={'state state-' + state}>{list.length}</span>)}
             <ul>
-              {map(q.jobs, (id, j) => <li key={id} className={'state state-' + j.state}>{j.name}</li>)}
+              {map(q.jobs, (id, j) => <li key={id} className={'state state-' + this.jobstate(j)} title={this.jobstate(j)}>{j.name} <a onClick={_ => this.cancelJob(q.id, j.id)} title="cancel">x</a> <a onClick={_ => this.resetJob(q.id, j.id)} title="Reset">*</a></li>)}
             </ul>
           </div>
         ),
@@ -251,6 +252,12 @@ class Queues extends React.Component<any, any> {
       </div>
     )
   }
+  
+  jobstate(job: JobSummary): string {
+    if (job.globalState == 'error') return job.state == 'error' ? 'error' : 'deperror'
+    if (job.globalState == 'canceled') return job.state == 'canceled' ? 'canceled' : 'depcanceled'
+    return job.globalState
+  }
 
   add(e) {
     e.preventDefault()
@@ -277,5 +284,13 @@ class Queues extends React.Component<any, any> {
 
   delete(queue) {
     del(`${apiurl}/cluster/queues/${queue.id}`)
+  }
+  
+  cancelJob(qid, jid) {
+    post(`${apiurl}/cluster/queues/${qid}/jobs/${jid}/cancel`)
+  }
+  
+  resetJob(qid, jid) {
+    post(`${apiurl}/cluster/queues/${qid}/jobs/${jid}/reset`)
   }
 }

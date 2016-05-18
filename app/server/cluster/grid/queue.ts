@@ -68,8 +68,18 @@ export class Queue {
     
     return jobs
   }
+  
+  resetJob(id: string) {
+    let job = this.jobs[id]
+    if (!job)
+      throw `Job with ID ${id} does not exit`
+    job.reset()
+  }
 
-  cancelJob(job: Job) {
+  cancelJob(id: string) {
+    let job = this.jobs[id]
+    if (!job)
+      throw `Job with ID ${id} does not exit`
     job.cancel()
   }
   
@@ -112,7 +122,7 @@ export class Queue {
   
   destroy() {
     this.scheduler.stop()
-    for (let id in this.jobs) this.cancelJob(this.jobs[id])
+    for (let id in this.jobs) this.cancelJob(id)
     for (let id in this.hosts) this.removeHost(this.hosts[id].host)
   }
   
