@@ -145,7 +145,7 @@ var Output = {
     
     formatted.unshift({
       id: graph.doc.id,
-      name: graph.doc.name,
+      name: graph.doc.name || graph.doc.props.name,
       cmd: 'echo Lets go',
       dependencies: []
     });
