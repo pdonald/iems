@@ -215,9 +215,9 @@ class Queues extends React.Component<any, any> {
         name: q.name,
         jobs: (
           <div>
-            {map(jobs, (status, list) => <span key={status} title={status} className={'status status-' + status}>{list.length}</span>)}
+            {map(jobs, (state, list) => <span key={state} title={state} className={'state state-' + state}>{list.length}</span>)}
             <ul>
-              {map(q.jobs, (id, j) => <li key={id}>{j.name}</li>)}
+              {map(q.jobs, (id, j) => <li key={id} className={'state state-' + j.state}>{j.name}</li>)}
             </ul>
           </div>
         ),

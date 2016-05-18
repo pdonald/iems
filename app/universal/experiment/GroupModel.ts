@@ -134,14 +134,14 @@ export default class GroupModel {
     return this.processes.filter(p => p.id == id)[0] || this.groups.filter(g => g.id == id)[0];
   }
 
-  resolveLinkInput(link): { process: ProcessModel, port: string } {
+  resolveLinkInput(link): { process: ProcessModel, port: string, toPort: string } {
     if (link.from) {
       if (link.from.id == this.id) {
         return this.parent.resolveLinkInput({ to: link.from });
       } else {
         var child = this.processes.filter(p => p.id == link.from.id)[0];
         if (child) {
-          return { process: child, port: link.from.port };
+          return { process: child, port: link.from.port, toPort: link.to.port };
         }
         var child2 = this.groups.filter(g => g.id == link.from.id)[0];
         if (child2) {

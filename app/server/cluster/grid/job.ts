@@ -49,11 +49,19 @@ export class Job {
   }
   
   finishRunning(err: any, exitCode: number, stdout: string, stderr: string) {
+    if (this.state == 'canceled') {
+      return
+    }
+    
     if (!err && exitCode == 0) {
       this.state = 'finished'
     } else {
       this.state = 'error'
     }
+  }
+  
+  reset() {
+    this.state = 'pending'
   }
 
   cancel() {

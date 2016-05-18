@@ -97,7 +97,7 @@ export default class ProcessModel {
     }
   }
 
-  getInputs(): { process: ProcessModel, port: string }[] {
+  getInputs(): { process: ProcessModel, port: string, toPort: string }[] {
     var result = []
     for (let link of this.group.links.filter(l => l.to.id == this.id)) {
       result = result.concat(this.group.resolveLinkInput(link));

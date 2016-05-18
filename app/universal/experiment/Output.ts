@@ -16,7 +16,7 @@ function joblist(graph: GroupModel): Job[] {
     var input: { [key: string]: string } = {};
     var output: { [key: string]: string } = {};
 
-    p.getInputs().forEach(i => input[i.port] = i.process.getMakefileKey(i.port));
+    p.getInputs().forEach(i => input[i.toPort] = i.process.getMakefileKey(i.port));
     p.getPorts().output.forEach(key => output[key] = p.getMakefileKey(key));
     
     return {
@@ -114,8 +114,6 @@ var Output = {
         'clean:\n\trm -rf status.* ' + alloutputs.join(' ') + '\n\n';
     
     for (let job of jobs) {
-      console.log(job)
-      
       let noOutput = Object.keys(job.output).length === 0;
       text += noOutput || Object.keys(job.output).map(k => job.output[k]).join(' ');
       text += ': '
