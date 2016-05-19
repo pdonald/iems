@@ -502,8 +502,8 @@ export default {
       },
       toBash: (params, input, output) => {
         return [
-          `docker run --rm -i -v ${params.workdir}:/work iems/cdec extract -c /work/${input.sa}/sa.ini -g /work/${output.gram} < ${input.src} | \\`,
-          `docker run --rm -i -v ${params.workdir}:/work iems/cdec cdec -c /work/${input.ini} > ${output.trans}`
+          `docker run --rm -i -v ${params.workdir}:/work -v ${params.workdir}:/${params.workdir} iems/cdec extract -c /work/${input.sa}/sa.ini -g /work/${output.gram} < ${input.src} | \\`,
+          `docker run --rm -i -v ${params.workdir}:/work -v ${params.workdir}:/${params.workdir} iems/cdec cdec -c /work/${input.ini} > ${output.trans}`
         ];
       }
     },

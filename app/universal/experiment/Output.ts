@@ -19,11 +19,6 @@ function joblist(graph: GroupModel): Job[] {
     p.getInputs().forEach(i => input[i.inPort] = getMakefileKey(i.process, i.outPort));
     p.getPorts().output.forEach(key => output[key] = getMakefileKey(p, key));
     
-    if (p.type == 'kenlm') {
-      console.log(p.getInputs(true))
-      console.log(p, input, output)
-    }
-    
     return {
       name: p.getTitle(),
       cmd: p.template.toBash(p.getParamValues(), input, output).join('\n'),
@@ -155,7 +150,7 @@ var Output = {
       return {
         id: j.process.getFullId(),
         name: j.name,
-        cmd: j.cmd,
+        cmd: `cd ${graph.doc.vars.workdir} && ${j.cmd}`,
         dependencies: [graph.doc.id, ...jobs.filter(jj => j.process.dependsOn(jj.process)).map(jj => jj.process.getFullId())],
         //input: Object.keys(j.input).map(k => j.input[k]),
         //output: Object.keys(j.output).map(k => j.output[k]),
