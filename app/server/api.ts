@@ -30,7 +30,7 @@ let services = {
 }
 
 let queues: { [id: string]: Queue } = {
-  all: new Queue({ id: 'all', name: 'All' }),
+  main: new Queue({ id: 'main', name: 'Main' }),
 }
 
 services.awsec2.connect(db.cluster.configs)

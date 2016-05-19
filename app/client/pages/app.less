@@ -249,3 +249,28 @@ ul.reset {
 .pull-right {
   float: right;
 }
+
+.action-buttons-container {
+  .action-buttons {
+    visibility: hidden;
+  }
+  
+  &:hover {
+    .action-buttons {
+      visibility: visible;
+    }
+  }
+}
+
+.action-buttons {
+  float: right;
+  
+  a, a:visited {
+    color: gray;
+    cursor: pointer;
+  }
+}
+
+.clickable {
+  cursor: pointer;
+}

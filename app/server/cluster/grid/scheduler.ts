@@ -73,8 +73,14 @@ export class Scheduler {
     if (!this.active[host.id]) this.active[host.id] = []
     this.active[host.id].push(job)
     
+    let timer = setInterval(function() {
+      // todo: check if job status is set to canceled
+    }, 1000)
+    
     job.startRuning()
     host.exec(job.cmd, (err, exitCode, stdout, stderr) => {
+      clearInterval(timer)
+      
       if (!this.timer) return // scheduler was stopped
       if (!this.hosts[host.id]) return // host was removed
       if (!this.active[host.id]) return // host was removed 

@@ -24,7 +24,7 @@ import './index.less'
 export default React.createClass({
   getInitialState: function() {
     return {
-      output: 'JobSpec',
+      output: 'Nothing',
       document: null
     }
   },

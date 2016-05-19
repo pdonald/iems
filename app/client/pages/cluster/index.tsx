@@ -5,7 +5,8 @@ import Page from '../../components/Page'
 import Table from '../../components/Table'
 import ErrorMessage from '../../components/ErrorMessage'
 import Loading from '../../components/Loading'
-import { map, get, post, del, groupBy } from '../../utils'
+import Modal from '../../components/Modal'
+import { map, sum, get, post, del, groupBy } from '../../utils'
 import { apiurl } from '../../settings'
 
 import { QueueSummary } from '../../../universal/grid/QueueSummary'
@@ -198,58 +199,96 @@ class Queues extends React.Component<any, any> {
     super(props)
 
     this.state = {
-      slots: {}
+      slots: {},
+      selectedQueue: null,
+      selectedQueueJobs: null
     }
   }
 
   render() {
     let columns = {
       name: { title: 'Name' },
-      hosts: { title: 'Hosts/Slots', sortable: false },
+      slots: { title: 'Slots', sortable: false },
       jobs: { title: 'Jobs', sortable: false }
     }
 
     let rows = map(this.props.queues, (key: string, q: QueueSummary) => {
       let jobs = groupBy(Object.keys(q.jobs).map(k => q.jobs[k]), j => j.state)
+      let states = ['pending', 'running', 'finished', 'error']
       return {
         queue: q,
-        name: q.name,
-        jobs: (
-          <div>
-            {map(jobs, (state, list) => <span key={state} title={state} className={'state state-' + state}>{list.length}</span>)}
-            <ul>
-              {map(q.jobs, (id, j) => <li key={id} className={'state state-' + this.jobstate(j)} title={this.jobstate(j)}>{j.name} <a onClick={_ => this.cancelJob(q.id, j.id)} title="cancel">x</a> <a onClick={_ => this.resetJob(q.id, j.id)} title="Reset">*</a></li>)}
-            </ul>
+        name: (
+          <div className="action-buttons-container">
+            {q.name}
+            <span className="action-buttons">
+              <a onClick={_ => this.delete(q)}><i className="fa fa-remove"></i></a>
+            </span>
           </div>
         ),
-        hosts: (
-          <ul className="reset">
-            {this.props.instances.map(host => (
-              <li key={host.id}>
-                <input type="text"
-                  defaultValue={typeof this.state.slots[q.id+host.id] != 'undefined' ? this.state.slots[q.id+host.id] : (q.hosts[host.id] && q.hosts[host.id].slots || 0)}
-                  onChange={e => this.state.slots[q.id+host.id] = +(e.target as HTMLInputElement).value}
-                  style={{width: '20px', textAlign: 'center'}}/>
-                {' '}
-                <label>{host.id}</label>
-              </li>
-            ))}
-          </ul>
+        jobs: (
+          <div onClick={_ => this.setState({ selectedQueueJobs: q })} className="clickable">
+            {states.map(state => <span key={state} title={state} className={'state state-' + state}>{jobs[state] ? jobs[state].length : 0}</span>)}
+          </div>
+        ),
+        slots: (
+          <div onClick={_ => this.setState({ selectedQueue: q })} className="clickable">
+            {sum(q.jobs, j => 1, j => j.state == 'running') + ' / ' + sum(q.hosts, h => h.slots)}
+          </div>
         )
       }
     })
-
-    let buttons = [
-      { title: 'Save', handler: row => this.update(row.queue) },
-      { title: 'Delete', handler: row => this.delete(row.queue) },
-    ]
-
+    
     return (
       <div>
         <h2>Queues</h2>
-        <Table columns={columns} rows={rows} buttons={buttons} />
+        <Table columns={columns} rows={rows} />
         <input type="text" ref="queueName"/>{' '}<button onClick={e => this.add(e)}>Add queue</button>
+        {this.renderSlotsModal()}
+        {this.renderJobsModal()}
       </div>
+    )
+  }
+  
+  renderSlotsModal() {
+    let q: QueueSummary = this.state.selectedQueue
+    if (!q) return
+    return (
+      <Modal width={800} height={500} style={{background: '#fff'}} onClose={() => this.setState({ selectedQueue: null })}>
+        <h1>{q.name} queue hosts</h1>
+        <ul className="reset">
+          {this.props.instances.map(host => (
+            <li key={host.id}>
+              <input type="text"
+                defaultValue={typeof this.state.slots[q.id+host.id] != 'undefined' ? this.state.slots[q.id+host.id] : (q.hosts[host.id] && q.hosts[host.id].slots || 0)}
+                onChange={e => this.state.slots[q.id+host.id] = +(e.target as HTMLInputElement).value}
+                style={{width: '20px', textAlign: 'center'}}/>
+              {' '}
+              <label>{host.id}</label>
+            </li>
+          ))}
+        </ul>
+        <button onClick={() => this.update(q) || this.setState({ selectedQueue: null })}>Save</button>
+      </Modal>
+    )
+  }
+  
+  renderJobsModal() {
+    let q: QueueSummary = this.state.selectedQueueJobs
+    if (!q) return
+    return (
+      <Modal width={800} height={500} style={{background: '#fff'}} onClose={() => this.setState({ selectedQueueJobs: null })}>
+        <h1>{q.name} jobs</h1>
+        <ul className="reset">
+          {map(q.jobs, (key, j) => (
+            <li key={j.id} className={'state state-' + this.jobstate(j)}>
+              {j.name}
+              {' '}
+              ({this.jobstate(j)})
+            </li>
+          ))}
+        </ul>
+        <button onClick={() => this.setState({ selectedQueueJobs: null })}>Close</button>
+      </Modal>
     )
   }
   

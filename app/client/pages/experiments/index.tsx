@@ -70,9 +70,9 @@ export default class Experiments extends React.Component<any, any> {
                        rows={group.map(e => { 
                          return { 
                            name: (
-                              <div>
+                              <div className="action-buttons-container">
                                 <a href="" onClick={ev => ev.preventDefault() || browserHistory.push(`/experiments/${e.id}`)}>{e.props.name}</a>
-                                <span className="pull-right">
+                                <span className="action-buttons">
                                   <a onClick={_ => this.cloneExperiment(e)}><i className="fa fa-clone"></i></a>
                                   {' '}
                                   <a onClick={_ => this.deleteExperiment(e)}><i className="fa fa-remove"></i></a>

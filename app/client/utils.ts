@@ -28,6 +28,16 @@ export function map<T, V>(obj: { [key: string]: T }, fn: (key: string, obj: T) =
   return result
 }
 
+export function sum<T>(obj: { [key: string]: T }, fn: (obj: T) => number, filter?: (obj: T) => boolean): number {
+  let sum = 0
+  for (let key in obj) {
+    if (!filter || filter(obj[key])) {
+      sum += fn(obj[key])
+    }
+  }
+  return sum
+}
+
 export function merge(obj, changed) {
   return extend(obj, changed)
 }
