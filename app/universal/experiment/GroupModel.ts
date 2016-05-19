@@ -1,7 +1,7 @@
 import ProcessModel from './ProcessModel';
 
 export default class GroupModel {
-  public id: string;
+  public id: number;
   public type: string;
   public title: string;
   public toTitle: (arg: any) => string;
@@ -10,7 +10,7 @@ export default class GroupModel {
   public groups: GroupModel[];
   public processes: ProcessModel[];
   public links: any[];
-  public parent: any;
+  public parent: GroupModel;
   public doc: any;
   public ports: any;
   public selected: any;
@@ -33,6 +33,9 @@ export default class GroupModel {
     this.processes.forEach((p, index) => this.processes[index] = new ProcessModel(p, this));
   }
 
+  /**
+   * Key for React.
+   */
   getKey(): string {
     return (this.parent ? this.parent.getKey() : '') + this.type + this.id;
   }
@@ -134,24 +137,25 @@ export default class GroupModel {
     return this.processes.filter(p => p.id == id)[0] || this.groups.filter(g => g.id == id)[0];
   }
 
-  resolveLinkInput(link): { process: ProcessModel, port: string, toPort: string } {
+  getLinkInput(link, debug: boolean = false): { process: ProcessModel, outPort: string, inPort: string } {
+    if (debug) console.log(link, this.id)
     if (link.from) {
       if (link.from.id == this.id) {
-        return this.parent.resolveLinkInput({ to: link.from });
+        return this.parent.getLinkInput({ to: link.from });
       } else {
         var child = this.processes.filter(p => p.id == link.from.id)[0];
         if (child) {
-          return { process: child, port: link.from.port, toPort: link.to.port };
+          return { process: child, outPort: link.from.port, inPort: link.to.port };
         }
         var child2 = this.groups.filter(g => g.id == link.from.id)[0];
         if (child2) {
-          return child2.resolveLinkInput({ to: link.from });
+          return child2.getLinkInput({ to: link.from });
         }
       }
     } else {
       var linkTo = this.links.filter(l => l.to.id == link.to.id && l.to.port == link.to.port)[0];
       if (linkTo) {
-        return this.resolveLinkInput(linkTo);
+        return this.getLinkInput(linkTo);
       }
     }
     return;
@@ -167,7 +171,7 @@ export default class GroupModel {
 
   getStatus() {
     if (this.processes.filter(p => p.getStatus() == 'running').length > 0) return 'running';
-    if (this.processes.filter(p => p.getStatus() == 'done').length == this.processes.length) return 'done';
+    if (this.processes.filter(p => p.getStatus() == 'finished').length == this.processes.length) return 'finished';
   }
   
   getAllProcesses(): ProcessModel[] {

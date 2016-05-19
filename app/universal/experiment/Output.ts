@@ -16,8 +16,13 @@ function joblist(graph: GroupModel): Job[] {
     var input: { [key: string]: string } = {};
     var output: { [key: string]: string } = {};
 
-    p.getInputs().forEach(i => input[i.toPort] = i.process.getMakefileKey(i.port));
-    p.getPorts().output.forEach(key => output[key] = p.getMakefileKey(key));
+    p.getInputs().forEach(i => input[i.inPort] = getMakefileKey(i.process, i.outPort));
+    p.getPorts().output.forEach(key => output[key] = getMakefileKey(p, key));
+    
+    if (p.type == 'kenlm') {
+      console.log(p.getInputs(true))
+      console.log(p, input, output)
+    }
     
     return {
       name: p.getTitle(),
@@ -27,6 +32,20 @@ function joblist(graph: GroupModel): Job[] {
       output: output
     };
   });
+}
+
+function hashFnv32a(str: string): string {
+  var i, l, hval = 0x811c9dc5;
+  for (i = 0, l = str.length; i < l; i++) {
+      hval ^= str.charCodeAt(i);
+      hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
+  }
+  return ("0000000" + (hval >>> 0).toString(16)).substr(-8);
+}
+
+function getMakefileKey(p: ProcessModel, port?: string): string {
+  var hash = hashFnv32a(p.getHashKey());
+  return p.type + '-' + hash + (port ? '.' + port : '');
 }
 
 var Output = {
@@ -103,7 +122,7 @@ var Output = {
     for (let job of jobs) {
       alloutputs = alloutputs.concat(Object.keys(job.output).map(k => job.output[k]));
       if (Object.keys(job.output).length == 0) {
-        alloutputs.push(job.process.getMakefileKey('done'));
+        alloutputs.push(getMakefileKey(job.process, 'done'));
       }
     }
     alloutputs = alloutputs.filter((e, i, arr) => arr.lastIndexOf(e) === i);
@@ -119,10 +138,10 @@ var Output = {
       text += ': '
       text += Object.keys(job.input).map(k => job.input[k]).join(' ')
       text += '\n'
-      text += '\t' + `touch status.${job.process.getMakefileKey('running')}` + '\n';
+      text += '\t' + `touch status.${getMakefileKey(job.process, 'running')}` + '\n';
       text += '\t' + escapecmd(job.process.template.toBash(job.process.getParamValues(), job.input, job.output).join('\n\t')) + '\n';
       if (noOutput) text += '\ttouch ' + noOutput + '\n';
-      text += '\t' + `mv status.${job.process.getMakefileKey('running')} status.${job.process.getMakefileKey('done')}` + '\n';
+      text += '\t' + `mv status.${getMakefileKey(job.process, 'running')} status.${getMakefileKey(job.process, 'done')}` + '\n';
       text += '\n'
     }
 

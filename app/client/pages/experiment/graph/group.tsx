@@ -2,6 +2,7 @@ import * as React from 'react'
 import * as PureRenderMixin from 'react-addons-pure-render-mixin'
 
 import GroupModel from '../../../../universal/experiment/GroupModel'
+import ProcessModel from '../../../../universal/experiment/ProcessModel'
 import Process from './process'
 import Connector from './connector'
 
@@ -27,7 +28,7 @@ export default class Group extends React.Component<any, any> {
   }
 
   render() {
-    var group = this.props.group;
+    var group: GroupModel = this.props.group;
 
     if (this.props.blank) {
       var groups = group.groups.map(g => <Group key={g.getKey()} group={g} />);
@@ -47,7 +48,7 @@ export default class Group extends React.Component<any, any> {
         if (targetp.id != group.id && targetp.getPorts().input.indexOf(l.to.port) === -1) return;
         var source = this.getPortPosition(sourcep, l.from.port, 'output', l.from.id == group.id);
         var target = this.getPortPosition(targetp, l.to.port, 'input', l.to.id == group.id);
-        var from = group.resolveLinkInput(l);
+        var from = group.getLinkInput(l);
         var to = group.getChildById(l.to.id);
 
         //console.log(from,to)
@@ -67,8 +68,8 @@ export default class Group extends React.Component<any, any> {
         return <Connector key={group.getKey()+'/'+l.from.id+'/'+l.from.port+'/'+l.to.id+'/'+l.to.port}
           selected={l.selected} graph={l}
           source={source} target={target}
-          sourceType={from ? from.process.template.output[from.port] : null}
-          targetType={to ? to.template.input[l.to.port] : null}/>;
+          sourceType={from ? from.process.template.output[from.outPort] : null}
+          targetType={to ? (to as ProcessModel).template.input[l.to.port] : null}/>;
       });
 
       var size = group.getCalculatedSize();
