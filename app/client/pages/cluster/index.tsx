@@ -226,12 +226,12 @@ class Queues extends React.Component<any, any> {
           </div>
         ),
         jobs: (
-          <div onClick={_ => this.setState({ selectedQueueJobs: q })} className="clickable">
+          <div onClick={_ => this.setState({ selectedQueueJobs: q.id })} className="clickable">
             {states.map(state => <span key={state} title={state} className={'state state-' + state}>{jobs[state] ? jobs[state].length : 0}</span>)}
           </div>
         ),
         slots: (
-          <div onClick={_ => this.setState({ selectedQueue: q })} className="clickable">
+          <div onClick={_ => this.setState({ selectedQueue: q.id })} className="clickable">
             {sum(q.jobs, j => 1, j => j.state == 'running') + ' / ' + sum(q.hosts, h => h.slots)}
           </div>
         )
@@ -250,7 +250,8 @@ class Queues extends React.Component<any, any> {
   }
   
   renderSlotsModal() {
-    let q: QueueSummary = this.state.selectedQueue
+    if (!this.state.selectedQueue) return
+    let q: QueueSummary = this.props.queues[this.state.selectedQueue]
     if (!q) return
     return (
       <Modal width={800} height={500} style={{background: '#fff'}} onClose={() => this.setState({ selectedQueue: null })}>
@@ -273,7 +274,8 @@ class Queues extends React.Component<any, any> {
   }
   
   renderJobsModal() {
-    let q: QueueSummary = this.state.selectedQueueJobs
+    if (!this.state.selectedQueueJobs) return
+    let q: QueueSummary = this.props.queues[this.state.selectedQueueJobs]
     if (!q) return
     return (
       <Modal width={800} height={500} style={{background: '#fff'}} onClose={() => this.setState({ selectedQueueJobs: null })}>
@@ -284,6 +286,8 @@ class Queues extends React.Component<any, any> {
               {j.name}
               {' '}
               ({this.jobstate(j)})
+              <a onClick={_ => this.cancelJob(q.id, j.id)}>cancel</a> 
+              <a onClick={_ => this.resetJob(q.id, j.id)}>reset</a>
             </li>
           ))}
         </ul>

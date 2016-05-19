@@ -17,15 +17,13 @@ export class Job {
   }
   
   get globalState(): string {
-    if (this.state != 'pending') return this.state
-    
     for (let dependency of this.dependencies) {
       let depstate = dependency.globalState
       if (depstate == 'error') return 'error'
       if (depstate == 'canceled') return 'canceled'
     }
-
-    return 'pending'
+    
+    return this.state
   }
 
   get isRunnable(): boolean {
@@ -62,6 +60,7 @@ export class Job {
   
   reset() {
     this.state = 'pending'
+    // todo: reset jobs that depend on this
   }
 
   cancel() {
