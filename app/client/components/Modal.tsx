@@ -7,22 +7,25 @@ export default class Modal extends React.Component<Props, {}> {
     if (this.props.isOpen === false)
       return
       
-    let width = this.props.width || 300
-    let height = this.props.height || 300
-    
-    let style = {
+    let modalStyle: any = {
       position: 'absolute',
-      width: width + 'px',
-      height: height + 'px',
-      marginLeft: '-' + (width/2) + 'px',
-      marginTop: '-' + (height/2) + 'px',
       top: '50%',
       left: '50%',
-      zIndex: '9999'
+      transform: 'translate(-50%, -50%)',
+      zIndex: '9999',
+      background: '#fff'
+    }
+
+    if (this.props.width && this.props.height) {
+      modalStyle.width = this.props.width + 'px'
+      modalStyle.height = this.props.height + 'px'
+      modalStyle.marginLeft = '-' + (this.props.width/2) + 'px',
+      modalStyle.marginTop = '-' + (this.props.height/2) + 'px',
+      modalStyle.transform = null
     }
     
     if (this.props.style) {
-      style = merge(style, this.props.style)
+      modalStyle = merge(modalStyle, this.props.style)
     }
     
     let backdropStyle = {
@@ -35,20 +38,25 @@ export default class Modal extends React.Component<Props, {}> {
       zIndex: '9998'
     }
     
+    if (this.props.backdropStyle) {
+      backdropStyle = merge(backdropStyle, this.props.backdropStyle)
+    }
+    
     return (
       <div className={this.props.containerClassName}>
-        <div style={style} className={this.props.className}>
+        <div className={this.props.className} style={modalStyle}>
           {this.props.children}
         </div>
         {!this.props.noBackdrop && 
-            <div style={backdropStyle} 
-                 className={this.props.backdropClassName} 
+            <div className={this.props.backdropClassName} style={backdropStyle} 
                  onClick={e => this.close(e)}/>}
       </div>
     )
   }
   
   close(e) {
+    e.preventDefault()
+    
     if (this.props.onClose) {
       this.props.onClose()
     }
@@ -61,6 +69,7 @@ interface Props {
   width: number
   height: number
   style?: { [key: string]: string }
+  backdropStyle?: { [key: string]: string }
   children?: any
   className?: string
   backdropClassName?: string
