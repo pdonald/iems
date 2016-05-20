@@ -112,12 +112,15 @@ export default class ProcessModel {
     }
   }
 
-  getInputs(debug: boolean = false): { process: ProcessModel, outPort: string, inPort: string }[] {
+  getInputs(): { process: ProcessModel, outPort: string, inPort: string }[] {
     var result = []
     for (let link of this.group.links.filter(l => l.to.id == this.id)) {
-      result = result.concat(this.group.getLinkInput(link, debug));
+      var input = this.group.getLinkInput(link)
+      if (input) {
+        result.push(input)
+      }
     }
-    return result;
+    return result
   }
   
   /**

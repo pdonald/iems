@@ -137,13 +137,11 @@ export default class GroupModel {
     return this.processes.filter(p => p.id == id)[0] || this.groups.filter(g => g.id == id)[0];
   }
 
-  getLinkInput(link, debug: boolean = false): { process: ProcessModel, outPort: string, inPort: string } {
-    if (debug) console.log(link, this.id)
-    
+  getLinkInput(link): { process: ProcessModel, outPort: string, inPort: string } {
     if (link.from) {
       // the link connects a port on this group to a process in the group
       if (link.from.id == this.id) {
-        return this.parent.getLinkInput({ to: link.from, inPort: link.to.port }, debug);
+        return this.parent.getLinkInput({ to: link.from, inPort: link.to.port });
       // the link connects a process in this group to another group in process in this group
       } else { 
         // the link connects a process in this group to another process in this group
@@ -151,11 +149,11 @@ export default class GroupModel {
         if (process) return { process: process, outPort: link.from.port, inPort: link.inPort || link.to.port };
         // the link connects a process in this group to another group in this group
         var group = this.groups.filter(g => g.id == link.from.id)[0];
-        if (group) return group.getLinkInput({ to: link.from }, debug);
+        if (group) return group.getLinkInput({ to: link.from });
       }
     } else if (link.to) {
       var linkTo = this.links.filter(l => l.to.id == link.to.id && l.to.port == link.to.port)[0];
-      if (linkTo) return this.getLinkInput({ from: linkTo.from, to: linkTo.to, inPort: link.inPort }, debug);
+      if (linkTo) return this.getLinkInput({ from: linkTo.from, to: linkTo.to, inPort: link.inPort });
     }
   }
 
