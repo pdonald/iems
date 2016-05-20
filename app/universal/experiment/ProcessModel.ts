@@ -68,7 +68,7 @@ export default class ProcessModel {
    * This key uniquely identifies this process in a group, but not in an experiment.
    */
   getKey(): string {
-    return this.type + '-g' + this.group.id + 'p' + this.id;
+    return 'P' + this.id;
   }
 
   /**

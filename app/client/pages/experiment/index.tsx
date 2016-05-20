@@ -264,7 +264,7 @@ export default React.createClass({
     let grid = (
       <div id="grid">
         <Graph ref="graph" graph={this.currentGraph()}>
-          <Group group={this.currentGraph()} blank={true} main={true}/>
+          <Group group={this.currentGraph()} blank={true} />
         </Graph>
       </div>
     )

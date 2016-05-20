@@ -44,7 +44,7 @@ export default class GroupModel {
    * Key for React.
    */
   getKey(): string {
-    return (this.parent ? this.parent.getKey() : '') + this.type + this.id;
+    return 'G' + this.id
   }
 
   getTitle(): string {
@@ -56,20 +56,24 @@ export default class GroupModel {
   }
 
   getMaxId(): number {
-    var gmax = Math.max.apply(null, this.groups.map(g => g.id));
-    var pmax = Math.max.apply(null, this.processes.map(p => p.id));
-    return Math.max.apply(null, [this.id, gmax, pmax]);
+    var gmax = Math.max.apply(null, this.groups.map(g => g.getMaxId()))
+    var pmax = Math.max.apply(null, this.processes.map(p => p.id))
+    return Math.max.apply(null, [this.id, gmax, pmax])
   }
 
   addGroup(group) {
-    var g = new GroupModel(group, this, this.doc);
+    var g = new GroupModel(group, this, this.doc)
+    
+    g.processes.forEach(p => {
+      p.id += g.id
+    })
 
     g.links.forEach(l => {
-      if (!l.from.id) l.from.id = group.id;
-      if (!l.to.id) l.to.id = group.id;
-    });
+      if (!l.from.id) { l.from.id = group.id } else { l.from.id += g.id } 
+      if (!l.to.id) { l.to.id = group.id } else { l.to.id += g.id }
+    })
 
-    this.groups.push(g);
+    this.groups.push(g)
   }
 
   addProcess(p: ProcessSpec) {
