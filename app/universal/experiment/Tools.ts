@@ -7,6 +7,9 @@ export default {
       output: { out: 'file<any>' },
       toBash: (params, input, output) => {
         return [`cp ${params.source} ${output.out}`];
+      },
+      validate: (params) => {
+        return !!params.source;
       }
     },
     echo: {
@@ -16,6 +19,9 @@ export default {
       params: { text: 'string' },
       toBash: (params, input, output) => {
         return [`echo "${(params.text + '').replace('"', '\\"')}" > ${output.out}`];
+      },
+      validate: (params) => {
+        return !!params.text;
       }
     },
     wget: {
@@ -25,6 +31,9 @@ export default {
       output: { out: 'file<any>' },
       toBash: (params, input, output) => {
         return [`wget ${params.url} -O ${output.out}`];
+      },
+      validate: (params) => {
+        return !!params.url;
       }
     },
     opus: {
@@ -88,6 +97,9 @@ export default {
       },
       toBash: (params, input, output) => {
         return [ `docker run --rm -i iems/moses perl /scripts/tokenizer/detokenizer.perl -l ${params.lang} < ${input.in} > ${output.out}` ];
+      },
+      validate: (params) => {
+        return !!params.lang;
       }
     },
     kenlm: {
@@ -109,6 +121,9 @@ export default {
         args.push(`-o ${params.order}`)
         args.push('--discount_fallback')
         return [`docker run --rm -i iems/kenlm lmplz ${args.join(' ')} < ${input.in} > ${output.out}`];
+      },
+      validate: (params) => {
+        return !!params.order && !!params.tempdir;
       }
     },
     binarpa: {
@@ -116,7 +131,7 @@ export default {
       params: {
         type: { type: 'string', default: 'trie' },
         memory: { type: 'size-unit', default: '$memory', nohash: true },
-        tempdir: { type: 'path', default: '$tempdir', nohash: true },
+        //tempdir: { type: 'path', default: '$tempdir', nohash: true },
         workdir: { type: 'path', default: '$workdir', nohash: true }
       },
       input: { in: 'file<arpa>' },
@@ -127,6 +142,9 @@ export default {
         //if (params.tempdir) args.push(`-T ${params.tempdir}`); // todo
         if (params.memory) args.push(`-S ${params.memory}`);
         return [`docker run --rm -i -v ${params.workdir}:/work iems/kenlm build_binary ${args.join(' ')} /work/${input.in} /work/${output.out}`];
+      },
+      validate: (params) => {
+        return !!params.type && !!params.workdir;
       }
     },
     fastalign: {
@@ -146,6 +164,9 @@ export default {
           `docker run --rm -i -v ${params.tempdir}:${params.tempdir} -v ${params.workdir}:/work iems/fastalign fast_align ${params.reverse ? '-r' : ''} -i $TEMP > ${output.out} && \\`,
           'rm $TEMP'
         ]
+      },
+      validate: (params) => {
+        return !!params.tempdir && !!params.workdir;
       }
     },
     symalign: {
@@ -158,6 +179,9 @@ export default {
       output: { out: 'file<align>' },
       toBash: (params, input, output) => {
         return [`docker run --rm -i -v ${params.workdir}:/work iems/fastalign atools -c ${params.method} -i /work/${input.srctrg} -j /work/${input.trgsrc} > ${output.out}`];
+      },
+      validate: (params) => {
+        return !!params.method && !!params.workdir;
       }
     },
     extractphrases: {
