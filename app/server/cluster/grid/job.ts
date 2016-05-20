@@ -7,12 +7,14 @@ export class Job {
   state: string
   dependencies: Job[]
   cmd: string
+  tags: { [name: string]: string }
 
   constructor(id: string, spec: JobSpec, deps: Job[]) {
     this.id = id
     this.name = spec.name
     this.cmd = spec.cmd
     this.dependencies = deps
+    this.tags = spec.tags
     this.state = 'pending'
   }
   
@@ -74,7 +76,8 @@ export class Job {
       cmd: this.cmd,
       state: this.state,
       globalState: this.globalState,
-      dependencies: this.dependencies.map(j => j.id)
+      dependencies: this.dependencies.map(j => j.id),
+      tags: this.tags
     }
   }
 }

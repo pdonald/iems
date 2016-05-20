@@ -152,8 +152,10 @@ var Output = {
         name: j.name,
         cmd: `cd ${graph.doc.vars.workdir} && ${j.cmd}`,
         dependencies: [graph.doc.id, ...jobs.filter(jj => j.process.dependsOn(jj.process)).map(jj => jj.process.getFullId())],
-        //input: Object.keys(j.input).map(k => j.input[k]),
-        //output: Object.keys(j.output).map(k => j.output[k]),
+        tags: {
+          expid: graph.doc.id,
+          process: j.process.getFullId()
+        }
       }
     });
     
@@ -161,7 +163,8 @@ var Output = {
       id: graph.doc.id,
       name: graph.doc.name || graph.doc.props.name,
       cmd: 'echo Lets go',
-      dependencies: []
+      dependencies: [],
+      tags: { expid: graph.doc.id }
     });
     
     return JSON.stringify(formatted, null, 2);

@@ -57,7 +57,7 @@ export default class extends React.Component<any, any> {
     if (this.props.blank) classes.push('blank');
     if (this.props.main) classes.push('main');
     if (this.props.selected) classes.push('selected');
-    if (this.props.status) classes.push(this.props.status);
+    if (this.props.status) classes.push('state-' + this.props.status);
 
     var padding = 10;
     var min = { x: padding, y: padding };

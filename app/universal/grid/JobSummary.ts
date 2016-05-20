@@ -5,4 +5,5 @@ export interface JobSummary {
   state: string
   globalState: string
   dependencies: string[]
+  tags: { [name: string]: string }
 }

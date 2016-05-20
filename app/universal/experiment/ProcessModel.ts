@@ -13,6 +13,7 @@ export default class ProcessModel {
   public params: { [key: string]: string };
   public width: number;
   public height: number;
+  public doc: any;
   
   constructor(obj, group: GroupModel) {
     for (var key in obj) {
@@ -157,7 +158,9 @@ export default class ProcessModel {
   }
 
   getStatus(): string {
-    return null;
+    if (this.group.doc.status) {
+      return this.group.doc.status[this.getFullId()]
+    }
   }
 
   static isLinkValid(a, b): boolean {

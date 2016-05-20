@@ -167,8 +167,11 @@ export default class GroupModel {
     return [].concat.apply([], links);
   }
 
-  getStatus() {
+  getStatus(): string {
+    if (this.processes.filter(p => p.getStatus() == 'error').length > 0) return 'error';
     if (this.processes.filter(p => p.getStatus() == 'running').length > 0) return 'running';
+    if (this.processes.filter(p => p.getStatus() == 'canceled').length > 0) return 'canceled';
+    if (this.processes.filter(p => p.getStatus() == 'pending').length == this.processes.length) return 'pending';
     if (this.processes.filter(p => p.getStatus() == 'finished').length == this.processes.length) return 'finished';
   }
   

@@ -5,9 +5,11 @@ import Loading from '../../components/Loading'
 import { get } from '../../utils'
 import { apiurl } from '../../settings'
 
+import { QueueSummary } from '../../../universal/grid/QueueSummary'
+
 import QueueList from './queue-list'
 
-export default class QueueContainer extends React.Component<any, any> {
+export default class QueueContainer extends React.Component<Props, any> {
   private timer: any;
   
   constructor(props) {
@@ -55,8 +57,17 @@ export default class QueueContainer extends React.Component<any, any> {
       .then(x => {
           get(`${apiurl}/cluster/queues`)
             .then(queues => this.setState({ loading: false, error: null, queues: queues }))
+            .then(_ => {
+              if (this.props.onUpdate) {
+                this.props.onUpdate(this.state.queues)
+              }
+            })
             .catch(err => this.setState({ loading: false, error: 'Could not load data: queues' }))
       })
       .catch(err => this.setState({ loading: false, error: 'Could not load data: services' }))
   }
+}
+
+interface Props {
+  onUpdate?: (queues: { [id: string]: QueueSummary }) => void
 }

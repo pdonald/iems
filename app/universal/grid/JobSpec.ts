@@ -3,4 +3,5 @@ export interface JobSpec {
   name: string
   cmd: string
   dependencies: string[]
+  tags: { [name: string]: any }
 }

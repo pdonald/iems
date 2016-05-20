@@ -5,19 +5,17 @@ import Output from '../../../../universal/experiment/Output'
 import { QueueSummary } from '../../../../universal/grid/QueueSummary'
 import Actions from '../actions'
 import Block from './block'
+import QueueContainer from '../../cluster/queue-container'
 
 import { get, post, clone, map } from '../../../utils'
 import { apiurl } from '../../../settings'
 
 export default class Cluster extends React.Component<any, any> {
-  private refreshInterval: any;
-  
   constructor(props) {
     super(props)
 
     this.state = {
-      queues: {},
-      running: null
+      queues: {}
     }
   }
   
@@ -29,28 +27,15 @@ export default class Cluster extends React.Component<any, any> {
     this.load()
   }
 
-  componentWillUnmount() {
-    this.stopChecking()
-  }
-
   render() {
     return (
       <Block name="cluster" title="Cluster">
-        {this.renderChildren()}
+        {this.renderContent()}
       </Block>
     )
   }
 
-  renderChildren() {
-    if (this.state.running) {
-      return (
-        <div>
-          <p>Running in queue {this.state.running.queue.id}</p>
-          <button onClick={e => this.cancel(e)}>Cancel</button>
-        </div>
-      )
-    }
-
+  renderContent() {
     return (
       <div>
         <select ref="queue">
@@ -58,6 +43,7 @@ export default class Cluster extends React.Component<any, any> {
           {map(this.state.queues, (id, q: QueueSummary) => <option key={id} value={id}>{`${q.name}`}</option>)}
         </select>
         <button onClick={e => this.run(e)}>Run</button>
+        <QueueContainer onUpdate={queues => this.updateStatus(queues)}/>
       </div>
     )
   }
@@ -76,28 +62,14 @@ export default class Cluster extends React.Component<any, any> {
       post(`${apiurl}/cluster/queues/${queueID}/submit`, jobs)
     }
   }
-
-  cancel(e) {
-    e.preventDefault()
-    // todo: post cancel
-    //this.setState({ running: null })
-    //this.stopChecking()
-  }
-
-  startChecking() {
-    this.refreshInterval = setInterval(() => this.checkStatus(), 1000)
-  }
-
-  stopChecking() {
-    if (this.refreshInterval) {
-      clearInterval(this.refreshInterval)
-      this.refreshInterval = null
+  
+  updateStatus(queues: { [id: string]: QueueSummary }) {
+    var status = {}
+    for (let qid in queues) {
+      for (let jid in queues[qid].jobs) {
+        status[jid] = queues[qid].jobs[jid].globalState
+      }
     }
-  }
-
-  checkStatus() {
-    //let instance = this.state.running.instance
-    //get(`${apiurl}/cluster/services/${instance.service}/instances/${instance.id}/status?workdir=${this.state.running.vars.workdir}`)
-      //.then(status => Actions.updateStatus(status))
+    Actions.updateStatus(status)
   }
 }
