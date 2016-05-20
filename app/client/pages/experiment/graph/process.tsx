@@ -6,7 +6,10 @@ import Port from './port'
 
 import Actions from '../actions'
 
-export default class extends React.Component<any, any> {
+import GroupModel from '../../../../universal/experiment/GroupModel'
+import ProcessModel from '../../../../universal/experiment/ProcessModel'
+
+export default class extends React.Component<Props, {}> {
   constructor(props) {
     super(props); 
   }
@@ -20,7 +23,7 @@ export default class extends React.Component<any, any> {
   }
 
   onDoubleClick(e) {
-    if (this.props.graph.template) {
+    if ((this.props.graph as ProcessModel).template) {
       if (!this.props.graph.selected) {
         Actions.selectManual(this.props.graph);
       } else {
@@ -52,13 +55,16 @@ export default class extends React.Component<any, any> {
       x: width / (ports.input.length+1),
       y: width / (ports.output.length+1)
     };
+    
+    var isProcess = !!(this.props.graph as ProcessModel).template;
+    var isCollapsedGroup = !!(this.props.graph as GroupModel).collapsed;
 
     var classes = ['process'];
     if (this.props.blank) classes.push('blank');
     if (this.props.main) classes.push('main');
     if (this.props.selected) classes.push('selected');
-    if (this.props.status) classes.push('state-' + this.props.status);
-    if (!this.props.main && this.props.graph.isValid() === false) classes.push('invalid');
+    if ((isProcess || isCollapsedGroup) && this.props.status) classes.push('state-' + this.props.status);
+    if ((isProcess || isCollapsedGroup) && this.props.graph.isValid() === false) classes.push('invalid');
 
     var padding = 10;
     var min = { x: padding, y: padding };
@@ -79,7 +85,7 @@ export default class extends React.Component<any, any> {
       <Draggable className={classes.join(' ')}
                  pos={{x: this.props.x, y: this.props.y}} min={min}
                  onMove={this.onMove.bind(this)} onClick={(function(){})}>
-        <g className={this.props.graph.collapsed?'zoom-in':''}>
+        <g className={(this.props.graph as GroupModel).collapsed ? 'zoom-in' : ''}>
           <rect className="process-rect" x={0} y={0} width={width} height={height} onDoubleClick={this.onDoubleClick.bind(this)}/>
           <text x="10" y="30" onDoubleClick={this.onDoubleClick.bind(this)}>{this.props.title}</text>
           {resize}
@@ -92,4 +98,20 @@ export default class extends React.Component<any, any> {
       </Draggable>
     );
   }
+}
+
+interface Props {
+  blank?: boolean
+  main?: boolean
+  selected?: boolean
+  status?: string
+  graph: GroupModel | ProcessModel
+  children?: any
+  x: number
+  y: number
+  width: number
+  height: number
+  title?: string
+  ports: { input: string[], output: string[] }
+  parent?: GroupModel
 }

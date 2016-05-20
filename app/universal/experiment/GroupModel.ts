@@ -176,15 +176,24 @@ export default class GroupModel {
   }
 
   getStatus(): string {
-    if (this.processes.filter(p => p.getStatus() == 'error').length > 0) return 'error';
-    if (this.processes.filter(p => p.getStatus() == 'running').length > 0) return 'running';
-    if (this.processes.filter(p => p.getStatus() == 'canceled').length > 0) return 'canceled';
-    if (this.processes.filter(p => p.getStatus() == 'pending').length == this.processes.length) return 'pending';
-    if (this.processes.filter(p => p.getStatus() == 'finished').length == this.processes.length) return 'finished';
+    let statuses = {}
+    this.groups.forEach(g => statuses[g.getStatus()] = true)
+    this.processes.forEach(p => statuses[p.getStatus()] = true)
+    
+    let count = Object.keys(statuses).length
+    
+    if (count === 0) {
+      return null
+    } else if (count === 1) {
+      return Object.keys(statuses)[0]
+    } else {
+      return 'mixed'
+    }
   }
   
   isValid(): boolean {
-    return this.processes.filter(p => p.isValid() === false).length === 0;
+    return this.groups.filter(g => g.isValid() === false).length === 0 && 
+           this.processes.filter(p => p.isValid() === false).length === 0;
   }
   
   getAllProcesses(): ProcessModel[] {
