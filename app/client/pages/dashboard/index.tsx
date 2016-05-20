@@ -1,13 +1,21 @@
 import * as React from 'react'
 
-export default class Dashboard extends React.Component<any, any> {
+import Page from '../../components/Page'
+
+import InstanceContainer from '../cluster/instance-container'
+import QueueContainer from '../cluster/queue-container'
+
+export default class Dashboard extends React.Component<{}, {}> {
   render() {
     return (
-      <article className="page">
-        <h1>Dashboard</h1>
-        <p>Overview of experiments</p>
-        <p>Overview of available hosts</p>
-      </article>
+      <Page heading="Dashboard">
+        <h2>Experiments</h2>
+        <p>...</p>
+        <h2>Jobs</h2>
+        <QueueContainer/>
+        <h2>Hosts</h2>
+        <InstanceContainer/>
+      </Page>
     )
   }
 }
