@@ -169,7 +169,12 @@ export default class Experiments extends React.Component<any, any> {
         "updated": isodate()
       },
       tags: {},
-      vars: {},
+      vars: {
+        'srclang': 'en',
+        'trglang': 'lv',
+        'tempdir': '/tmp',
+        'workdir': '!!!'
+      },
       "graph": {
         "id": 0, "title": "Main", "type": "main", "category": "undefined",
         "x": 0, "y": 0, "collapsed": false,

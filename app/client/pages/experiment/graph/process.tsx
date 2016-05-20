@@ -58,6 +58,7 @@ export default class extends React.Component<any, any> {
     if (this.props.main) classes.push('main');
     if (this.props.selected) classes.push('selected');
     if (this.props.status) classes.push('state-' + this.props.status);
+    if (this.props.graph.isValid() === false) classes.push('invalid');
 
     var padding = 10;
     var min = { x: padding, y: padding };

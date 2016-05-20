@@ -162,6 +162,13 @@ export default class ProcessModel {
       return this.group.doc.status[this.getFullId()]
     }
   }
+  
+  isValid(): boolean {
+    if (this.template.validate) {
+      return !!this.template.validate(this.getParamValues());
+    }
+    return null;
+  }
 
   static isLinkValid(a, b): boolean {
     var atype = a.type || a;

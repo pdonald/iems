@@ -58,6 +58,9 @@ export default {
           `unzip -p $TEMP ${params.corpus}.${params.srclang}-${params.trglang}.${params.trglang} > ${output.trg} && \\`,
           'rm $TEMP'
         ];
+      },
+      validate: (params) => {
+        return !!params.corpus && !!params.srclang && !!params.trglang && !!params.tempdir;
       }
     },
     tokenizer: {
@@ -68,9 +71,12 @@ export default {
       },
       input: { in: 'file<text>' },
       output: { out: 'file<tok>' },
-      toTitle: (p, params) => params.lang ? `Tokenizer [${params.lang}] (moses)` : p.title,
+      toTitle: (p, params) => params.lang ? `Tokenizer [${params.lang}] (moses)` : 'Tokenizer (moses)',
       toBash: (params, input, output) => {
         return [`docker run --rm -i iems/moses perl /scripts/tokenizer/tokenizer.perl -l ${params.lang} < ${input.in} > ${output.out}`];
+      },
+      validate: (params) => {
+        return !!params.lang;
       }
     },
     detokenizer: {

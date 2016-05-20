@@ -175,6 +175,10 @@ export default class GroupModel {
     if (this.processes.filter(p => p.getStatus() == 'finished').length == this.processes.length) return 'finished';
   }
   
+  isValid(): boolean {
+    return this.processes.filter(p => p.isValid() === false).length === 0;
+  }
+  
   getAllProcesses(): ProcessModel[] {
     let proceses = [];
     
