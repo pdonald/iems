@@ -191,7 +191,7 @@ export default React.createClass({
   onConnect: function(from) {
     if (from && this.selectedPort) {
       if (from.id == this.selectedPort.id && from.port == this.selectedPort.port) return;
-      // validate connection
+      // todo: validate connection
       this.currentGraph().links.push({ from: from, to: this.selectedPort });
       this.setState(this.state);
     }
