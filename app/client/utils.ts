@@ -46,7 +46,7 @@ export function deepmerge(obj, changes) {
   return extend(true, {}, obj, changes)
 }
 
-export function clone(obj) {
+export function clone<T>(obj: T): T {
   return extend(true, {}, obj)
 }
 

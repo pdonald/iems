@@ -1,35 +1,45 @@
-import Tools from './Tools'
 import GroupModel from './GroupModel'
+import DocumentModel from './DocumentModel'
+import { Template, TemplateParamDefinition, DynamicInputOutput } from './Template'
+
+export interface ProcessSpec {
+  id: number
+  x: number
+  y: number
+  width?: number
+  height?: number
+  type: string
+  params: { [name: string]: string }
+}
 
 export default class ProcessModel {
-  public id: string;
-  public title: string;
-  public type: string;
-  public template: any;
-  public x: number;
-  public y: number;
-  public selected: boolean;
-  public group: GroupModel;
-  public params: { [key: string]: string };
-  public width: number;
-  public height: number;
-  public doc: any;
+  public id: number
+  public type: string
+  public template: Template
+  public params: { [key: string]: string }
+  public group: GroupModel
   
-  constructor(obj, group: GroupModel) {
-    for (var key in obj) {
-      this[key] = obj[key];
-    }
-
-    if (!(this.type in Tools.processes))
-      throw Error('No such tool: ' + this.type);
-
-    this.group  = group;
-    this.params = this.params || {};
-    this.template = Tools.processes[this.type];
+  public x: number
+  public y: number
+  public width: number
+  public height: number
+  public selected: boolean
+  
+  constructor(p: ProcessSpec, template: Template, group: GroupModel) {
+    this.id = p.id
+    this.type = p.type
+    this.template = template
+    this.x = p.x
+    this.y = p.y
+    this.width = p.width
+    this.height = p.height
+    this.group  = group
+    
+    this.params = p.params || {}
 
     for (var key in this.template.params) {
-      if (!this.params[key] && this.template.params[key].default) {
-        this.params[key] = this.template.params[key].default;
+      if (!this.params[key] && (<TemplateParamDefinition>this.template.params[key]).default) {
+        this.params[key] = (<TemplateParamDefinition>this.template.params[key]).default;
       }
     }
   }
@@ -71,7 +81,7 @@ export default class ProcessModel {
     key.push('templateVer=' + this.template.version);
     var params = this.getParamValues();
     for (var name in this.template.params) {
-      if (this.template.params[name].nohash)
+      if ((<TemplateParamDefinition>this.template.params[name]).nohash)
         continue;
       if (name in params) {
         key.push(`param:${name}=${params[name]}`);
@@ -85,7 +95,6 @@ export default class ProcessModel {
   }
 
   getTitle(): string {
-    if (this.title) return this.title;
     if (this.template.toTitle) return this.template.toTitle(this, this.getParamValues());
     if (this.template.title) return this.template.title;
     return this.type;
@@ -100,15 +109,15 @@ export default class ProcessModel {
 
   getPorts(): { input: string[], output: string[] } {
     return {
-      input: Object.keys(this.template.input.call ? this.template.input(this, this.getParamValues()) : this.template.input),
-      output: Object.keys(this.template.output.call ? this.template.output(this, this.getParamValues()) : this.template.output)
+      input: Object.keys((<DynamicInputOutput>this.template.input).call ? (<DynamicInputOutput>this.template.input)(this, this.getParamValues()) : this.template.input),
+      output: Object.keys((<DynamicInputOutput>this.template.output).call ? (<DynamicInputOutput>this.template.output)(this, this.getParamValues()) : this.template.output)
     }
   }
 
   getPortsInfo() {
     return {
-      input: this.template.input.call ? this.template.input(this, this.getParamValues()) : this.template.input,
-      output: this.template.output.call ? this.template.output(this, this.getParamValues()) : this.template.output
+      input: (<DynamicInputOutput>this.template.input).call ? (<DynamicInputOutput>this.template.input)(this, this.getParamValues()) : this.template.input,
+      output: (<DynamicInputOutput>this.template.output).call ? (<DynamicInputOutput>this.template.output)(this, this.getParamValues()) : this.template.output
     }
   }
 
@@ -140,9 +149,9 @@ export default class ProcessModel {
    * Replaces variables with corresponding values
    * in experiment parameters.
    */
-  getParamValues() {
-    function resolveParams(params, vars) {
-      var result = {};
+  getParamValues(): { [name: string]: string } {
+    function resolveParams(params, vars): { [name: string]: string } {
+      var result: { [name: string]: string } = {};
       for (var key in params) {
         if (params[key][0] == '$') {
           if (params[key].substr(1) in vars) {

@@ -2,8 +2,10 @@ import * as React from 'react'
 import * as ReactDOM from 'react-dom'
 import * as Reflux from 'reflux'
 
+import DocumentModel from '../../../universal/experiment/DocumentModel'
 import GroupModel from '../../../universal/experiment/GroupModel'
 import ProcessModel from '../../../universal/experiment/ProcessModel'
+import { Template, GroupTemplate } from '../../../universal/experiment/Template'
 import Output from '../../../universal/experiment/Output'
 
 import Graph from './graph/graph'
@@ -49,7 +51,7 @@ export default React.createClass({
 
      //this.clipboard = new ZeroClipboard(this.refs.copyMakefileButton);
 
-     get(`${apiurl}/experiments/${this.props.routeParams.id}`).then((document) => {
+     get(`${apiurl}/experiments/${this.props.routeParams.id}`).then((document: DocumentModel) => {
        let graph = document.graph
        delete document.graph
        document.stack = [new GroupModel(graph, null, document)]
@@ -64,13 +66,14 @@ export default React.createClass({
   },
 
   save: function() {
-    this.state.document.props.updated = isodate()
+    let doc: DocumentModel = this.state.document
+    doc.props.updated = isodate()
     this.forceUpdate()
 
-    let stack = this.state.document.stack
-    delete this.state.document.stack
+    let stack = doc.stack
+    delete doc.stack
 
-    let data = clone(this.state.document)
+    let data = clone(doc)
     delete data.status
     let graphjson = Output.JSON(stack[0])
     eval("data.graph = " + graphjson) // hahaha
@@ -110,12 +113,12 @@ export default React.createClass({
      this.setState(this.state);
   },
 
-  onAdd: function(template, x, y) {
+  onAdd: function(template: Template | GroupTemplate, x: number, y: number) {
     var offset = ReactDOM.findDOMNode(this.refs.graph).getBoundingClientRect();
     if (x >= offset.left && x <= offset.right && y >= offset.top && y <= offset.bottom) {
       var nextid = this.currentGraph().getMaxId() + 1;
-      if (!template.toBash) {
-        var group = clone(template);
+      if (!(template as Template).toBash) {
+        let group: any = clone(template);
         group.id = nextid;
         group.x = x - offset.left;
         group.y = y - offset.top;
@@ -201,7 +204,7 @@ export default React.createClass({
     this.setState({ output: type });
   },
 
-  currentGraph: function() {
+  currentGraph: function(): GroupModel {
     return this.state.document.stack[this.state.document.stack.length-1];
   },
 

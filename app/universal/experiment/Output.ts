@@ -46,7 +46,7 @@ function getMakefileKey(p: ProcessModel, port?: string): string {
 var Output = {
   Nothing: () => '',
 
-  JSON: (graph, depth?: number): string => {
+  JSON: (graph: GroupModel, depth?: number): string => {
     function params2str(params) {
       var arr = [];
       for (var key in params) {
@@ -64,8 +64,7 @@ var Output = {
 
     // group data
     var json = pad1 + '{' + '\n';
-    json += pad + `id: ${graph.id}, title: '${graph.title.replace("'", "\\'")}', `
-                + `type: '${graph.type}', category: '${graph.category}',` + '\n';
+    json += pad + `id: ${graph.id}, title: '${graph.title.replace("'", "\\'")}',\n`
     json += pad + `x: ${graph.x}, y: ${graph.y}, collapsed: ${graph.collapsed ? true : false},` + '\n';
     if (graph.ports) json += pad + `ports: { input: ['${graph.ports.input.join("', '")}'], output: ['${graph.ports.output.join("', '")}'] },` + '\n';
 
@@ -150,7 +149,7 @@ var Output = {
       return {
         id: j.process.getFullId(),
         name: j.name,
-        cmd: `cd ${graph.doc.vars.workdir} && ${j.cmd}`,
+        cmd: `cd ${graph.doc.vars['workdir']} && ${j.cmd}`,
         dependencies: [graph.doc.id, ...jobs.filter(jj => j.process.dependsOn(jj.process)).map(jj => jj.process.getFullId())],
         tags: {
           expid: graph.doc.id,
@@ -161,7 +160,7 @@ var Output = {
     
     formatted.unshift({
       id: graph.doc.id,
-      name: graph.doc.name || graph.doc.props.name,
+      name: graph.doc.props.name,
       cmd: 'echo Lets go',
       dependencies: [],
       tags: { expid: graph.doc.id }

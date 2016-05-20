@@ -1,24 +1,31 @@
-import ProcessModel from './ProcessModel';
+import Tools from './Tools'
+import ProcessModel from './ProcessModel'
+import { ProcessSpec } from './ProcessModel'
+import DocumentModel from './DocumentModel'
+import { Template, Link } from './Template'
 
 export default class GroupModel {
-  public id: number;
-  public type: string;
-  public title: string;
-  public toTitle: (arg: any) => string;
-  public from: any;
-  public link: any;
-  public groups: GroupModel[];
-  public processes: ProcessModel[];
-  public links: any[];
-  public parent: GroupModel;
-  public doc: any;
-  public ports: any;
-  public selected: any;
-  public x: any;
-  public y: any;
-  public collapsed: any;
+  public id: number
   
-  constructor(obj, parent, doc) {
+  public parent: GroupModel
+  public doc: DocumentModel
+  
+  public type: string
+  public title: string
+  public ports: { input: string[], output: string[] }
+  
+  public groups: GroupModel[]
+  public processes: ProcessModel[]
+  public links: Link[]
+  
+  public x: number
+  public y: number
+  public width: number
+  public height: number
+  public selected: boolean
+  public collapsed: boolean
+  
+  constructor(obj, parent: GroupModel, doc: DocumentModel) {
     this.groups = [];
     this.processes = [];
     this.links = [];
@@ -30,7 +37,7 @@ export default class GroupModel {
     }
 
     this.groups.forEach((g, index) => this.groups[index] = new GroupModel(g, this, doc));
-    this.processes.forEach((p, index) => this.processes[index] = new ProcessModel(p, this));
+    this.processes.forEach((p: any, index) => this.processes[index] = new ProcessModel(p, Tools.processes[p.type], this));
   }
 
   /**
@@ -41,16 +48,14 @@ export default class GroupModel {
   }
 
   getTitle(): string {
-    if (this.toTitle) return this.toTitle(this);
-    if (this.title) return this.title;
-    return this.type;
+    return this.title || this.type
   }
 
-  getPorts() {
-    return this.ports || [];
+  getPorts(): { input: string[], output: string[] } {
+    return this.ports
   }
 
-  getMaxId() {
+  getMaxId(): number {
     var gmax = Math.max.apply(null, this.groups.map(g => g.id));
     var pmax = Math.max.apply(null, this.processes.map(p => p.id));
     return Math.max.apply(null, [this.id, gmax, pmax]);
@@ -67,8 +72,9 @@ export default class GroupModel {
     this.groups.push(g);
   }
 
-  addProcess(process) {
-    this.processes.push(new ProcessModel(process, this));
+  addProcess(p: ProcessSpec) {
+    let template: Template = Tools.processes[p.type]
+    this.processes.push(new ProcessModel(p, template, this));
   }
 
   deleteSelected() {
@@ -80,7 +86,7 @@ export default class GroupModel {
     this.groups.forEach(g => g.deleteSelected());
   }
 
-  deleteGroup(group) {
+  deleteGroup(group: GroupModel) {
     this.groups.splice(this.groups.indexOf(group), 1);
     this.links.slice().forEach(l => {
       if (l.from.id == group.id || l.to.id == group.id) {
@@ -89,7 +95,7 @@ export default class GroupModel {
     });
   }
 
-  deleteProcess(process) {
+  deleteProcess(process: ProcessModel) {
     this.processes.splice(this.processes.indexOf(process), 1);
     this.links.slice().forEach(l => {
       if (l.from.id == process.id || l.to.id == process.id) {
