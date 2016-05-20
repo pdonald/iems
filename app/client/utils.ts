@@ -50,7 +50,7 @@ export function clone(obj) {
   return extend(true, {}, obj)
 }
 
-function checkStatus(response) {
+function checkStatus(response: Response) {
   if (response.status >= 200 && response.status < 300) {
     return response
   } else {
@@ -58,8 +58,13 @@ function checkStatus(response) {
   }
 }
 
-function parseJSON(response) {
-  return response.json()
+function parseJSON(response: Response) {
+  let contentType = response.headers.get('content-type')
+  if (contentType && contentType.indexOf('application/json') !== -1) {
+    return response.json()
+  } else {
+    return response.text()
+  }
 }
 
 export function get(url: string) {
