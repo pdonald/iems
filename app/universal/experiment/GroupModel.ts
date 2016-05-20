@@ -151,7 +151,7 @@ export default class GroupModel {
     if (link.from) {
       // the link connects a port on this group to a process in the group
       if (link.from.id == this.id) {
-        return this.parent.getLinkInput({ to: link.from, inPort: link.to.port });
+        return this.parent.getLinkInput({ to: link.from, inPort: link.inPort || link.to.port });
       // the link connects a process in this group to another group in process in this group
       } else { 
         // the link connects a process in this group to another process in this group
