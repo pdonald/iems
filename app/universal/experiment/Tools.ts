@@ -109,6 +109,34 @@ export default {
         return !!params.lang;
       }
     },
+    split: {
+      type: 'split', title: 'Split', category: 'corpora',
+      input: { in: 'file<text>' },
+      output: { a: 'file<text>', b: 'file<text>' },
+      params: { 
+        perc: 'integer',
+        tempdir: { type: 'path', default: '$tempdir', nohash: true } 
+      },
+      toBash: (params, input, output) => {
+        return [
+          `TEMP=$(mktemp -d --tmpdir=${params.tempdir}) && \\`,
+          `csplit ${input.in} $[ $(wc -l < ${input.in}) * ${params.perc} / 100 + 1] -n 1 -q -f $TEMP/split && \\`,
+          `mv $TEMP/split0 ${output.a} && \\`,
+          `mv $TEMP/split1 ${output.b} && \\`,
+          `rm -rf $TEMP`
+        ];
+      },
+      toTitle: (p, params) => {
+        if (params.perc) {
+          let x = parseInt(params.perc)
+          return `Split ${x}/${100-x}%`
+        }
+        return `Split`;
+      },
+      validate: (params) => {
+        return !!params.perc && params.perc > 0 && params.perc < 100;
+      }
+    },
     kenlm: {
       type: 'kenlm', title: 'KenLM', category: 'lm',
       params: {
@@ -601,7 +629,7 @@ export default {
     },
     'phrasesampling': {
       title: 'Sampling Phrases', type: 'phrasesampling', category: 'phrases',
-      ports: { input: ['src', 'trg', 'algn'], output: ['model'] },
+      ports: { input: ['algn', 'src', 'trg'], output: ['model'] },
       processes: [
         { id: 2, x: 20, y: 50, type: 'bintext' },
         { id: 3, x: 214, y: 50, type: 'bintext' },
