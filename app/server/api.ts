@@ -133,6 +133,7 @@ app.post('/api/cluster/configs', (req, res) => {
   let config = req.body
   config.id = `c-${config.service}-` + Object.keys(db.cluster.configs).length + 1
   db.cluster.configs[config.id] = config
+  savedb()
   res.send(config)
   // todo: connect
 })
@@ -148,6 +149,7 @@ app.post('/api/cluster/configs/:id', (req, res) => {
     let config = req.body
     config.id = req.params.id
     db.cluster.configs[config.id] = config
+    savedb()
     res.send(config) // todo: secret keys
     // todo: connect
   } else {
@@ -160,6 +162,7 @@ app.post('/api/cluster/configs/:id/clone', (req, res) => {
     let config = JSON.parse(JSON.stringify(db.cluster.configs[req.params.id])) //Object.assign({}, db.cluster.configs[req.params.id])
     config.id = `c-${config.service}-` + Object.keys(db.cluster.configs).length + 1
     db.cluster.configs[config.id] = config
+    savedb()
     res.send(config) // todo: secret keys
     // todo: connect
   } else {
@@ -171,6 +174,7 @@ app.delete('/api/cluster/configs/:id', (req, res) => {
   if (db.cluster.configs[req.params.id]) {
     // todo: connect
     delete db.cluster.configs[req.params.id]
+    savedb()
     res.send()
   } else {
     res.status(404).send('No such config')
