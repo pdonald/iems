@@ -20,6 +20,13 @@ export default {
       toBash: (params, input, output) => {
         return [`echo "${(params.text + '').replace('"', '\\"')}" > ${output.out}`];
       },
+      toTitle: (p, params) => {
+        if (params.text) {
+          if (params.text.length < 10) return `echo ${params.text}`;
+          else return `echo ${params.text.substr(0, 10)}...`;
+        }
+        return `echo`;
+      },
       validate: (params) => {
         return !!params.text;
       }
@@ -328,7 +335,7 @@ export default {
     'moses-ini': {
       type: 'moses-ini', title: 'Moses INI', category: 'decoder',
       width: 300,
-      input: { lm: 'file<lm-bin>', phrases: 'file<moses>', sample: 'sampling' },
+      input: { phrases: 'file<moses>', sample: 'dir<sample>', lm: 'file<lm-bin>' },
       output: { ini: 'file<moses>' },
       params: {
         workdir: { type: 'path', default: '$workdir' },
@@ -372,29 +379,21 @@ export default {
       },
       toBash: (params, input, output) => {
         return [
-          `docker run --rm -i -v ${params.workdir}:/work iems/moses moses -f /work/${input.ini} < ${input.in} > ${output.out}`
+          `docker run --rm -i -v ${params.workdir}:/work -v ${params.workdir}:${params.workdir} iems/moses moses -f /work/${input.ini} < ${input.in} > ${output.out}`
         ];
       }
     },
     bleu: {
       type: 'bleu', title: 'BLEU', category: 'evaluation',
-      input: { trans: 'file<text>', src: 'file<text>', ref: 'file<text>' },
+      input: { trans: 'file<text>', ref: 'file<text>' },
       output: { out: 'file<bleu>' },
       params: {
-        case: { type: 'bool', default: true },
-        srclang: { type: 'language', default: '$srclang' },
-        trglang: { type: 'language', default: '$trglang' },
-        tempdir: { type: 'path', default: '$tempdir' }
+        //case: { type: 'bool', default: true },
+        workdir: { type: 'path', default: '$workdir' }
       },
       toBash: (params, input, output) => {
         return [
-          `TEMP=$(mktemp -d --tmpdir=${params.tempdir}) && \\`,
-          `docker run --rm -i iems/moses perl /scripts/wrap-sgm.perl ref ${params.srclang} ${params.trglang} < ${input.ref} > $TEMP/ref.sgm && \\`,
-          `docker run --rm -i iems/moses perl /scripts/wrap-sgm.perl src ${params.srclang} < ${input.src} > $TEMP/src.sgm && \\`,
-          `docker run --rm -i -v ${params.tempdir}:${params.tempdir} iems/moses perl /scripts/ems/support/wrap-xml.perl ${params.trglang} $TEMP/src.sgm < ${input.trans} > $TEMP/trans.sgm && \\`,
-          `docker run --rm -i -v ${params.tempdir}:${params.tempdir} iems/moses perl /scripts/generic/mteval-v13a.pl -s $TEMP/src.sgm -r $TEMP/ref.sgm -t $TEMP/trans.sgm -b -d 3 ${params.case ? '-c' : ''} > ${output.out} && \\`,
-          `cat ${output.out} && \\`,
-          'rm -r $TEMP'
+          `docker run --rm -i -v ${params.workdir}:/work iems/moses perl /scripts/generic/multi-bleu.perl /work/${input.ref} < ${input.trans} > ${output.out}`,
         ];
       }
     },
@@ -446,7 +445,7 @@ export default {
     'phrases-sampling-model': {
       type: 'phrases-sampling-model', title: 'Sampling model', category: 'phrases',
       input: { src: 'dir<bin>', trg: 'dir<bin>', algn: 'file<bin>', lex: 'file<bin>' },
-      output: { out: 'dir' },
+      output: { out: 'dir<sample>' },
       params: { 
         workdir: { type: 'path', default: '$workdir' }
       },
@@ -646,10 +645,9 @@ export default {
       title: 'Evaluation', type: 'evaluation', category: 'evaluation',
       ports: { input: ['src', 'ref', 'ini'], output: ['trans', 'bleu'] },
       processes: [
-        { id: 2, x: 45, y: 95, type: 'tokenizer' },
-        { id: 3, x: 298, y: 99, type: 'tokenizer' },
+        { id: 2, x: 45, y: 95, type: 'tokenizer', params: { lang: '$srclang' } },
         { id: 4, x: 59, y: 255, type: 'moses' },
-        { id: 5, x: 65, y: 397, type: 'detokenizer' },
+        { id: 5, x: 65, y: 397, type: 'detokenizer', params: { lang: '$trglang' } },
         { id: 6, x: 291, y: 456, type: 'bleu' }
       ],
       links: [
@@ -659,7 +657,6 @@ export default {
         { from: { id: 2, port: 'out' }, to: { id: 4, port: 'in' } },
         { from: { id: 4, port: 'out' }, to: { id: 5, port: 'in' } },
         { from: { id: 5, port: 'out' }, to: { id: 6, port: 'trans' } },
-        { from: { id: undefined, port: 'src' }, to: { id: 6, port: 'src' } },
         { from: { id: undefined, port: 'ref' }, to: { id: 6, port: 'ref' } },
         { from: { id: 5, port: 'out' }, to: { id: undefined, port: 'trans' } },
         { from: { id: 6, port: 'out' }, to: { id: undefined, port: 'bleu' } }
