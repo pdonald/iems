@@ -173,7 +173,7 @@ export default class Experiments extends React.Component<any, any> {
         'srclang': 'en',
         'trglang': 'lv',
         'tempdir': '/tmp',
-        'workdir': '!!!'
+        'workdir': ''
       },
       "graph": {
         "id": 0, "title": "Main", "type": "main", "category": "undefined",

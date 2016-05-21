@@ -417,7 +417,7 @@ export default {
       output: { out: 'file<bin>' },
       params: { workdir: { type: 'path', default: '$workdir' } },
       toBash: (params, input, output) => {
-        return [ `docker run --rm -i -v ${params.workdir}:/work iems/moses symal2mam work/${output.out} < ${input.in}`, ];
+        return [ `docker run --rm -i -v ${params.workdir}:/work iems/moses symal2mam /work/${output.out} < ${input.in}`, ];
       }
     },
     binlex: {

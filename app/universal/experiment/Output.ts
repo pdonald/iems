@@ -161,7 +161,7 @@ var Output = {
     formatted.unshift({
       id: graph.doc.id,
       name: graph.doc.props.name,
-      cmd: 'echo Lets go',
+      cmd: `mkdir -p ${graph.doc.vars['workdir']}`,
       dependencies: [],
       tags: { expid: graph.doc.id }
     });
