@@ -159,7 +159,7 @@ export default class GroupModel {
         if (process) return { process: process, outPort: link.from.port, inPort: link.inPort || link.to.port };
         // the link connects a process in this group to another group in this group
         var group = this.groups.filter(g => g.id == link.from.id)[0];
-        if (group) return group.getLinkInput({ to: link.from });
+        if (group) return group.getLinkInput({ to: link.from, inPort: link.inPort });
       }
     } else if (link.to) {
       var linkTo = this.links.filter(l => l.to.id == link.to.id && l.to.port == link.to.port)[0];

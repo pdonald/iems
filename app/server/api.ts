@@ -82,9 +82,11 @@ app.post('/api/cluster/queues/:id', (req, res) => {
   if (queue) {
     for (let hostid in req.body) {
       let instance = services.vagrant.instances[hostid]
-      let host: Host = new Host(instance)
-      let params: HostInQueueParams = { slots: req.body[hostid] }
-      queue.addOrUpdateHost(host, params)
+      if (instance) {
+        let host: Host = new Host(instance)
+        let params: HostInQueueParams = { slots: req.body[hostid] }
+        queue.addOrUpdateHost(host, params)
+      }
     }
     res.send('')
   } else {

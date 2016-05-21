@@ -438,7 +438,7 @@ export default {
           `ln -s \`readlink -f ${input.trg}/corpus.sfa\` $TEMP/corpus.trg.sfa && \\`,
           `ln -s \`readlink -f ${input.trg}/corpus.tdx\` $TEMP/corpus.trg.tdx && \\`,
           `ln -s \`readlink -f ${input.algn}\` $TEMP/corpus.src-trg.mam && \\`,
-          `docker run --rm -i -v ${params.tempdir}:${params.tempdir} -v ${params.workdir}:/work iems/moses mmlex-build $TEMP/corpus. src trg -o /work/${output.out} && \\`,
+          `docker run --rm -i -v ${params.tempdir}:${params.tempdir} -v ${params.workdir}:/work -v ${params.workdir}:/${params.workdir} iems/moses mmlex-build $TEMP/corpus. src trg -o /work/${output.out} && \\`,
           'rm -rf $TEMP'
         ];
       }
