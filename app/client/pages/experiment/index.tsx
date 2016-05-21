@@ -45,7 +45,10 @@ export default React.createClass({
      this.listenTo(Actions.connect, this.onConnect);
      this.listenTo(Actions.portSelected, p => this.selectedPort = p);
      this.listenTo(Actions.portDeselected, p => this.selectedPort = null);
-     this.listenTo(Actions.paramChanged, this.onParamChanged);
+     this.listenTo(Actions.processParamChanged, this.onParamChanged);
+     this.listenTo(Actions.experimentPropertyChanged, this.onExperimentPropertyChanged);
+     this.listenTo(Actions.experimentTagChanged, this.onExperimentTagChanged);
+     this.listenTo(Actions.experimentTagRemoved, this.onExperimentTagRemoved);
      this.listenTo(Actions.variableChanged, this.onVariableChanged);
      this.listenTo(Actions.variableRemoved, this.onVariableRemoved);
      this.listenTo(Actions.updateStatus, this.onUpdateStatus);
@@ -86,15 +89,25 @@ export default React.createClass({
   },
 
   onParamChanged: function(process, key, value) {
-    if (process == this.state.document) {
-      if (key in process) {
-        process[key] = value;
-      } else {
-        process.tags[key] = value;
-      }
-    } else {
-      process.params[key] = value;
-    }
+    process.params[key] = value;
+    this.setState(this.state);
+  },
+  
+  onExperimentPropertyChanged: function(key, value) {
+    let doc: DocumentModel = this.state.document
+    doc.props[key] = value
+    this.setState(this.state);
+  },
+  
+  onExperimentTagChanged: function(key, value) {
+    let doc: DocumentModel = this.state.document
+    doc.tags[key] = value
+    this.setState(this.state);
+  },
+  
+  onExperimentTagRemoved: function(key) {
+    let doc: DocumentModel = this.state.document
+    delete doc.tags[key]
     this.setState(this.state);
   },
 
