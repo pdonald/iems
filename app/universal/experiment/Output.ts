@@ -149,7 +149,7 @@ var Output = {
       return {
         id: j.process.getFullId(),
         name: j.name,
-        cmd: `cd ${graph.doc.vars['workdir']} && ${j.cmd}`,
+        cmd: `cd ${graph.doc.vars['workdir']} && exec >${getMakefileKey(j.process, 'stdout')} 2>${getMakefileKey(j.process, 'stderr')} && ${j.cmd}`,
         dependencies: [graph.doc.id, ...jobs.filter(jj => j.process.dependsOn(jj.process)).map(jj => jj.process.getFullId())],
         tags: {
           expid: graph.doc.id,
