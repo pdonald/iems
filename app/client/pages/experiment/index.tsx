@@ -47,6 +47,7 @@ export default React.createClass({
      this.listenTo(Actions.portDeselected, p => this.selectedPort = null);
      this.listenTo(Actions.paramChanged, this.onParamChanged);
      this.listenTo(Actions.variableChanged, this.onVariableChanged);
+     this.listenTo(Actions.variableRemoved, this.onVariableRemoved);
      this.listenTo(Actions.updateStatus, this.onUpdateStatus);
 
      //this.clipboard = new ZeroClipboard(this.refs.copyMakefileButton);
@@ -99,6 +100,11 @@ export default React.createClass({
 
   onVariableChanged: function(key, value) {
     this.state.document.vars[key] = value;
+    this.setState(this.state);
+  },
+  
+  onVariableRemoved: function(key) {
+    delete this.state.document.vars[key];
     this.setState(this.state);
   },
 
