@@ -38,7 +38,7 @@ class AwsEc2 {
             ec2: new AWS.EC2({ region: region, accessKeyId: config.accessKeyId, secretAccessKey: config.secretAccessKey }),
             keyName: `iEMS-${hash}`,
             keyData: null,
-            keyFilename: `${__dirname}/../../../build/awsec2/iems-${hash}.pem`, // todo
+            keyFilename: `${__dirname}/../../../../build/awsec2/iems-${hash}.pem`, // todo
             securityGroup: `iEMS-${hash}`,
             failures: 0
           }
@@ -297,6 +297,7 @@ class Instance {
       if (err) {
         this.state = 'error'
         this.error = err
+        console.error(err)
         return
       }
 
@@ -405,6 +406,7 @@ class Instance {
       if (err) {
         this.state = 'error'
         this.error = err
+        console.error(err)
         return
       }
     })
