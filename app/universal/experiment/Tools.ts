@@ -447,12 +447,14 @@ export default {
       type: 'phrases-sampling-model', title: 'Sampling model', category: 'phrases',
       input: { src: 'dir<bin>', trg: 'dir<bin>', algn: 'file<bin>', lex: 'file<bin>' },
       output: { out: 'dir' },
-      params: { },
+      params: { 
+        workdir: { type: 'path', default: '$workdir' }
+      },
       toBash: (params, input, output) => {
         var ini = [];
         ini.push('[feature]');
         ini.push('LexicalReordering name=DM0 type=hier-mslr-bidirectional-fe-allff input-factor=0 output-factor=0');
-        ini.push(`Mmsapt name=PT0 lr-func=DM0 path=/tools/train/${output.out}/ L1=src L2=trg sample=1000`);
+        ini.push(`Mmsapt name=PT0 lr-func=DM0 path=${params.workdir}/${output.out}/ L1=src L2=trg sample=1000`);
         ini.push('[weight]');
         ini.push('DM0= 0.3 0.3 0.3 0.3 0.3 0.3 0.3 0.3');
 
