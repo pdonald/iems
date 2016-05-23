@@ -18,13 +18,18 @@
     clear: both;
   }
 
-  th {
-    color: @sidebar-foreground;
-    padding-right: 3px;
-    text-align: left;
-  }
-  
   .properties, .variables {
+    thead th, tbody td { 
+      border: none; 
+      padding: 2px; 
+    }
+    
+    th {
+      color: @sidebar-foreground;
+      padding-right: 3px;
+      text-align: left;
+    }
+    
     input {
       width: 100%;
       border: none;
@@ -42,6 +47,14 @@
     select {
       width: 100%;
       margin-bottom: 8px;
+    }
+    
+    > div > div > .cool-table { // todo: .cool-table-condensed
+      margin-top: 10px;
+      
+      thead th, tbody td {
+        padding: 5px 5px;
+      }
     }
   }
 

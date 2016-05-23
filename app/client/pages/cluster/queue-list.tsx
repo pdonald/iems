@@ -70,21 +70,33 @@ export default class QueueList extends React.Component<Props, any> {
     let q: QueueSummary = this.props.queues[this.state.selectedQueue]
     if (!q) return
     return (
-      <Modal width={800} height={500} style={{background: '#fff'}} onClose={() => this.setState({ selectedQueue: null })}>
-        <h1>{q.name} queue hosts</h1>
-        <ul className="reset">
+      <Modal width={800} height={500} onClose={() => this.setState({ selectedQueue: null })} className="modal">
+        <h1>
+          {q.name} queue hosts
+          <i className="close-button fa fa-remove" onClick={() => this.setState({ selectedQueue: null })}/>
+        </h1>
+        <table className="cool-table">
+        <thead>
+          <tr>
+            <th>Host</th>
+            <th>Slots</th>
+          </tr>
+        </thead>
+        <tbody>
           {this.props.instances.map(host => (
-            <li key={host.id}>
-              <input type="text"
-                defaultValue={typeof this.state.slots[q.id+host.id] != 'undefined' ? this.state.slots[q.id+host.id] : (q.hosts[host.id] && q.hosts[host.id].slots || 0)}
-                onChange={e => this.state.slots[q.id+host.id] = +(e.target as HTMLInputElement).value}
-                style={{width: '20px', textAlign: 'center'}}/>
-              {' '}
-              <label>{host.id}</label>
-            </li>
+            <tr key={host.id}>
+              <td>{host.id}</td>
+              <td><input type="text"
+                    defaultValue={typeof this.state.slots[q.id+host.id] != 'undefined' ? this.state.slots[q.id+host.id] : (q.hosts[host.id] && q.hosts[host.id].slots || 0)}
+                    onChange={e => this.state.slots[q.id+host.id] = +(e.target as HTMLInputElement).value}
+                    style={{width: '20px', textAlign: 'center'}}/></td>
+            </tr>
           ))}
-        </ul>
-        <button onClick={() => this.update(q) || this.setState({ selectedQueue: null })}>Save</button>
+        </tbody>
+        </table>
+        <p>
+          <button onClick={() => this.update(q) || this.setState({ selectedQueue: null })}>Save</button>
+        </p>
       </Modal>
     )
   }
