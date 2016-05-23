@@ -42,6 +42,8 @@ class Connection extends events.EventEmitter {
         disk: null
       }
     }
+    
+    this.on('error', (err) => console.error('SSH Error: ' + err))
   }
 
   connect() {

@@ -81,7 +81,9 @@ app.post('/api/cluster/queues/:id', (req, res) => {
   let queue = queues[req.params.id]
   if (queue) {
     for (let hostid in req.body) {
-      let instance = services.vagrant.instances[hostid]
+      let instance = services.vagrant.instances[hostid] || 
+        services.awsec2.instances[hostid] ||
+        services.localssh.instances[hostid]
       if (instance) {
         let host: Host = new Host(instance)
         let params: HostInQueueParams = { slots: req.body[hostid] }
