@@ -38,7 +38,7 @@ function hashFnv32a(str: string): string {
   return ("0000000" + (hval >>> 0).toString(16)).substr(-8);
 }
 
-function getMakefileKey(p: ProcessModel, port?: string): string {
+export function getMakefileKey(p: ProcessModel, port?: string): string {
   var hash = hashFnv32a(p.getHashKey());
   return p.type + '-' + hash + (port ? '.' + port : '');
 }

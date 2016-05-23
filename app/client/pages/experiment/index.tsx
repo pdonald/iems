@@ -7,6 +7,8 @@ import GroupModel from '../../../universal/experiment/GroupModel'
 import ProcessModel from '../../../universal/experiment/ProcessModel'
 import { Template, GroupTemplate } from '../../../universal/experiment/Template'
 import Output from '../../../universal/experiment/Output'
+import { getMakefileKey } from '../../../universal/experiment/Output'
+import { QueueSummary } from '../../../universal/grid/QueueSummary'
 
 import Graph from './graph/graph'
 import Group from './graph/group'
@@ -15,6 +17,8 @@ import Properties from './sidebar/properties'
 import Variables from './sidebar/variables'
 import Toolbox from './sidebar/toolbox'
 import Cluster from './sidebar/cluster'
+
+import Modal from '../../components/Modal'
 
 import Actions from './actions'
 
@@ -27,7 +31,8 @@ export default React.createClass({
   getInitialState: function() {
     return {
       output: 'Nothing',
-      document: null
+      document: null,
+      modal: null
     }
   },
 
@@ -52,8 +57,7 @@ export default React.createClass({
      this.listenTo(Actions.variableChanged, this.onVariableChanged);
      this.listenTo(Actions.variableRemoved, this.onVariableRemoved);
      this.listenTo(Actions.updateStatus, this.onUpdateStatus);
-
-     //this.clipboard = new ZeroClipboard(this.refs.copyMakefileButton);
+     this.listenTo(Actions.viewFile, this.onViewFile)
 
      get(`${apiurl}/experiments/${this.props.routeParams.id}`).then((document: DocumentModel) => {
        let graph = document.graph
@@ -121,8 +125,9 @@ export default React.createClass({
     this.setState(this.state);
   },
 
-  onUpdateStatus: function(status) {
+  onUpdateStatus: function(status, queues) {
     this.state.document.status = status;
+    this.state.queues = queues;
     this.setState(this.state);
   },
 
@@ -218,6 +223,38 @@ export default React.createClass({
       this.setState(this.state);
     }
   },
+  
+  onViewFile: function(type: string, process: ProcessModel, port: string) {
+    let doc: DocumentModel = this.state.document
+    if (type === 'output') {
+      let pid = process.getFullId()
+      let queues: { [id: string]: QueueSummary } = this.state.queues
+      for (let qid in queues) {
+        let queue = queues[qid]
+        for (let jid in queue.jobs) {
+          if (queue.jobs[jid].tags['process'] == pid) {
+            let host = queue.jobs[jid].tags['host']
+            if (host) {
+              let filename = doc.vars['workdir'] + '/' + getMakefileKey(process, port)
+              post(`${apiurl}/cluster/file?host=${host}&filename=${filename}`)
+                .then(res => {
+                  if (res.err) console.error(res.err)
+                  else {
+                    this.setState({
+                      modal: {
+                        title: filename,
+                        content: <pre>{res.contents}</pre>
+                      }
+                    })
+                  }
+                })
+              return
+            }
+          } 
+        }
+      }
+    }
+  },
 
   changeOutputType: function(type) {
     this.setState({ output: type });
@@ -234,6 +271,10 @@ export default React.createClass({
     }
     this.currentGraph().collapsed = false;
     this.setState(this.state);
+  },
+  
+  closeModal: function() {
+    this.setState({ modal: null })
   },
 
   render: function() {
@@ -287,12 +328,27 @@ export default React.createClass({
         </Graph>
       </div>
     )
+    
+    let modal = null
+    if (this.state.modal) {
+      modal = (
+        <Modal className="modal" onClose={() => this.closeModal()}>
+          <h1>
+            {this.state.modal.title}
+            <i className="close-button fa fa-remove" onClick={() => this.closeModal()}/>
+          </h1>
+          <div className="modal-content">
+            {this.state.modal.content}
+          </div>
+        </Modal>
+      )
+    }
 
-    return <ExperimentLayout sidebar={sidebar} mainTop={top} mainMiddle={grid} />
+    return <ExperimentLayout sidebar={sidebar} mainTop={top} mainMiddle={grid}>{modal}</ExperimentLayout>
   }
 })
 
-class ExperimentLayout extends React.Component<any, any> {
+class ExperimentLayout extends React.Component<any, {}> {
   render() {
     return (
       <div className="experiment-layout">
@@ -307,6 +363,7 @@ class ExperimentLayout extends React.Component<any, any> {
             {this.props.mainMiddle}
           </div>
         </div>
+        {this.props.children}
       </div>
     )
   }

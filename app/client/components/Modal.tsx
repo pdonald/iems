@@ -66,8 +66,8 @@ export default class Modal extends React.Component<Props, {}> {
 interface Props {
   isOpen?: boolean
   noBackdrop?: boolean
-  width: number
-  height: number
+  width?: number
+  height?: number
   style?: { [key: string]: string }
   backdropStyle?: { [key: string]: string }
   children?: any

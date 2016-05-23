@@ -77,7 +77,7 @@ export default class Port extends React.Component<Props, any> {
   }
 
   onDoubleClick(e) {
-    Actions.viewFile(this.props);
+    Actions.viewFile(this.props.type, this.props.process, this.props.port);
   }
 
   render() {

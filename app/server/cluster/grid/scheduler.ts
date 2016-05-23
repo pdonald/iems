@@ -77,7 +77,7 @@ export class Scheduler {
       // todo: check if job status is set to canceled
     }, 1000)
     
-    job.startRuning()
+    job.startRuning(host)
     host.exec(job.cmd, (err, exitCode, stdout, stderr) => {
       clearInterval(timer)
       

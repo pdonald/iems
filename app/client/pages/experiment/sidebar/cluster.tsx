@@ -70,6 +70,6 @@ export default class Cluster extends React.Component<any, any> {
         status[jid] = queues[qid].jobs[jid].globalState
       }
     }
-    Actions.updateStatus(status)
+    Actions.updateStatus(status, queues)
   }
 }

@@ -25,4 +25,15 @@ export class Host {
       cb(`Can't exec, not connected?`)
     }
   }
+  
+  readFile(filename: string, bytes: number, cb: (err: any, contents: string) => void) {
+    var cmd = ['head', `--bytes=${bytes}`, filename]
+    
+    this.exec(cmd.join(' '), (err, code, stdout, stderr) => {
+      if (err) return cb(err, null)
+      if (code != 0) return cb('Exit code != 0', null)
+      if (stderr) return cb('STDERR: ' + stderr, null)
+      cb(null, stdout)
+    })
+  }
 }

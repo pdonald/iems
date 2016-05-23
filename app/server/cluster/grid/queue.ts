@@ -120,6 +120,10 @@ export class Queue {
     delete this.hosts[host.id]
   }
   
+  getHosts(): Host[] {
+    return Object.keys(this.hosts).map(h => this.hosts[h].host)
+  }
+  
   destroy() {
     this.scheduler.stop()
     for (let id in this.jobs) this.cancelJob(id)

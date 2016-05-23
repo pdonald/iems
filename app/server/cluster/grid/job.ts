@@ -1,5 +1,6 @@
 import { JobSpec } from '../../../universal/grid/JobSpec'
 import { JobSummary } from '../../../universal/grid/JobSummary'
+import { Host } from './host'
 
 export class Job {
   id: string
@@ -44,8 +45,9 @@ export class Job {
     return this.state == 'finished'
   }
   
-  startRuning() {
+  startRuning(host: Host) {
     this.state = 'running'
+    this.tags['host'] = host.id
   }
   
   finishRunning(err: any, exitCode: number, stdout: string, stderr: string) {
