@@ -224,34 +224,49 @@ export default React.createClass({
     }
   },
   
-  onViewFile: function(type: string, process: ProcessModel, port: string) {
-    let doc: DocumentModel = this.state.document
-    if (type === 'output') {
-      let pid = process.getFullId()
-      let queues: { [id: string]: QueueSummary } = this.state.queues
-      for (let qid in queues) {
-        let queue = queues[qid]
-        for (let jid in queue.jobs) {
-          if (queue.jobs[jid].tags['process'] == pid) {
-            let host = queue.jobs[jid].tags['host']
-            if (host) {
-              let filename = doc.vars['workdir'] + '/' + getMakefileKey(process, port)
-              post(`${apiurl}/cluster/file?host=${host}&filename=${filename}`)
-                .then(res => {
-                  if (res.err) console.error(res.err)
-                  else {
-                    this.setState({
-                      modal: {
-                        title: filename,
-                        content: <pre>{res.contents}</pre>
-                      }
-                    })
-                  }
-                })
-              return
-            }
-          } 
+  onViewFile: function(type: string, graph: ProcessModel | GroupModel, port: string) {
+    if (graph instanceof GroupModel) {
+      let group = graph as GroupModel
+    }
+    if (graph instanceof ProcessModel) {
+      let process = graph as ProcessModel
+      if (type === 'input') {
+        let p = process.getInputs().filter(pp => pp.inPort === port)[0]
+        if (p) {
+          this.viewFile(p.process, p.outPort)
         }
+      } else if (type === 'output') {
+        this.viewFile(process, port)
+      }
+    }
+  },
+  
+  viewFile: function(process: ProcessModel, port: string) {
+    let doc: DocumentModel = this.state.document
+    let pid = process.getFullId()
+    let queues: { [id: string]: QueueSummary } = this.state.queues
+    for (let qid in queues) {
+      let queue = queues[qid]
+      for (let jid in queue.jobs) {
+        if (queue.jobs[jid].tags['process'] == pid) {
+          let host = queue.jobs[jid].tags['host']
+          if (host) {
+            let filename = doc.vars['workdir'] + '/' + getMakefileKey(process, port)
+            post(`${apiurl}/cluster/file?host=${host}&filename=${filename}`)
+              .then(res => {
+                if (res.err) console.error(res.err)
+                else {
+                  this.setState({
+                    modal: {
+                      title: filename,
+                      content: <pre>{res.contents}</pre>
+                    }
+                  })
+                }
+              })
+            return
+          }
+        } 
       }
     }
   },
