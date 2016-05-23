@@ -1,6 +1,6 @@
-.PHONY: all fastalign kenlm mgiza cdec moses
+.PHONY: all fastalign kenlm mgiza cdec moses opus
 
-all: fastalign kenlm mgiza cdec moses
+all: fastalign kenlm mgiza cdec moses opus
 
 fastalign:
 	make -C fastalign
@@ -16,3 +16,6 @@ cdec:
 
 moses:
 	make -C moses
+
+opus:
+	make -C opus

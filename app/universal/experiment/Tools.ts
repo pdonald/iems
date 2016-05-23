@@ -68,11 +68,11 @@ export default {
       },
       toBash: (params, input, output) => {
         return [
-          `TEMP=$(mktemp --tmpdir=${params.tempdir}) && \\`,
-          `wget http://opus.lingfil.uu.se/${params.corpus}/${params.srclang}-${params.trglang}.txt.zip -O $TEMP && \\`,
-          `unzip -p $TEMP ${params.corpus}.${params.srclang}-${params.trglang}.${params.srclang} > ${output.src} && \\`,
-          `unzip -p $TEMP ${params.corpus}.${params.srclang}-${params.trglang}.${params.trglang} > ${output.trg} && \\`,
-          'rm $TEMP'
+          `TEMP=$(mktemp -d --tmpdir=${params.tempdir}) && \\`,
+          `docker run --rm -i -v $TEMP:$TEMP iems/opus wget http://opus.lingfil.uu.se/${params.corpus}/${params.srclang}-${params.trglang}.txt.zip -O $TEMP/corpus.zip && \\`,
+          `docker run --rm -i -v $TEMP:$TEMP iems/opus unzip -p $TEMP/corpus.zip ${params.corpus}.${params.srclang}-${params.trglang}.${params.srclang} > ${output.src} && \\`,
+          `docker run --rm -i -v $TEMP:$TEMP iems/opus unzip -p $TEMP/corpus.zip ${params.corpus}.${params.srclang}-${params.trglang}.${params.trglang} > ${output.trg} && \\`,
+          'rm -r $TEMP'
         ];
       },
       validate: (params) => {
