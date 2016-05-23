@@ -5,6 +5,7 @@ export interface TemplateParamDefinition {
   type: string
   default: string
   nohash?: boolean
+  optional?: boolean
 }
 
 export interface TemplateInputOutputParams {
