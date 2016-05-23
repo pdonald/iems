@@ -60,7 +60,7 @@ class Connection extends events.EventEmitter {
       this.refreshStatsTimer = setInterval(() => this.refreshStats(), 30 * 1000)
       this.refreshStats()
 
-      //this.provision()
+      this.provision()
       //this.ping()
     })
 
@@ -163,9 +163,13 @@ class Connection extends events.EventEmitter {
   }
 
   provision() {
+    this.state = 'provisioning'
     sshexec(this.ssh, this.config.provision, (err, code, stdout, stderr) => {
+      console.log(err, code, stdout, stderr)
+      if (err || code != 0) this.state = 'error'
       if (err) return this.emit('error', 'Error while provisioning', err)
       if (code != 0) return this.emit('error', 'Provisioning was not successful', code, stdout, stderr)
+      this.state = 'connected'
     })
   }
 
