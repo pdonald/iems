@@ -144,16 +144,20 @@ var Output = {
   
   JobSpec: (graph: GroupModel): string => {
     let jobs = joblist(graph);
+    let workdir = graph.doc.vars['workdir'];
         
     let formatted: JobSpec[] = jobs.map(j => {
       return {
         id: j.process.getFullId(),
         name: j.name,
-        cmd: `cd ${graph.doc.vars['workdir']} && exec >${getMakefileKey(j.process, 'stdout')} 2>${getMakefileKey(j.process, 'stderr')} && ${j.cmd}`,
+        cmd: `cd ${workdir} && exec >${getMakefileKey(j.process, 'stdout')} 2>${getMakefileKey(j.process, 'stderr')} && ${j.cmd}`,
         dependencies: [graph.doc.id, ...jobs.filter(jj => j.process.dependsOn(jj.process)).map(jj => jj.process.getFullId())],
         tags: {
           expid: graph.doc.id,
-          process: j.process.getFullId()
+          expname: graph.doc.props.name,
+          process: j.process.getFullId(),
+          stdout: workdir + '/' + getMakefileKey(j.process, 'stdout'),
+          stderr: workdir + '/' + getMakefileKey(j.process, 'stderr')
         }
       }
     });
@@ -161,9 +165,9 @@ var Output = {
     formatted.unshift({
       id: graph.doc.id,
       name: graph.doc.props.name,
-      cmd: `mkdir -p ${graph.doc.vars['workdir']}`,
+      cmd: `mkdir -p ${workdir}`,
       dependencies: [],
-      tags: { expid: graph.doc.id }
+      tags: { expid: graph.doc.id, expname: graph.doc.props.name }
     });
     
     return JSON.stringify(formatted, null, 2);

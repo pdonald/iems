@@ -127,20 +127,29 @@ app.delete('/api/cluster/queues/:id', (req, res) => {
   }
 })
 
-app.post('/api/cluster/file', (req, res) => {
+app.get('/api/cluster/file', (req, res) => {
   let hostid = req.query.host
   let filename = req.query.filename
+  let size = parseInt(req.query.size) || 10 * 1024
+  let raw = 'raw' in req.query
+  if (raw) res.set('Content-Type', 'text/plain')
   for (let qid in queues) {
     let host = queues[qid].getHosts().filter(h => h.id == hostid)[0]
     if (host) {
-      host.readFile(filename, 10 * 1024, (err, contents) => {
-        if (err) res.send({ err: err })
-        else res.send({ contents: contents })
+      host.readFile(filename, size + 5, (err, contents) => {
+        if (err) res.status(500).send(raw ? err : { err: err })
+        else {
+          console.log(contents.length, size)
+          if (contents.length > size) {
+            contents = contents + '\n[ ... TRUNCATED ... ]'
+          }
+          res.send(raw ? contents : { contents: contents })
+        }
       })
       return
     }
   }
-  res.send({ err: 'No such host' })
+  res.status(404).send(raw ? 'No such host' : { err: 'No such host' })
 })
 
 app.get('/api/cluster/configs', (req, res) => {

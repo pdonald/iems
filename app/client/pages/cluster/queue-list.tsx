@@ -93,21 +93,45 @@ export default class QueueList extends React.Component<Props, any> {
     if (!this.state.selectedQueueJobs) return
     let q: QueueSummary = this.props.queues[this.state.selectedQueueJobs]
     if (!q) return
+    
+    let columns = {
+      experiment: { title: 'Experiment' },
+      jobname: { title: 'Process name' },
+      logs: { title: 'Logs', sortable: false },
+      status: { title: 'Status' },
+      actions: { title: 'Actions', sortable: false }
+    }
+    
+    let rows = map(q.jobs, (key, j) => ({
+      job: j,
+      experiment: j.tags['expname'] || j.tags['expid'],
+      jobname: j.name,
+      logs: (
+        <span>
+          <a href={`${apiurl}/cluster/file?host=${j.tags['host']}&filename=${j.tags['stdout']}&size=${100*1024}&raw`} target="_blank">stdout</a>
+          {' '}
+          <a href={`${apiurl}/cluster/file?host=${j.tags['host']}&filename=${j.tags['stderr']}&size=${100*1024}&raw`} target="_blank">stderr</a>
+        </span>
+      ) ,
+      status: <span className={'state state-' + this.jobstate(j)}>{this.jobstate(j)}</span>,
+      actions: (
+        <span>
+          <a onClick={_ => this.cancelJob(q.id, j.id)}>Cancel</a>
+          {' '}
+          <a onClick={_ => this.resetJob(q.id, j.id)}>Reset</a>
+          {' '}
+          <a>Delete</a>
+        </span>
+      )
+    }))
+    
     return (
-      <Modal width={800} height={500} style={{background: '#fff'}} onClose={() => this.setState({ selectedQueueJobs: null })}>
-        <h1>{q.name} jobs</h1>
-        <ul className="reset">
-          {map(q.jobs, (key, j) => (
-            <li key={j.id} className={'state state-' + this.jobstate(j)}>
-              {j.name}
-              {' '}
-              ({this.jobstate(j)})
-              <a onClick={_ => this.cancelJob(q.id, j.id)}>cancel</a> 
-              <a onClick={_ => this.resetJob(q.id, j.id)}>reset</a>
-            </li>
-          ))}
-        </ul>
-        <button onClick={() => this.setState({ selectedQueueJobs: null })}>Close</button>
+      <Modal width={800} height={500} onClose={() => this.setState({ selectedQueueJobs: null })} className="modal">
+        <h1>
+          {q.name} jobs
+          <i className="close-button fa fa-remove" onClick={() => this.setState({ selectedQueueJobs: null })}/>
+        </h1>
+        <Table columns={columns} rows={rows} id={row => row.job.id} />
       </Modal>
     )
   }

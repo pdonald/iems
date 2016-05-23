@@ -252,7 +252,7 @@ export default React.createClass({
           let host = queue.jobs[jid].tags['host']
           if (host) {
             let filename = doc.vars['workdir'] + '/' + getMakefileKey(process, port)
-            post(`${apiurl}/cluster/file?host=${host}&filename=${filename}`)
+            get(`${apiurl}/cluster/file?host=${host}&filename=${filename}&size=${10*1024}`)
               .then(res => {
                 if (res.err) console.error(res.err)
                 else {
