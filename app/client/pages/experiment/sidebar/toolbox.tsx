@@ -12,6 +12,7 @@ var CategoryTitles = {
   'corpora': 'Corpora tools',
   'evaluation': 'Evaluation',
   'phrases': 'Phrase based tools',
+  'phrases-sampling': 'Phrase sampling',
   'tuning': 'Tuning'
 }
 

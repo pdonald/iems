@@ -3,9 +3,13 @@ import GroupModel from './GroupModel'
 
 export interface TemplateParamDefinition {
   type: string
-  default: string
+  default?: string
   nohash?: boolean
   optional?: boolean
+  required?: boolean
+  min?: number
+  max?: number
+  options?: string[]
 }
 
 export interface TemplateInputOutputParams {

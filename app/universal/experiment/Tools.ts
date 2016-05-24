@@ -5,30 +5,20 @@ export default {
       params: { source: 'string' },
       input: { },
       output: { out: 'file<any>' },
-      toBash: (params, input, output) => {
-        return [`cp ${params.source} ${output.out}`];
-      },
-      validate: (params) => {
-        return !!params.source;
-      }
+      toBash: (params, input, output) => [`cp ${params.source} ${output.out}`]
     },
     echo: {
       type: 'echo', category: 'corpora',
       input: { },
       output: { out: 'file<text>' },
       params: { text: 'string' },
-      toBash: (params, input, output) => {
-        return [`echo "${(params.text + '').replace('"', '\\"')}" > ${output.out}`];
-      },
+      toBash: (params, input, output) => [`echo "${(params.text + '').replace('"', '\\"')}" > ${output.out}`],
       toTitle: (p, params) => {
         if (params.text) {
           if (params.text.length < 10) return `echo ${params.text}`;
           else return `echo ${params.text.substr(0, 10)}...`;
         }
         return `echo`;
-      },
-      validate: (params) => {
-        return !!params.text;
       }
     },
     wget: {
@@ -36,12 +26,7 @@ export default {
       params: { url: 'string' },
       input: { },
       output: { out: 'file<any>' },
-      toBash: (params, input, output) => {
-        return [`wget ${params.url} -O ${output.out}`];
-      },
-      validate: (params) => {
-        return !!params.url;
-      }
+      toBash: (params, input, output) => [`wget ${params.url} -O ${output.out}`]
     },
     opus: {
       type: 'opus', title: 'OPUS', category: 'corpora',
@@ -74,9 +59,6 @@ export default {
           `docker run --rm -i -v $TEMP:$TEMP iems/opus unzip -p $TEMP/corpus.zip ${params.corpus}.${params.srclang}-${params.trglang}.${params.trglang} > ${output.trg} && \\`,
           'rm -r $TEMP'
         ];
-      },
-      validate: (params) => {
-        return !!params.corpus && !!params.srclang && !!params.trglang && !!params.tempdir;
       }
     },
     tokenizer: {
@@ -90,9 +72,6 @@ export default {
       toTitle: (p, params) => params.lang ? `Tokenizer [${params.lang}] (moses)` : 'Tokenizer (moses)',
       toBash: (params, input, output) => {
         return [`docker run --rm -i iems/moses perl /scripts/tokenizer/tokenizer.perl -l ${params.lang} < ${input.in} > ${output.out}`];
-      },
-      validate: (params) => {
-        return !!params.lang;
       }
     },
     detokenizer: {
@@ -104,9 +83,6 @@ export default {
       },
       toBash: (params, input, output) => {
         return [ `docker run --rm -i iems/moses perl /scripts/tokenizer/detokenizer.perl -l ${params.lang} < ${input.in} > ${output.out}` ];
-      },
-      validate: (params) => {
-        return !!params.lang;
       }
     },
     split: {
@@ -114,8 +90,15 @@ export default {
       input: { in: 'file<text>' },
       output: { a: 'file<text>', b: 'file<text>' },
       params: { 
-        perc: 'integer',
+        perc: { type: 'int', default: 70, min: 1, max: 99 },
         tempdir: { type: 'path', default: '$tempdir', nohash: true } 
+      },
+      toTitle: (p, params) => {
+        if (params.perc) {
+          let x = parseInt(params.perc)
+          return `Split ${x}/${100-x}%`
+        }
+        return `Split`;
       },
       toBash: (params, input, output) => {
         return [
@@ -125,22 +108,12 @@ export default {
           `mv $TEMP/split1 ${output.b} && \\`,
           `rm -rf $TEMP`
         ];
-      },
-      toTitle: (p, params) => {
-        if (params.perc) {
-          let x = parseInt(params.perc)
-          return `Split ${x}/${100-x}%`
-        }
-        return `Split`;
-      },
-      validate: (params) => {
-        return !!params.perc && params.perc > 0 && params.perc < 100;
       }
     },
     kenlm: {
       type: 'kenlm', title: 'KenLM', category: 'lm',
       params: {
-        order: { type: 'uint', default: '$lm-order' },
+        order: { type: 'uint', default: '$lm-order', min: 1 },
         memory: { type: 'size-unit', default: '$memory', nohash: true },
         tempdir: { type: 'path', default: '$tempdir', nohash: true }
       },
@@ -156,9 +129,6 @@ export default {
         args.push(`-o ${params.order}`)
         args.push('--discount_fallback')
         return [`docker run --rm -i iems/kenlm lmplz ${args.join(' ')} < ${input.in} > ${output.out}`];
-      },
-      validate: (params) => {
-        return !!params.order && !!params.tempdir;
       }
     },
     binarpa: {
@@ -177,15 +147,12 @@ export default {
         //if (params.tempdir) args.push(`-T ${params.tempdir}`); // todo
         if (params.memory) args.push(`-S ${params.memory}`);
         return [`docker run --rm -i -v ${params.workdir}:/work iems/kenlm build_binary ${args.join(' ')} /work/${input.in} /work/${output.out}`];
-      },
-      validate: (params) => {
-        return !!params.type && !!params.workdir;
       }
     },
     fastalign: {
       type: 'fastalign', title: 'Fast align', category: 'alignment', version: 1,
       params: {
-        reverse: { type: 'bool', default: false },
+        reverse: { type: 'bool', default: false, optional: true },
         tempdir: { type: 'path', default: '$tempdir', nohash: true },
         workdir: { type: 'path', default: '$workdir', nohash: true }
       },
@@ -199,9 +166,6 @@ export default {
           `docker run --rm -i -v ${params.tempdir}:${params.tempdir} -v ${params.workdir}:/work iems/fastalign fast_align ${params.reverse ? '-r' : ''} -i $TEMP > ${output.out} && \\`,
           'rm $TEMP'
         ]
-      },
-      validate: (params) => {
-        return !!params.tempdir && !!params.workdir;
       }
     },
     symalign: {
@@ -214,17 +178,14 @@ export default {
       output: { out: 'file<align>' },
       toBash: (params, input, output) => {
         return [`docker run --rm -i -v ${params.workdir}:/work iems/fastalign atools -c ${params.method} -i /work/${input.srctrg} -j /work/${input.trgsrc} > ${output.out}`];
-      },
-      validate: (params) => {
-        return !!params.method && !!params.workdir;
       }
     },
     extractphrases: {
       title: 'Extract phrases', type: 'extractphrases', category: 'phrases',
       params: {
-        maxLength: { type: 'uint', default: 7 },
-        type: { type: 'string', default: '$reordering-type' },
-        orientation: { type: 'string', default: '$reordering-orientation' },
+        maxLength: { type: 'uint', default: 7, min: 1 },
+        type: { type: 'string', default: '$reordering-type', options: ['wbe'] },
+        orientation: { type: 'string', default: '$reordering-orientation', options: ['msd'] },
         workdir: { type: 'path', default: '$workdir' },
         tempdir: { type: 'path', default: '$tempdir' }
       },
@@ -254,7 +215,7 @@ export default {
         tempdir: { type: 'path', default: '$tempdir' }
       },
       input: { phr: 'file<phrases>', phrinv: 'file<phrases>', srctrg: 'file<lex>', trgsrc: 'file<lex>' },
-      output: { ptable: 'file<phrase-table>' },
+      output: { phr: 'file<phrase-table>' },
       toBash: (params, input, output) => {
         return [
           `TEMP=$(mktemp -d --tmpdir=${params.tempdir}) && \\`,
@@ -262,23 +223,22 @@ export default {
           `docker run --rm -i -v ${params.workdir}:/work iems/moses score /work/${input.phrinv} /work/${input.srctrg} /dev/stdout --Inverse > $TEMP/srctrg && \\`,
           `LC_ALL=C sort $TEMP/srctrg -T $TEMP | gzip > $TEMP/srctrg.sorted.gz && \\`,
           `LC_ALL=C sort $TEMP/trgsrc -T $TEMP | gzip > $TEMP/trgsrc.sorted.gz && \\`,
-          `docker run --rm -i -v ${params.tempdir}:${params.tempdir} -v ${params.workdir}:/work iems/moses consolidate $TEMP/trgsrc.sorted.gz $TEMP/srctrg.sorted.gz /work/${output.ptable} && \\`,
+          `docker run --rm -i -v ${params.tempdir}:${params.tempdir} -v ${params.workdir}:/work iems/moses consolidate $TEMP/trgsrc.sorted.gz $TEMP/srctrg.sorted.gz /work/${output.phr} && \\`,
           'rm -r $TEMP'
         ];
       }
     },
     phrasesbin: {
       title: 'Binarize phrases', type: 'phrasesbin', category: 'phrases',
-      input: { ptable: 'file<phrase-table>' },
+      input: { phr: 'file<phrase-table>' },
       output: { minphr: 'file<phrase-table-bin>' },
       params: {
         workdir: { type: 'path', default: '$workdir' },
-        threads: { type: 'uint', default: '$threads' }
+        threads: { type: 'uint', default: '$threads', min: 1, optional: true }
       },
       toBash: (params, input, output) => {
         return [
-          `docker run --rm -i -v ${params.workdir}:/work iems/moses processPhraseTableMin -nscores 4 -threads ${params.threads || 1} -in /work/${input.ptable} -out /work/${output.minphr}`,
-          //`mv ${output.bin}.minphr ${output.bin}`
+          `docker run --rm -i -v ${params.workdir}:/work iems/moses processPhraseTableMin -nscores 4 -threads ${params.threads || 1} -in /work/${input.phr} -out /work/${output.minphr}`
         ];
       }
     },
@@ -324,10 +284,10 @@ export default {
     binreordering: {
       title: 'Binarize reordering', type: 'binreordering', category: 'phrases',
       input: { reord: 'file<reordering>' },
-      output: { minlexr: 'file<reordering-bin>' },
+      output: { minreord: 'file<reordering-bin>' },
       params: {
         workdir: { type: 'path', default: '$workdir' },
-        threads: { type: 'uint', default: '$threads' }
+        threads: { type: 'uint', default: '$threads', min: 1, optional: true }
       },
       toBash: (params, input, output) => {
         return [
@@ -367,7 +327,7 @@ export default {
       output: { ini: 'file<moses>' },
       params: {
         workdir: { type: 'path', default: '$workdir' },
-        lmorder: { type: 'uint', default: '$lm-order' },
+        lmorder: { type: 'uint', default: '$lm-order', min: 1 },
       },
       toBash: (params, input, output) => {
         var ini = [];
@@ -426,7 +386,7 @@ export default {
       }
     },
     bintext: {
-      type: 'bintext', title: 'Binarize text', category: 'phrases',
+      type: 'bintext', title: 'Binarize text', category: 'phrases-sampling',
       input: { in: 'file<tok>' },
       output: { out: 'dir<bin>' },
       params: { workdir: { type: 'path', default: '$workdir' }, },
@@ -439,7 +399,7 @@ export default {
       }
     },
     binalign: {
-      type: 'binalign', title: 'Binarize alignments', category: 'phrases',
+      type: 'binalign', title: 'Binarize alignments', category: 'phrases-sampling',
       input: { in: 'file<align>' },
       output: { out: 'file<bin>' },
       params: { workdir: { type: 'path', default: '$workdir' } },
@@ -448,7 +408,7 @@ export default {
       }
     },
     binlex: {
-      type: 'binlex', title: 'Binarize lex', category: 'phrases',
+      type: 'binlex', title: 'Binarize lex', category: 'phrases-sampling',
       input: { src: 'dir<bin>', trg: 'dir<bin>', algn: 'file<bin>' },
       output: { out: 'file<bin>' },
       params: {
@@ -471,7 +431,7 @@ export default {
       }
     },
     'phrases-sampling-model': {
-      type: 'phrases-sampling-model', title: 'Sampling model', category: 'phrases',
+      type: 'phrases-sampling-model', title: 'Sampling model', category: 'phrases-sampling',
       input: { src: 'dir<bin>', trg: 'dir<bin>', algn: 'file<bin>', lex: 'file<bin>' },
       output: { out: 'dir<sample>' },
       params: { 
@@ -571,7 +531,7 @@ export default {
       input: { src: 'file<tok>', trg: 'file<tok>', ini: 'file<ini>' },
       output: { gram: 'dir<grammars>', sgm: 'file<sgm>'},
       params: {
-        threads: { type: 'uinteger', default: '$threads' },
+        threads: { type: 'uint', default: '$threads', min: 1, optional: true },
         workdir: { type: 'path', default: '$workdir' },
         tempdir: { type: 'path', default: '$tempdir' }
       },
@@ -601,14 +561,15 @@ export default {
     },
     'phraseextraction': {
       title: 'Phrase Extraction', type: 'phraseextraction', category: 'phrases',
-      ports: { input: ['src', 'trg', 'algn'], output: ['model'] },
+      ports: { input: ['algn', 'src', 'trg'], output: ['model'] },
       processes: [
-        { id: 1, x: 69, y: 80, type: 'extractphrases', params: { maxLength: "7", model: "xxx", workdir: "$workdir", tempdir: "$tempdir" } },
-        { id: 2, x: 66, y: 258, type: 'scorephrases', params: { workdir: "$workdir", tempdir: "$tempdir" } },
-        { id: 3, x: 376, y: 109, type: 'lexical', params: { workdir: "$workdir", tempdir: "$tempdir" } },
-        { id: 4, x: 75, y: 435, type: 'phrasesbin', params: { workdir: "$workdir", threads: "$threads" } },
-        { id: 5, x: 408, y: 274, type: 'reordering', params: { workdir: "$workdir", tempdir: "$tempdir" } },
-        { id: 6, x: 413, y: 462, type: 'binreordering', params: { workdir: "$workdir", threads: "$threads" } }
+        { id: 1, x: 69, y: 80, type: 'extractphrases', params: { maxLength: "7" } },
+        { id: 2, x: 66, y: 258, type: 'scorephrases', params: {} },
+        { id: 3, x: 376, y: 109, type: 'lexical', params: {} },
+        { id: 4, x: 75, y: 435, type: 'phrasesbin', params: {} },
+        { id: 5, x: 413, y: 340, type: 'reordering', params: {} },
+        { id: 6, x: 413, y: 462, type: 'binreordering', params: {} },
+        { id: 7, x: 226, y: 562, type: 'phrase-extraction-model', params: {} }
       ],
       links: [
         { from: { id: 111, port: 'reord' }, to: { id: 6, port: 'reord' } },
@@ -617,18 +578,22 @@ export default {
         { from: { id: undefined, port: 'algn' }, to: { id: 1, port: 'algn' } },
         { from: { id: undefined, port: 'src' }, to: { id: 3, port: 'src' } },
         { from: { id: undefined, port: 'trg' }, to: { id: 3, port: 'trg' } },
-        { from: { id: 2, port: 'ptable' }, to: { id: 4, port: 'ptable' } },
+        { from: { id: 2, port: 'phr' }, to: { id: 4, port: 'phr' } },
         { from: { id: undefined, port: 'algn' }, to: { id: 3, port: 'algn' } },
         { from: { id: 3, port: 'srctrg' }, to: { id: 2, port: 'srctrg' } },
         { from: { id: 3, port: 'trgsrc' }, to: { id: 2, port: 'trgsrc' } },
         { from: { id: 1, port: 'o' }, to: { id: 5, port: 'phr' } },
         { from: { id: 1, port: 'out' }, to: { id: 2, port: 'phr' } },
         { from: { id: 1, port: 'inv' }, to: { id: 2, port: 'phrinv' } },
-        { from: { id: 5, port: 'reord' }, to: { id: 6, port: 'reord' } }
+        { from: { id: 5, port: 'reord' }, to: { id: 6, port: 'reord' } },
+        { from: { id: 2, port: 'phr' }, to: { id: 5, port: 'phr' } },
+        { from: { id: 4, port: 'minphr' }, to: { id: 7, port: 'phr' } },
+        { from: { id: 6, port: 'minreord' }, to: { id: 7, port: 'reord' } },
+        { from: { id: 7, port: 'ini' }, to: { id: undefined, port: 'model' } }
       ]
     },
     'phrasesampling': {
-      title: 'Sampling Phrases', type: 'phrasesampling', category: 'phrases',
+      title: 'Sampling Phrases', type: 'phrasesampling', category: 'phrases-sampling',
       ports: { input: ['algn', 'src', 'trg'], output: ['model'] },
       processes: [
         { id: 2, x: 20, y: 50, type: 'bintext' },

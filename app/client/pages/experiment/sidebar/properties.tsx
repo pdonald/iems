@@ -81,12 +81,15 @@ export default class Properties extends React.Component<Props, {}> {
         </table>
       )
     } else {
-      var p = selected
+      var p: ProcessModel = selected
       var children = Object.keys(p.template.params).map(key => {
+        let validationMsg = p.isParamInvalid(key)
         return (
           <tr key={'P' + key}>
           <th>{key}</th>
-          <td><input type="text" value={p.params[key] || ''} onChange={e => this.onProcessParamChange(p, key, (e.target as HTMLInputElement).value)}/></td>
+          <td className={validationMsg ? 'invalid' : ''}>
+            <input title={validationMsg} type="text" value={p.params[key] || ''} onChange={e => this.onProcessParamChange(p, key, (e.target as HTMLInputElement).value)}/>
+          </td>
           </tr>
         )
       })

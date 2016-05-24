@@ -39,7 +39,7 @@ export default class ProcessModel {
 
     for (var key in this.template.params) {
       if (!this.params[key] && (<TemplateParamDefinition>this.template.params[key]).default) {
-        this.params[key] = (<TemplateParamDefinition>this.template.params[key]).default;
+        this.params[key] = (<TemplateParamDefinition>this.template.params[key]).default
       }
     }
   }
@@ -48,19 +48,19 @@ export default class ProcessModel {
    * Unique ID for this process in an experiment.
    */
   getFullId(sep: string = '.'): string {
-    let ids = [];
-    ids.push(this.id);
-    let group = this.group;
+    let ids = []
+    ids.push(this.id)
+    let group = this.group
     while (group) {
-      ids.push(group.id);
+      ids.push(group.id)
       if (group.parent) {
-        group = group.parent;
+        group = group.parent
       } else {
-        ids.push(group.doc.id);
-        break;
+        ids.push(group.doc.id)
+        break
       }
     }
-    return ids.reverse().join(sep);
+    return ids.reverse().join(sep)
   }
 
   /**
@@ -68,7 +68,7 @@ export default class ProcessModel {
    * This key uniquely identifies this process in a group, but not in an experiment.
    */
   getKey(): string {
-    return 'P' + this.id;
+    return 'P' + this.id
   }
 
   /**
@@ -76,35 +76,35 @@ export default class ProcessModel {
    * to arrive at the output file of this particular process (template, parameters, previous processes).
    */
   getHashKey(): string {
-    var key = [];
-    key.push('template='  + this.type);
-    key.push('templateVer=' + this.template.version);
-    var params = this.getParamValues();
+    var key = []
+    key.push('template='  + this.type)
+    key.push('templateVer=' + this.template.version)
+    var params = this.getParamValues()
     for (var name in this.template.params) {
       if ((<TemplateParamDefinition>this.template.params[name]).nohash)
-        continue;
+        continue
       if (name in params) {
-        key.push(`param:${name}=${params[name]}`);
+        key.push(`param:${name}=${params[name]}`)
       }
     }
-    var prev = [];
+    var prev = []
     for (let input of this.getInputs()) {
-      prev.push(input.process.getHashKey() + '/' + input.outPort);
+      prev.push(input.process.getHashKey() + '/' + input.outPort)
     }
-    return prev.join('->') + key.join(';');
+    return prev.join('->') + key.join(';')
   }
 
   getTitle(): string {
-    if (this.template.toTitle) return this.template.toTitle(this, this.getParamValues());
-    if (this.template.title) return this.template.title;
-    return this.type;
+    if (this.template.toTitle) return this.template.toTitle(this, this.getParamValues())
+    if (this.template.title) return this.template.title
+    return this.type
   }
 
   getSize(): { width: number, height: number } {
     return {
       width: this.width || this.template.width || Math.max(150, Object.keys(this.template.input).length * 50),
       height: this.height || this.template.height || 50
-    };
+    }
   }
 
   getPorts(): { input: string[], output: string[] } {
@@ -139,10 +139,10 @@ export default class ProcessModel {
   dependsOn(p: ProcessModel): boolean {
     for (let input of this.getInputs()) {
       if (input.process == p) {
-        return true;
+        return true
       }
     }
-    return false;
+    return false
   }
   
   /**
@@ -150,23 +150,29 @@ export default class ProcessModel {
    * in experiment parameters.
    */
   getParamValues(): { [name: string]: string } {
-    function resolveParams(params, vars): { [name: string]: string } {
-      var result: { [name: string]: string } = {};
-      for (var key in params) {
-        if (params[key][0] == '$') {
-          if (params[key].substr(1) in vars) {
-            result[key] = vars[params[key].substr(1)];
-          } else {
-            result[key] = undefined;
-          }
-        } else {
-          result[key] = params[key];
-        }
-      }
-      return result;
+    var result: { [name: string]: string } = {}
+    for (var key in this.params) {
+      result[key] = this.getParamValue(key)
     }
-
-    return resolveParams(this.params, this.group.doc.vars);
+    return result
+  }
+  
+  getParamValue(p: string): string {
+    let vars = this.group.doc.vars
+    let value = this.params[p]
+    //if (value === null || typeof value === 'undefined' || value === '') {
+      //value = (<TemplateParamDefinition>this.template.params[p]).default
+    //}
+    if (value && value[0] == '$') {
+      let name = value.substr(1) 
+      if (name in vars) {
+        return vars[name]
+      } else {
+        return undefined
+      }
+    } else {
+      return value
+    }
   }
 
   getStatus(): string {
@@ -176,16 +182,63 @@ export default class ProcessModel {
   }
   
   isValid(): boolean {
-    if (this.template.validate) {
-      return !!this.template.validate(this.getParamValues());
+    for (let p in this.template.params) {
+      if (this.isParamInvalid(p)) {
+        return false
+      }
     }
-    return null;
+    
+    if (this.template.validate) {
+      return !!this.template.validate(this.getParamValues())
+    }
+    
+    return true
+  }
+  
+  isParamInvalid(p: string): string {
+    let ptpl = this.template.params[p]
+    let tpl: TemplateParamDefinition = typeof ptpl === 'string' ? { type: ptpl as string } : ptpl as TemplateParamDefinition
+    let value = this.getParamValue(p)
+    
+    if (!value && (tpl.required || !tpl.optional)) {
+      return 'This is a required field'
+    }
+    
+    if (!value && tpl.optional) return
+    
+    if (tpl.type === 'path' && value[0] != '/') {
+      return 'This must be a path and start with /'
+    }
+    
+    if (tpl.type == 'uint' || tpl.type == 'int' || tpl.type == 'integer') {
+      let intval = parseInt(value, 10)
+      if (isNaN(intval)) return 'This is not a valid number'
+      let min = Number.MIN_VALUE
+      let max = Number.MAX_VALUE
+      if (tpl.type == 'uint') min = 0
+      if (tpl.min) min = tpl.min
+      if (tpl.max) max = tpl.max
+      if (intval > max) return `Max possible value is ${max}`
+      if (intval < min) return `Min possible value is ${min}`
+    }
+    
+    if (tpl.type === 'lang' || tpl.type === 'language' || tpl.type == 'lang2' || tpl.type == 'language2') {
+      if (value.length !== 2) return 'Language code is expected to be 2 chars'
+    }
+    
+    if (tpl.options) {
+      if (tpl.options.indexOf(value) === -1) {
+        return 'Value must be one of: ' + tpl.options.join(', ')
+      }
+    }
+    
+    return null
   }
 
   static isLinkValid(a, b): boolean {
-    var atype = a.type || a;
-    var btype = b.type || b;
-    if (atype == 'file<any>' || btype == 'file<any>') return true;
-    return atype == btype;
+    var atype = a.type || a
+    var btype = b.type || b
+    if (atype == 'file<any>' || btype == 'file<any>') return true
+    return atype == btype
   } 
 }
