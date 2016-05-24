@@ -184,15 +184,15 @@ export default {
       title: 'Extract phrases', type: 'extractphrases', category: 'phrases',
       params: {
         maxLength: { type: 'uint', default: 7, min: 1 },
-        type: { type: 'string', default: '$reordering-type', options: ['wbe'] },
-        orientation: { type: 'string', default: '$reordering-orientation', options: ['msd'] },
+        type: { type: 'string', default: '$reordering-type', optional: true, options: ['wbe', 'phrase', 'hier'] },
+        orientation: { type: 'string', default: '$reordering-orientation', optional: true, options: ['msd', 'mslr', 'mono'] },
         workdir: { type: 'path', default: '$workdir' },
         tempdir: { type: 'path', default: '$tempdir' }
       },
       input: { src: 'file<tok>', trg: 'file<tok>', algn: 'file<align>' },
       output: function(p, params) {
-        var output = { out: 'file<phrases>', inv: 'file<phrases>' };
-        if (params.type && params.orientation) output.out = 'file<any>';
+        var output: any = { out: 'file<phrases>', inv: 'file<phrases>' };
+        if (params.type && params.orientation) output.o = 'file<any>';
         return output;
       },
       toBash: (params, input, output) => {
@@ -263,8 +263,8 @@ export default {
     reordering: {
       title: 'Reordering', type: 'reordering', category: 'phrases',
       params: {
-        type: { type: 'string', default: '$reordering-type' },
-        orientation: { type: 'string', default: '$reordering-orientation' },
+        type: { type: 'string', default: '$reordering-type', options: ['wbe', 'phrase', 'hier'] },
+        orientation: { type: 'string', default: '$reordering-orientation', options: ['msd', 'mslr', 'mono'] },
         model: { type: 'string', default: '$reordering-model' },
         smoothing: { type: 'float', default: 0.5 },
         workdir: { type: 'path', default: '$workdir' },
@@ -273,6 +273,7 @@ export default {
       input: { phr: 'file<any>' },
       output: { reord: 'file<reordering>' },
       toBash: (params, input, output) => {
+        // https://github.com/moses-smt/mosesdecoder/blob/271aaa67daee1deeebacb25093abd9641066805f/scripts/training/train-model.perl#L1896
         return [
           `TEMP=$(mktemp -d --tmpdir=${params.tempdir}) && \\`,
           `docker run --rm -i -v ${params.tempdir}:${params.tempdir} -v ${params.workdir}:/work iems/moses lexical-reordering-score /work/${input.phr} ${params.smoothing} $TEMP/output. --model "${params.type} ${params.orientation} ${params.model}" && \\`,
@@ -291,7 +292,7 @@ export default {
       },
       toBash: (params, input, output) => {
         return [
-          `docker run --rm -i -v ${params.workdir}:/work iems/moses processLexicalTableMin -threads ${params.threads || 1} -in /work/${input.reord} -out /work/${output.minlexr}`,
+          `docker run --rm -i -v ${params.workdir}:/work iems/moses processLexicalTableMin -threads ${params.threads || 1} -in /work/${input.reord} -out /work/${output.minreord}`,
           //`mv ${output.reord}.minlexr ${output.reord}`
         ];
       }
@@ -301,7 +302,7 @@ export default {
       input: { phr: 'file<phrase-table-bin>', reord: 'file<reordering-bin>' },
       output: { ini: 'file<moses>' },
       params: {
-        model: { type: 'string', default: '$reordering-model' },
+        model: { type: 'string', default: '$reordering-model', optional: true },
         workdir: { type: 'path', default: '$workdir' },
       },
       toBash: (params, input, output) => {
@@ -559,8 +560,8 @@ export default {
         { from: { id: 3, port: 'out' }, to: { id: undefined, port: 'lm' } },
       ]
     },
-    'phraseextraction': {
-      title: 'Phrase Extraction', type: 'phraseextraction', category: 'phrases',
+    'phraseextraction-reord': {
+      title: 'Phrase Extraction w/ R', type: 'phraseextraction-reord', category: 'phrases',
       ports: { input: ['algn', 'src', 'trg'], output: ['model'] },
       processes: [
         { id: 1, x: 69, y: 80, type: 'extractphrases', params: { maxLength: "7" } },
@@ -572,23 +573,48 @@ export default {
         { id: 7, x: 226, y: 562, type: 'phrase-extraction-model', params: {} }
       ],
       links: [
-        { from: { id: 111, port: 'reord' }, to: { id: 6, port: 'reord' } },
         { from: { id: undefined, port: 'src' }, to: { id: 1, port: 'src' } },
         { from: { id: undefined, port: 'trg' }, to: { id: 1, port: 'trg' } },
         { from: { id: undefined, port: 'algn' }, to: { id: 1, port: 'algn' } },
         { from: { id: undefined, port: 'src' }, to: { id: 3, port: 'src' } },
         { from: { id: undefined, port: 'trg' }, to: { id: 3, port: 'trg' } },
-        { from: { id: 2, port: 'phr' }, to: { id: 4, port: 'phr' } },
         { from: { id: undefined, port: 'algn' }, to: { id: 3, port: 'algn' } },
-        { from: { id: 3, port: 'srctrg' }, to: { id: 2, port: 'srctrg' } },
-        { from: { id: 3, port: 'trgsrc' }, to: { id: 2, port: 'trgsrc' } },
-        { from: { id: 1, port: 'o' }, to: { id: 5, port: 'phr' } },
         { from: { id: 1, port: 'out' }, to: { id: 2, port: 'phr' } },
         { from: { id: 1, port: 'inv' }, to: { id: 2, port: 'phrinv' } },
+        { from: { id: 3, port: 'srctrg' }, to: { id: 2, port: 'srctrg' } },
+        { from: { id: 3, port: 'trgsrc' }, to: { id: 2, port: 'trgsrc' } },
+        { from: { id: 2, port: 'phr' }, to: { id: 4, port: 'phr' } },
+        { from: { id: 1, port: 'o' }, to: { id: 5, port: 'phr' } },
         { from: { id: 5, port: 'reord' }, to: { id: 6, port: 'reord' } },
-        { from: { id: 2, port: 'phr' }, to: { id: 5, port: 'phr' } },
         { from: { id: 4, port: 'minphr' }, to: { id: 7, port: 'phr' } },
         { from: { id: 6, port: 'minreord' }, to: { id: 7, port: 'reord' } },
+        { from: { id: 7, port: 'ini' }, to: { id: undefined, port: 'model' } }
+      ]
+    },
+    'phraseextraction': {
+      title: 'Phrase Extraction', type: 'phraseextraction', category: 'phrases',
+      ports: { input: ['algn', 'src', 'trg'], output: ['model'] },
+      processes: [
+        { id: 1, x: 69, y: 80, type: 'extractphrases', params: { maxLength: "7" } },
+        { id: 2, x: 66, y: 258, type: 'scorephrases', params: {} },
+        { id: 3, x: 376, y: 109, type: 'lexical', params: {} },
+        { id: 4, x: 75, y: 435, type: 'phrasesbin', params: {} },
+        { id: 7, x: 226, y: 562, type: 'phrase-extraction-model', params: {} }
+      ],
+      links: [
+        { from: { id: undefined, port: 'src' }, to: { id: 1, port: 'src' } },
+        { from: { id: undefined, port: 'trg' }, to: { id: 1, port: 'trg' } },
+        { from: { id: undefined, port: 'algn' }, to: { id: 1, port: 'algn' } },
+        { from: { id: undefined, port: 'src' }, to: { id: 3, port: 'src' } },
+        { from: { id: undefined, port: 'trg' }, to: { id: 3, port: 'trg' } },
+        { from: { id: undefined, port: 'algn' }, to: { id: 3, port: 'algn' } },
+        { from: { id: 1, port: 'out' }, to: { id: 2, port: 'phr' } },
+        { from: { id: 1, port: 'inv' }, to: { id: 2, port: 'phrinv' } },
+        { from: { id: 3, port: 'srctrg' }, to: { id: 2, port: 'srctrg' } },
+        { from: { id: 3, port: 'trgsrc' }, to: { id: 2, port: 'trgsrc' } },
+        { from: { id: 2, port: 'phr' }, to: { id: 4, port: 'phr' } },
+        { from: { id: 1, port: 'o' }, to: { id: 5, port: 'phr' } },
+        { from: { id: 4, port: 'minphr' }, to: { id: 7, port: 'phr' } },
         { from: { id: 7, port: 'ini' }, to: { id: undefined, port: 'model' } }
       ]
     },
