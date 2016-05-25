@@ -35,6 +35,8 @@ export default class GroupModel {
     for (var key in obj) {
       this[key] = obj[key];
     }
+    
+    this.collapsed = true;
 
     this.groups.forEach((g, index) => this.groups[index] = new GroupModel(g, this, doc));
     this.processes.forEach((p: any, index) => this.processes[index] = new ProcessModel(p, Tools.processes[p.type], this));
