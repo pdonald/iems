@@ -1,6 +1,7 @@
 import { Job } from './job'
 import { Host } from  './host'
 import { HostInQueue } from './queue'
+import { CancelationToken } from '../sshexec'
 
 export class Scheduler {
   private timer: NodeJS.Timer
@@ -57,7 +58,7 @@ export class Scheduler {
     
     let slots = this.slots
     
-    console.log(`Running scheduler, I have ${numjobs} total jobs, ${pendingjobs.length} pending jobs, ${runnablejobs.length} runnable, ${numhosts} hosts with ${slots.total} total and ${slots.free} free slots`)
+    //console.log(`Running scheduler, I have ${numjobs} total jobs, ${pendingjobs.length} pending jobs, ${runnablejobs.length} runnable, ${numhosts} hosts with ${slots.total} total and ${slots.free} free slots`)
     
     runnablejobs.slice(0, slots.free).forEach(job => this.runJob(job))
   } 
@@ -73,12 +74,16 @@ export class Scheduler {
     if (!this.active[host.id]) this.active[host.id] = []
     this.active[host.id].push(job)
     
+    let cancelationToken: CancelationToken
     let timer = setInterval(function() {
-      // todo: check if job status is set to canceled
-    }, 1000)
+      if (job.state == 'stopped') {
+        console.log(`Job ${job.id} was canceled...`, cancelationToken)
+        if (cancelationToken) cancelationToken.canceled = true
+      }
+    }, 500)
     
     job.startRuning(host)
-    host.exec(job.cmd, (err, exitCode, stdout, stderr) => {
+    cancelationToken = host.exec(job.cmd, (err, exitCode, stdout, stderr) => {
       clearInterval(timer)
       
       if (!this.timer) return // scheduler was stopped

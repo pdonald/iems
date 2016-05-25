@@ -84,6 +84,7 @@ export class Queue {
     job.reset()
     
     for (let depid in this.jobs) {
+      if (id == depid) continue
       let dep = this.jobs[depid]
       if (dep.dependencies.indexOf(job) !== -1) {
         this.resetJob(dep.id)
@@ -104,6 +105,7 @@ export class Queue {
     delete this.jobs[id]
     
     for (let depid in this.jobs) {
+      if (id == depid) continue
       let dep = this.jobs[depid]
       if (dep.dependencies.indexOf(job) !== -1) {
         this.deleteJob(dep.id)

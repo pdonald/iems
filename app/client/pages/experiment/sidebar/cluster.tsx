@@ -36,11 +36,12 @@ export default class Cluster extends React.Component<any, any> {
   }
 
   renderContent() {
+    let queueCount = Object.keys(this.state.queues).length
     return (
       <div>
         <select ref="queue">
           <option value="">- Queues -</option>
-          {map(this.state.queues, (id, q: QueueSummary) => <option key={id} value={id}>{`${q.name}`}</option>)}
+          {map(this.state.queues, (id, q: QueueSummary) => <option key={id} value={id} selected={queueCount == 1}>{`${q.name}`}</option>)}
         </select>
         <button onClick={e => this.run(e)}>Run</button>
         <QueueContainer onUpdate={queues => this.updateStatus(queues)}/>

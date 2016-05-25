@@ -1,16 +1,6 @@
 let events = require('events')
 let SshClient = require('ssh2').Client
-
-function sshexec(ssh, cmd, cb) {
-  ssh.exec(cmd, (err, stream) => {
-    if (err) return cb(err)
-    let stdout = ''
-    let stderr = ''
-    stream.on('close', (code, signal) => cb(null, code, stdout, stderr))
-    stream.on('data', data => stdout += data)
-    stream.stderr.on('data', data => stderr += data)
-  })
-}
+let sshexec = require('./sshexec').sshexec
 
 class Connection extends events.EventEmitter {
   constructor(config) {
@@ -182,15 +172,6 @@ class Connection extends events.EventEmitter {
         if (stdout) console.log(stdout.trim())
       })
     }, 1000)
-  }
-
-  exec(cmd, cb) {
-    console.log('executing: ' + cmd)
-    //console.log(cmd)
-    sshexec(this.ssh, cmd, (err, code, stdout, stderr) => {
-      console.log(err, code, stdout, stderr)
-      if (cb) cb(err, code, stdout, stderr)
-    })
   }
 }
 

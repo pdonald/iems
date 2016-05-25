@@ -1,3 +1,5 @@
+import { sshexec, CancelationToken, SshExecCallback } from '../sshexec'
+
 interface Instance {
   id: string
   state: string
@@ -14,10 +16,11 @@ export class Host {
   get id(): string { return this.instance.id }
   get state(): string { return this.instance.state }
   
-  exec(cmd: string, cb: Function) {
-    if (this.instance && this.instance.ssh && this.instance.ssh.exec) {
+  exec(cmd: string, cb: SshExecCallback): CancelationToken {
+    if (this.instance && this.instance.ssh && this.instance.ssh.ssh) {
       try {
-        this.instance.ssh.exec(cmd, cb)
+        let ssh = this.instance.ssh.ssh
+        return sshexec(ssh, cmd, cb)
       } catch (e) {
         cb(e)
       }
