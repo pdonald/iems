@@ -12,6 +12,15 @@ export interface ProcessSpec {
   params: { [name: string]: string }
 }
 
+function hashFnv32a(str: string): string {
+  var i, l, hval = 0x811c9dc5;
+  for (i = 0, l = str.length; i < l; i++) {
+      hval ^= str.charCodeAt(i);
+      hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
+  }
+  return ("0000000" + (hval >>> 0).toString(16)).substr(-8);
+}
+
 export default class ProcessModel {
   public id: number
   public type: string
@@ -92,6 +101,10 @@ export default class ProcessModel {
       prev.push(input.process.getHashKey() + '/' + input.outPort)
     }
     return prev.join('->') + key.join(';')
+  }
+  
+  getHashKeyHashed(): string {
+    return hashFnv32a(this.getHashKey())
   }
 
   getTitle(): string {
@@ -177,7 +190,7 @@ export default class ProcessModel {
 
   getStatus(): string {
     if (this.group.doc.status) {
-      return this.group.doc.status[this.getFullId()]
+      return this.group.doc.status[this.getHashKeyHashed()]
     }
   }
   

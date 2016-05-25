@@ -29,17 +29,8 @@ function joblist(graph: GroupModel): Job[] {
   });
 }
 
-function hashFnv32a(str: string): string {
-  var i, l, hval = 0x811c9dc5;
-  for (i = 0, l = str.length; i < l; i++) {
-      hval ^= str.charCodeAt(i);
-      hval += (hval << 1) + (hval << 4) + (hval << 7) + (hval << 8) + (hval << 24);
-  }
-  return ("0000000" + (hval >>> 0).toString(16)).substr(-8);
-}
-
 export function getMakefileKey(p: ProcessModel, port?: string): string {
-  var hash = hashFnv32a(p.getHashKey());
+  var hash = p.getHashKeyHashed();
   return p.type + '-' + hash + (port ? '.' + port : '');
 }
 
@@ -148,10 +139,10 @@ var Output = {
         
     let formatted: JobSpec[] = jobs.map(j => {
       return {
-        id: j.process.getFullId(),
+        id: j.process.getHashKeyHashed(),
         name: j.name,
         cmd: `cd ${workdir} && exec >${getMakefileKey(j.process, 'stdout')} 2>${getMakefileKey(j.process, 'stderr')} && ${j.cmd}`,
-        dependencies: [graph.doc.id, ...jobs.filter(jj => j.process.dependsOn(jj.process)).map(jj => jj.process.getFullId())],
+        dependencies: [graph.doc.id, ...jobs.filter(jj => j.process.dependsOn(jj.process)).map(jj => jj.process.getHashKeyHashed())],
         tags: {
           expid: graph.doc.id,
           expname: graph.doc.props.name,

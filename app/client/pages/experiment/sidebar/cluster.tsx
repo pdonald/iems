@@ -66,8 +66,9 @@ export default class Cluster extends React.Component<any, any> {
   updateStatus(queues: { [id: string]: QueueSummary }) {
     var status = {}
     for (let qid in queues) {
-      for (let jid in queues[qid].jobs) {
-        status[jid] = queues[qid].jobs[jid].globalState
+      for (let hash in queues[qid].jobs) {
+        let job = queues[qid].jobs[hash]
+        status[hash] = job.globalState
       }
     }
     Actions.updateStatus(status, queues)
