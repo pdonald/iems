@@ -1,5 +1,12 @@
 export default {
   processes: {
+    sleep: {
+      type: 'sleep', title: 'Sleep', category: 'corpora',
+      params: { time: 'uint' },
+      input: { },
+      output: { },
+      toBash: (params, input, output) => [`sleep ${params.time}`]
+    },
     cp: {
       type: 'cp', title: 'Copy local file', category: 'corpora',
       params: { source: 'string' },
