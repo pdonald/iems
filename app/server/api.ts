@@ -96,11 +96,11 @@ app.post('/api/cluster/queues/:id', (req, res) => {
   }
 })
 
-app.post('/api/cluster/queues/:id/jobs/:jid/cancel', (req, res) => {
+app.post('/api/cluster/queues/:id/jobs/:jid/stop', (req, res) => {
   let queue = queues[req.params.id]
   if (queue) {
     let jobid = req.params.jid
-    queue.cancelJob(jobid)
+    queue.stopJob(jobid)
     res.send('')
   } else {
     res.status(404).send('')
@@ -112,6 +112,17 @@ app.post('/api/cluster/queues/:id/jobs/:jid/reset', (req, res) => {
   if (queue) {
     let jobid = req.params.jid
     queue.resetJob(jobid)
+    res.send('')
+  } else {
+    res.status(404).send('')
+  }
+})
+
+app.post('/api/cluster/queues/:id/jobs/:jid/delete', (req, res) => {
+  let queue = queues[req.params.id]
+  if (queue) {
+    let jobid = req.params.jid
+    queue.deleteJob(jobid)
     res.send('')
   } else {
     res.status(404).send('')

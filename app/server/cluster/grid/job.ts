@@ -23,7 +23,7 @@ export class Job {
     for (let dependency of this.dependencies) {
       let depstate = dependency.globalState
       if (depstate == 'error') return 'error'
-      if (depstate == 'canceled') return 'canceled'
+      if (depstate == 'stopped') return 'stopped'
     }
     
     return this.state
@@ -51,7 +51,7 @@ export class Job {
   }
   
   finishRunning(err: any, exitCode: number, stdout: string, stderr: string) {
-    if (this.state == 'canceled') {
+    if (this.state == 'stopped') {
       return
     }
     
@@ -64,11 +64,10 @@ export class Job {
   
   reset() {
     this.state = 'pending'
-    // todo: reset jobs that depend on this
   }
 
-  cancel() {
-    this.state = 'canceled'
+  stop() {
+    this.state = 'stopped'
   }
   
   toSummary(): JobSummary {

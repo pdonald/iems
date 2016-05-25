@@ -41,7 +41,7 @@ export class Queue {
     let id2job: { [id: string]: Job } = {}
     for (let spec of specs) {
       if (this.jobs[spec.id])
-        throw `Job with ID ${spec.id} already exists`
+        continue // throw `Job with ID ${spec.id} already exists`
       if (id2job[spec.id])
         throw `Submitted more than one job with ID ${spec.id}`
       id2job[spec.id] = new Job(spec.id, spec, [])
@@ -58,8 +58,17 @@ export class Queue {
         dependencies.push(job)
       }
       
-      id2job[spec.id].dependencies = dependencies
-      jobs.push(id2job[spec.id])
+      if (id2job[spec.id]) {
+        id2job[spec.id].dependencies = dependencies
+        jobs.push(id2job[spec.id])  
+      } else {
+        for (let dep of dependencies) {
+          let job = this.jobs[spec.id]
+          if (job.dependencies.indexOf(dep) === -1) {
+            job.dependencies.push(dep)
+          }
+        } 
+      }
     }
     
     for (let job of jobs) {
@@ -71,16 +80,35 @@ export class Queue {
   
   resetJob(id: string) {
     let job = this.jobs[id]
-    if (!job)
-      throw `Job with ID ${id} does not exit`
+    if (!job) throw `Job with ID ${id} does not exit`
     job.reset()
+    
+    for (let depid in this.jobs) {
+      let dep = this.jobs[depid]
+      if (dep.dependencies.indexOf(job) !== -1) {
+        this.resetJob(dep.id)
+      }
+    }
   }
 
-  cancelJob(id: string) {
+  stopJob(id: string) {
     let job = this.jobs[id]
-    if (!job)
-      throw `Job with ID ${id} does not exit`
-    job.cancel()
+    if (!job) throw `Job with ID ${id} does not exit`
+    job.stop()
+  }
+  
+  deleteJob(id: string) {
+    let job = this.jobs[id]
+    if (!job) throw `Job with ID ${id} does not exit`
+    job.stop()
+    delete this.jobs[id]
+    
+    for (let depid in this.jobs) {
+      let dep = this.jobs[depid]
+      if (dep.dependencies.indexOf(job) !== -1) {
+        this.deleteJob(dep.id)
+      }
+    }
   }
   
   addOrUpdateHost(host: Host, params: HostInQueueParams) {
@@ -126,7 +154,7 @@ export class Queue {
   
   destroy() {
     this.scheduler.stop()
-    for (let id in this.jobs) this.cancelJob(id)
+    for (let id in this.jobs) this.deleteJob(id)
     for (let id in this.hosts) this.removeHost(this.hosts[id].host)
   }
   

@@ -130,7 +130,7 @@ export default class GroupModel {
     var size = { width: 0, height: 0 };
     var padding = { x: 20, y: 50 };
     this.groups.forEach(g => {
-      var groupSize = g.collapsed ? g.getSize() : g.getCalculatedSize();
+      var groupSize = g.collapsed ? g.getCollapsedSize() : g.getCalculatedSize();
       if (g.x + groupSize.width + padding.x > size.width) size.width = g.x + groupSize.width + padding.x;
       if (g.y + groupSize.height + padding.y > size.height) size.height = g.y + groupSize.height + padding.y;
     });

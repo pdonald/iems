@@ -29,9 +29,14 @@ export default class QueueList extends React.Component<Props, any> {
       slots: { title: 'Slots', sortable: false },
       jobs: { title: 'Jobs', sortable: false }
     }
+    
+    function mapState(state) {
+      if (state == 'stopped') return 'pending'
+      return state
+    }
 
     let rows = map(this.props.queues, (key: string, q: QueueSummary) => {
-      let jobs = groupBy(Object.keys(q.jobs).map(k => q.jobs[k]), j => j.state)
+      let jobs = groupBy(Object.keys(q.jobs).map(k => q.jobs[k]), j => mapState(j.state))
       let states = ['pending', 'running', 'finished', 'error']
       return {
         queue: q,
@@ -128,11 +133,11 @@ export default class QueueList extends React.Component<Props, any> {
       status: <span className={'state state-' + this.jobstate(j)}>{this.jobstate(j)}</span>,
       actions: (
         <span>
-          <a onClick={_ => this.cancelJob(q.id, j.id)}>Cancel</a>
+          <a onClick={_ => this.stopJob(q.id, j.id)}>Stop</a>
           {' '}
           <a onClick={_ => this.resetJob(q.id, j.id)}>Reset</a>
           {' '}
-          <a>Delete</a>
+          <a onClick={_ => this.deleteJob(q.id, j.id)}>Delete</a>
         </span>
       )
     }))
@@ -150,7 +155,7 @@ export default class QueueList extends React.Component<Props, any> {
   
   jobstate(job: JobSummary): string {
     if (job.globalState == 'error') return job.state == 'error' ? 'error' : 'deperror'
-    if (job.globalState == 'canceled') return job.state == 'canceled' ? 'canceled' : 'depcanceled'
+    if (job.globalState == 'stopped') return job.state == 'stopped' ? 'stopped' : 'depstopped'
     return job.globalState
   }
 
@@ -169,12 +174,16 @@ export default class QueueList extends React.Component<Props, any> {
     del(`${apiurl}/cluster/queues/${queue.id}`)
   }
   
-  cancelJob(qid, jid) {
-    post(`${apiurl}/cluster/queues/${qid}/jobs/${jid}/cancel`)
+  stopJob(qid, jid) {
+    post(`${apiurl}/cluster/queues/${qid}/jobs/${jid}/stop`)
   }
   
   resetJob(qid, jid) {
     post(`${apiurl}/cluster/queues/${qid}/jobs/${jid}/reset`)
+  }
+  
+  deleteJob(qid, jid) {
+    post(`${apiurl}/cluster/queues/${qid}/jobs/${jid}/delete`)
   }
 }
 
