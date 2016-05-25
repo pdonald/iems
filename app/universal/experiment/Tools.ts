@@ -114,7 +114,7 @@ export default {
       type: 'kenlm', title: 'KenLM', category: 'lm',
       params: {
         order: { type: 'uint', default: '$lm-order', min: 1 },
-        memory: { type: 'size-unit', default: '$memory', nohash: true },
+        memory: { type: 'size-unit', default: '$memory', nohash: true, optional: true },
         tempdir: { type: 'path', default: '$tempdir', nohash: true }
       },
       input: { in: 'file<tok>' },
@@ -135,7 +135,7 @@ export default {
       type: 'binarpa', title: 'Binarize LM', category: 'lm',
       params: {
         type: { type: 'string', default: 'trie' },
-        memory: { type: 'size-unit', default: '$memory', nohash: true },
+        memory: { type: 'size-unit', default: '$memory', nohash: true, optional: true },
         //tempdir: { type: 'path', default: '$tempdir', nohash: true },
         workdir: { type: 'path', default: '$workdir', nohash: true }
       },
