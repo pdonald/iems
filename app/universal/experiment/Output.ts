@@ -97,8 +97,10 @@ var Output = {
 
   Makefile: (graph: GroupModel): string => {
     function escapecmd(cmd: string): string {
+      // $TEMP => $$TEMP
+      // $(echo lalala) => $(shell echo lalala)
       // i know, i know
-      return cmd.replace(/\$/g, '$$$' /* we want $$ */).replace(/\$\(/g, '$(shell ')
+      return cmd.replace(/\$/g, '$$$' /* we want $$ */).replace(/\$\$\(/g, '$(shell ')
     }
     
     let jobs = joblist(graph);
@@ -119,13 +121,12 @@ var Output = {
     
     for (let job of jobs) {
       let noOutput = Object.keys(job.output).length === 0;
-      text += noOutput || Object.keys(job.output).map(k => job.output[k]).join(' ');
+      text += noOutput ? getMakefileKey(job.process, 'done') : Object.keys(job.output).map(k => job.output[k]).join(' ');
       text += ': '
       text += Object.keys(job.input).map(k => job.input[k]).join(' ')
       text += '\n'
       text += '\t' + `touch status.${getMakefileKey(job.process, 'running')}` + '\n';
       text += '\t' + escapecmd(job.process.template.toBash(job.process.getParamValues(), job.input, job.output).join('\n\t')) + '\n';
-      if (noOutput) text += '\ttouch ' + noOutput + '\n';
       text += '\t' + `mv status.${getMakefileKey(job.process, 'running')} status.${getMakefileKey(job.process, 'done')}` + '\n';
       text += '\n'
     }
