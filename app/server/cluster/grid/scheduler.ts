@@ -15,7 +15,7 @@ export class Scheduler {
   }
   
   start() {
-    this.timer = setInterval(() => this.run(), 2000)
+    this.timer = setInterval(() => this.run(), 500)
   }
   
   stop() {
