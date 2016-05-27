@@ -23,7 +23,7 @@ export default class InstanceList extends React.Component<Props, {}> {
         service: instance.service,
         state: instance.state,
         ssh: instance.ssh ? instance.ssh.state : 'n/a',
-        config: instance.config.name,
+        config: instance.config ? instance.config.name : 'n/a',
         loadavg: instance.stats && instance.stats.cpu.loadavg && instance.stats.cpu.loadavg.join(' '),
         cores: instance.stats && instance.stats.cpu.cores,
         ram: instance.stats && instance.stats.memory.ram ? this.format(instance.stats.memory.ram.used) + ' / ' + this.format(instance.stats.memory.ram.total) : null,

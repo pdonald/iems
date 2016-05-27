@@ -156,9 +156,7 @@ class AwsEc2 {
               this.instances[id] = new Instance(aws, id, config)
             }
 
-            if (this.instances[id]) {
-              this.instances[id].update(instance, new Date())
-            }
+            this.instances[id].update(instance, new Date())
           }
         }
       })
