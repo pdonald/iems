@@ -1,151 +1,461 @@
 {
   "experiments": {
-    "exp1": {
-      "id": "exp1",
+    "exp-413-clone1": {
+      "id": "exp-413-clone1",
+      "props": {"name": "Phrase extraction with reordering", "created": "2016-05-24 06:27:34", "updated": "2016-05-24 08:56:57"},
+      "tags": {"Source Language": "EN", "Target Language": "LV", "BLEU": "40.35"},
       "vars": {
         "srclang": "en",
         "trglang": "lv",
-        "lm-order": 5,
+        "tempdir": "/tmp",
+        "workdir": "/home/$USER/exp2",
+        "lm-order": "5",
+        "memory": "32M",
         "reordering-type": "wbe",
         "reordering-orientation": "msd",
-        "reordering-model": "wbe-msd-bidirectional-fe",
-        "workdir": "/tools/train",
-        "tempdir": "/tmp"
+        "reordering-model": "wbe-msd-bidirectional-fe"
       },
-      "props": {"name": "Experiment #1 EN-LV", "created": "2016-01-09T21:00:00", "updated": "2016-02-10 06:21:33"},
-      "tags": {"Source Language": "EN", "Target Language": "LV", "BLEU": "41.5", "TER": "0.64"},
       "graph": {
         "id": 0,
         "title": "Main",
-        "type": "main",
-        "category": "undefined",
         "x": 0,
         "y": 0,
         "collapsed": false,
         "processes": [
-          {"id": 2, "x": 24, "y": 268, "type": "tokenizer", "params": {"lang": "$srclang", "toolsdir": "$toolsdir"}},
-          {"id": 3, "x": 277, "y": 274, "type": "tokenizer", "params": {"lang": "$trglang", "toolsdir": "$toolsdir"}},
-          {"id": 105, "x": 256, "y": 49, "type": "opus", "params": {"srclang": "$srclang", "trglang": "$trglang", "tempdir": "$tempdir", "corpus": "EUconst"}},
-          {"id": 106, "x": 56, "y": 638, "type": "sacompile", "params": {"toolsdir": "$toolsdir", "tempdir": "$tempdir"}},
-          {"id": 107, "x": 290, "y": 722, "type": "cdec-model", "params": {"workdir": "$workdir"}},
-          {"id": 108, "x": 116, "y": 786, "type": "echo", "params": {"text": "Europe"}},
-          {"id": 109, "x": 271, "y": 904, "type": "cdec", "params": {"toolsdir": "$toolsdir", "tempdir": "$tempdir"}}
+          {"id": 1, "x": 87, "y": 48, "type": "opus", "params": {"srclang": "$srclang", "trglang": "$trglang", "tempdir": "$tempdir", "corpus": "EUconst"}},
+          {"id": 2, "x": 145, "y": 288, "type": "tokenizer", "params": {"lang": "$srclang"}},
+          {"id": 3, "x": 434, "y": 322, "type": "tokenizer", "params": {"lang": "$trglang"}},
+          {"id": 619, "x": 324, "y": 801, "type": "moses-ini", "params": {"workdir": "$workdir", "lmorder": "$lm-order"}},
+          {"id": 627, "x": 24, "y": 179, "type": "split", "params": {"perc": "95", "tempdir": "$tempdir"}},
+          {"id": 628, "x": 319, "y": 143, "type": "split", "params": {"tempdir": "$tempdir", "perc": "95"}}
         ],
         "links": [
-          {"from": {"id": 2, "port": "out"}, "to": {"id": 103, "port": "src"}},
-          {"from": {"id": 3, "port": "out"}, "to": {"id": 103, "port": "trg"}},
-          {"from": {"id": 3, "port": "out"}, "to": {"id": 104, "port": "trg"}},
-          {"from": {"id": 105, "port": "src"}, "to": {"id": 2, "port": "in"}},
-          {"from": {"id": 105, "port": "trg"}, "to": {"id": 3, "port": "in"}},
-          {"from": {"id": 2, "port": "out"}, "to": {"id": 106, "port": "src"}},
-          {"from": {"id": 3, "port": "out"}, "to": {"id": 106, "port": "trg"}},
-          {"from": {"id": 103, "port": "algn"}, "to": {"id": 106, "port": "algn"}},
-          {"from": {"id": 104, "port": "lm"}, "to": {"id": 107, "port": "lm"}},
-          {"from": {"id": 107, "port": "ini"}, "to": {"id": 109, "port": "ini"}},
-          {"from": {"id": 108, "port": "out"}, "to": {"id": 109, "port": "src"}},
-          {"from": {"id": 106, "port": "out"}, "to": {"id": 109, "port": "sa"}}
+          {"from": {"id": 2, "port": "out"}, "to": {"id": 4, "port": "src"}},
+          {"from": {"id": 3, "port": "out"}, "to": {"id": 4, "port": "trg"}},
+          {"from": {"id": 3, "port": "out"}, "to": {"id": 608, "port": "trg"}},
+          {"from": {"id": 608, "port": "lm"}, "to": {"id": 619, "port": "lm"}},
+          {"from": {"id": 619, "port": "ini"}, "to": {"id": 620, "port": "ini"}},
+          {"from": {"id": 1, "port": "src"}, "to": {"id": 627, "port": "in"}},
+          {"from": {"id": 1, "port": "trg"}, "to": {"id": 628, "port": "in"}},
+          {"from": {"id": 627, "port": "a"}, "to": {"id": 2, "port": "in"}},
+          {"from": {"id": 628, "port": "a"}, "to": {"id": 3, "port": "in"}},
+          {"from": {"id": 627, "port": "b"}, "to": {"id": 620, "port": "src"}},
+          {"from": {"id": 628, "port": "b"}, "to": {"id": 620, "port": "ref"}},
+          {"from": {"id": 4, "port": "algn"}, "to": {"id": 629, "port": "algn"}},
+          {"from": {"id": 2, "port": "out"}, "to": {"id": 629, "port": "src"}},
+          {"from": {"id": 3, "port": "out"}, "to": {"id": 629, "port": "trg"}},
+          {"from": {"id": 629, "port": "model"}, "to": {"id": 619, "port": "phrases"}}
         ],
         "groups": [
           {
-            "id": 103,
+            "id": 4,
             "title": "Word alignment",
-            "type": "word-alignment",
-            "category": "alignment",
-            "x": 86,
-            "y": 444,
+            "x": 143,
+            "y": 465,
             "collapsed": true,
             "ports": {"input": ["src", "trg"], "output": ["algn"]},
             "processes": [
-              {"id": 601, "x": 20, "y": 50, "type": "fastalign", "params": {"toolsdir": "$toolsdir", "tempdir": "$tempdir"}},
-              {"id": 602, "x": 200, "y": 50, "type": "fastalign", "params": {"reverse": "true", "toolsdir": "$toolsdir", "tempdir": "$tempdir"}},
-              {"id": 603, "x": 120, "y": 200, "type": "symalign", "params": {"method": "grow-diag-final-and", "toolsdir": "$toolsdir"}}
+              {"id": 605, "x": 20, "y": 50, "type": "fastalign", "params": {"tempdir": "$tempdir", "workdir": "$workdir"}},
+              {"id": 606, "x": 200, "y": 50, "type": "fastalign", "params": {"reverse": "true", "tempdir": "$tempdir", "workdir": "$workdir"}},
+              {"id": 607, "x": 120, "y": 200, "type": "symalign", "params": {"method": "grow-diag-final-and", "workdir": "$workdir"}}
             ],
             "links": [
-              {"from": {"id": 103, "port": "src"}, "to": {"id": 601, "port": "src"}},
-              {"from": {"id": 103, "port": "trg"}, "to": {"id": 602, "port": "trg"}},
-              {"from": {"id": 103, "port": "src"}, "to": {"id": 602, "port": "src"}},
-              {"from": {"id": 103, "port": "trg"}, "to": {"id": 601, "port": "trg"}},
-              {"from": {"id": 601, "port": "out"}, "to": {"id": 603, "port": "srctrg"}},
-              {"from": {"id": 602, "port": "out"}, "to": {"id": 603, "port": "trgsrc"}},
-              {"from": {"id": 603, "port": "out"}, "to": {"id": 103, "port": "algn"}}
+              {"from": {"id": 4, "port": "src"}, "to": {"id": 605, "port": "src"}},
+              {"from": {"id": 4, "port": "trg"}, "to": {"id": 606, "port": "trg"}},
+              {"from": {"id": 4, "port": "src"}, "to": {"id": 606, "port": "src"}},
+              {"from": {"id": 4, "port": "trg"}, "to": {"id": 605, "port": "trg"}},
+              {"from": {"id": 605, "port": "out"}, "to": {"id": 607, "port": "srctrg"}},
+              {"from": {"id": 606, "port": "out"}, "to": {"id": 607, "port": "trgsrc"}},
+              {"from": {"id": 607, "port": "out"}, "to": {"id": 4, "port": "algn"}}
             ]
           },
           {
-            "id": 104,
+            "id": 608,
             "title": "Language model",
-            "type": "lm-kenlm",
-            "category": "lm",
-            "x": 294,
-            "y": 434,
+            "x": 465,
+            "y": 592,
             "collapsed": true,
             "ports": {"input": ["trg"], "output": ["lm"]},
             "processes": [
-              {
-                "id": 2,
-                "x": 20,
-                "y": 50,
-                "type": "kenlm",
-                "params": {"order": "$lm-order", "memory": "$memory", "toolsdir": "$toolsdir", "tempdir": "$tempdir"}
-              },
-              {"id": 3, "x": 20, "y": 175, "type": "binarpa", "params": {"type": "trie", "memory": "$memory", "toolsdir": "$toolsdir", "tempdir": "$tempdir"}}
+              {"id": 611, "x": 49, "y": 232, "type": "binarpa", "params": {"type": "trie", "memory": "$memory", "workdir": "$workdir"}},
+              {"id": 612, "x": 10, "y": 55, "type": "kenlm", "params": {"order": "$lm-order", "memory": "$memory", "tempdir": "$tempdir"}}
             ],
             "links": [
-              {"from": {"id": 2, "port": "out"}, "to": {"id": 3, "port": "in"}},
-              {"from": {"id": 104, "port": "trg"}, "to": {"id": 2, "port": "in"}},
-              {"from": {"id": 3, "port": "out"}, "to": {"id": 104, "port": "lm"}}
+              {"from": {"id": 611, "port": "out"}, "to": {"id": 608, "port": "lm"}},
+              {"from": {"id": 608, "port": "trg"}, "to": {"id": 612, "port": "in"}},
+              {"from": {"id": 612, "port": "out"}, "to": {"id": 611, "port": "in"}}
+            ]
+          },
+          {
+            "id": 620,
+            "title": "Evaluation",
+            "x": 91,
+            "y": 956,
+            "collapsed": false,
+            "ports": {"input": ["src", "ref", "ini"], "output": ["trans", "bleu"]},
+            "processes": [
+              {"id": 622, "x": 45, "y": 95, "type": "tokenizer", "params": {"lang": "$srclang"}},
+              {"id": 624, "x": 59, "y": 255, "type": "moses", "params": {"workdir": "$workdir"}},
+              {"id": 625, "x": 65, "y": 397, "type": "detokenizer", "params": {"lang": "$trglang"}},
+              {"id": 626, "x": 277, "y": 532, "type": "bleu", "params": {"workdir": "$workdir"}}
+            ],
+            "links": [
+              {"from": {"id": 620, "port": "src"}, "to": {"id": 622, "port": "in"}},
+              {"from": {"id": 620, "port": "ref"}, "to": {"id": 623, "port": "in"}},
+              {"from": {"id": 620, "port": "ini"}, "to": {"id": 624, "port": "ini"}},
+              {"from": {"id": 622, "port": "out"}, "to": {"id": 624, "port": "in"}},
+              {"from": {"id": 624, "port": "out"}, "to": {"id": 625, "port": "in"}},
+              {"from": {"id": 625, "port": "out"}, "to": {"id": 626, "port": "trans"}},
+              {"from": {"id": 620, "port": "ref"}, "to": {"id": 626, "port": "ref"}},
+              {"from": {"id": 625, "port": "out"}, "to": {"id": 620, "port": "trans"}},
+              {"from": {"id": 626, "port": "out"}, "to": {"id": 620, "port": "bleu"}}
+            ]
+          },
+          {
+            "id": 629,
+            "title": "Phrase Extraction w/ R",
+            "x": 291,
+            "y": 645,
+            "collapsed": true,
+            "ports": {"input": ["algn", "src", "trg"], "output": ["model"]},
+            "processes": [
+              {
+                "id": 630,
+                "x": 69,
+                "y": 80,
+                "type": "extractphrases",
+                "params": {"maxLength": "7", "type": "$reordering-type", "orientation": "$reordering-orientation", "workdir": "$workdir", "tempdir": "$tempdir"}
+              },
+              {"id": 631, "x": 66, "y": 258, "type": "scorephrases", "params": {"workdir": "$workdir", "tempdir": "$tempdir"}},
+              {"id": 632, "x": 376, "y": 109, "type": "lexical", "params": {"workdir": "$workdir", "tempdir": "$tempdir"}},
+              {"id": 633, "x": 75, "y": 435, "type": "phrasesbin", "params": {"workdir": "$workdir", "threads": "$threads"}},
+              {
+                "id": 634,
+                "x": 413,
+                "y": 340,
+                "type": "reordering",
+                "params": {
+                  "type": "$reordering-type",
+                  "orientation": "$reordering-orientation",
+                  "model": "$reordering-model",
+                  "smoothing": "0.5",
+                  "workdir": "$workdir",
+                  "tempdir": "$tempdir"
+                }
+              },
+              {"id": 635, "x": 413, "y": 462, "type": "binreordering", "params": {"workdir": "$workdir", "threads": "$threads"}},
+              {"id": 636, "x": 226, "y": 562, "type": "phrase-extraction-model", "params": {"model": "$reordering-model", "workdir": "$workdir"}}
+            ],
+            "links": [
+              {"from": {"id": 629, "port": "src"}, "to": {"id": 630, "port": "src"}},
+              {"from": {"id": 629, "port": "trg"}, "to": {"id": 630, "port": "trg"}},
+              {"from": {"id": 629, "port": "algn"}, "to": {"id": 630, "port": "algn"}},
+              {"from": {"id": 629, "port": "src"}, "to": {"id": 632, "port": "src"}},
+              {"from": {"id": 629, "port": "trg"}, "to": {"id": 632, "port": "trg"}},
+              {"from": {"id": 629, "port": "algn"}, "to": {"id": 632, "port": "algn"}},
+              {"from": {"id": 630, "port": "out"}, "to": {"id": 631, "port": "phr"}},
+              {"from": {"id": 630, "port": "inv"}, "to": {"id": 631, "port": "phrinv"}},
+              {"from": {"id": 632, "port": "srctrg"}, "to": {"id": 631, "port": "srctrg"}},
+              {"from": {"id": 632, "port": "trgsrc"}, "to": {"id": 631, "port": "trgsrc"}},
+              {"from": {"id": 631, "port": "phr"}, "to": {"id": 633, "port": "phr"}},
+              {"from": {"id": 630, "port": "o"}, "to": {"id": 634, "port": "phr"}},
+              {"from": {"id": 634, "port": "reord"}, "to": {"id": 635, "port": "reord"}},
+              {"from": {"id": 633, "port": "minphr"}, "to": {"id": 636, "port": "phr"}},
+              {"from": {"id": 635, "port": "minreord"}, "to": {"id": 636, "port": "reord"}},
+              {"from": {"id": 636, "port": "ini"}, "to": {"id": 629, "port": "model"}}
             ]
           }
         ]
       }
     },
-    "exp-331": {
-      "id": "exp-331",
-      "props": {"name": "New Experiment", "created": "2016-05-11 08:30:35", "updated": "2016-05-11 08:35:42"},
-      "tags": {"name": "New Experimen"},
-      "vars": {"srclang": "lv", "trglang": "en"},
+    "exp-413-clone1-clone": {
+      "id": "exp-413-clone1-clone",
+      "props": {"name": "Phrase extraction", "created": "2016-05-24 08:58:21", "updated": "2016-05-24 09:02:00"},
+      "tags": {"Source Language": "EN", "Target Language": "LV", "BLEU": "40.84"},
+      "vars": {
+        "srclang": "en",
+        "trglang": "lv",
+        "tempdir": "/tmp",
+        "workdir": "/home/$USER/exp2",
+        "lm-order": "5",
+        "memory": "32M",
+        "reordering-type": "wbe",
+        "reordering-orientation": "msd",
+        "reordering-model": "wbe-msd-bidirectional-fe"
+      },
       "graph": {
         "id": 0,
         "title": "Main",
-        "type": "main",
-        "category": "undefined",
         "x": 0,
         "y": 0,
         "collapsed": false,
         "processes": [
-          {"id": 1, "x": 135.390625, "y": 98, "type": "wget", "params": {}},
-          {"id": 2, "x": 135.390625, "y": 347, "type": "tokenizer", "params": {"lang": "$srclang"}},
-          {"id": 3, "x": 399.390625, "y": 337, "type": "tokenizer", "params": {"lang": "$trglang"}},
-          {"id": 4, "x": 367.390625, "y": 133, "type": "wget", "params": {}}
+          {"id": 1, "x": 87, "y": 48, "type": "opus", "params": {"srclang": "$srclang", "trglang": "$trglang", "tempdir": "$tempdir", "corpus": "EUconst"}},
+          {"id": 2, "x": 145, "y": 288, "type": "tokenizer", "params": {"lang": "$srclang"}},
+          {"id": 3, "x": 434, "y": 322, "type": "tokenizer", "params": {"lang": "$trglang"}},
+          {"id": 619, "x": 324, "y": 801, "type": "moses-ini", "params": {"workdir": "$workdir", "lmorder": "$lm-order"}},
+          {"id": 627, "x": 24, "y": 179, "type": "split", "params": {"perc": "95", "tempdir": "$tempdir"}},
+          {"id": 628, "x": 319, "y": 143, "type": "split", "params": {"tempdir": "$tempdir", "perc": "95"}}
         ],
         "links": [
-          {"from": {"id": 1, "port": "out"}, "to": {"id": 2, "port": "in"}},
-          {"from": {"id": 4, "port": "out"}, "to": {"id": 3, "port": "in"}},
-          {"from": {"id": 2, "port": "out"}, "to": {"id": 5, "port": "src"}},
-          {"from": {"id": 3, "port": "out"}, "to": {"id": 5, "port": "trg"}}
+          {"from": {"id": 2, "port": "out"}, "to": {"id": 4, "port": "src"}},
+          {"from": {"id": 3, "port": "out"}, "to": {"id": 4, "port": "trg"}},
+          {"from": {"id": 3, "port": "out"}, "to": {"id": 608, "port": "trg"}},
+          {"from": {"id": 608, "port": "lm"}, "to": {"id": 619, "port": "lm"}},
+          {"from": {"id": 619, "port": "ini"}, "to": {"id": 620, "port": "ini"}},
+          {"from": {"id": 1, "port": "src"}, "to": {"id": 627, "port": "in"}},
+          {"from": {"id": 1, "port": "trg"}, "to": {"id": 628, "port": "in"}},
+          {"from": {"id": 627, "port": "a"}, "to": {"id": 2, "port": "in"}},
+          {"from": {"id": 628, "port": "a"}, "to": {"id": 3, "port": "in"}},
+          {"from": {"id": 627, "port": "b"}, "to": {"id": 620, "port": "src"}},
+          {"from": {"id": 628, "port": "b"}, "to": {"id": 620, "port": "ref"}},
+          {"from": {"id": 4, "port": "algn"}, "to": {"id": 629, "port": "algn"}},
+          {"from": {"id": 2, "port": "out"}, "to": {"id": 629, "port": "src"}},
+          {"from": {"id": 3, "port": "out"}, "to": {"id": 629, "port": "trg"}},
+          {"from": {"id": 629, "port": "model"}, "to": {"id": 619, "port": "phrases"}}
         ],
         "groups": [
           {
-            "id": 5,
+            "id": 4,
             "title": "Word alignment",
-            "type": "word-alignment",
-            "category": "alignment",
-            "x": 255.390625,
-            "y": 517,
+            "x": 143,
+            "y": 465,
             "collapsed": true,
             "ports": {"input": ["src", "trg"], "output": ["algn"]},
             "processes": [
-              {"id": 601, "x": 20, "y": 50, "type": "fastalign", "params": {"tempdir": "$tempdir", "workdir": "$workdir"}},
-              {"id": 602, "x": 200, "y": 50, "type": "fastalign", "params": {"reverse": "true", "tempdir": "$tempdir", "workdir": "$workdir"}},
-              {"id": 603, "x": 120, "y": 200, "type": "symalign", "params": {"method": "grow-diag-final-and", "workdir": "$workdir"}}
+              {"id": 605, "x": 20, "y": 50, "type": "fastalign", "params": {"tempdir": "$tempdir", "workdir": "$workdir"}},
+              {"id": 606, "x": 200, "y": 50, "type": "fastalign", "params": {"reverse": "true", "tempdir": "$tempdir", "workdir": "$workdir"}},
+              {"id": 607, "x": 120, "y": 200, "type": "symalign", "params": {"method": "grow-diag-final-and", "workdir": "$workdir"}}
             ],
             "links": [
-              {"from": {"id": 5, "port": "src"}, "to": {"id": 601, "port": "src"}},
-              {"from": {"id": 5, "port": "trg"}, "to": {"id": 602, "port": "trg"}},
-              {"from": {"id": 5, "port": "src"}, "to": {"id": 602, "port": "src"}},
-              {"from": {"id": 5, "port": "trg"}, "to": {"id": 601, "port": "trg"}},
-              {"from": {"id": 601, "port": "out"}, "to": {"id": 603, "port": "srctrg"}},
-              {"from": {"id": 602, "port": "out"}, "to": {"id": 603, "port": "trgsrc"}},
-              {"from": {"id": 603, "port": "out"}, "to": {"id": 5, "port": "algn"}}
+              {"from": {"id": 4, "port": "src"}, "to": {"id": 605, "port": "src"}},
+              {"from": {"id": 4, "port": "trg"}, "to": {"id": 606, "port": "trg"}},
+              {"from": {"id": 4, "port": "src"}, "to": {"id": 606, "port": "src"}},
+              {"from": {"id": 4, "port": "trg"}, "to": {"id": 605, "port": "trg"}},
+              {"from": {"id": 605, "port": "out"}, "to": {"id": 607, "port": "srctrg"}},
+              {"from": {"id": 606, "port": "out"}, "to": {"id": 607, "port": "trgsrc"}},
+              {"from": {"id": 607, "port": "out"}, "to": {"id": 4, "port": "algn"}}
+            ]
+          },
+          {
+            "id": 608,
+            "title": "Language model",
+            "x": 465,
+            "y": 592,
+            "collapsed": true,
+            "ports": {"input": ["trg"], "output": ["lm"]},
+            "processes": [
+              {"id": 611, "x": 49, "y": 232, "type": "binarpa", "params": {"type": "trie", "memory": "$memory", "workdir": "$workdir"}},
+              {"id": 612, "x": 10, "y": 55, "type": "kenlm", "params": {"order": "$lm-order", "memory": "$memory", "tempdir": "$tempdir"}}
+            ],
+            "links": [
+              {"from": {"id": 611, "port": "out"}, "to": {"id": 608, "port": "lm"}},
+              {"from": {"id": 608, "port": "trg"}, "to": {"id": 612, "port": "in"}},
+              {"from": {"id": 612, "port": "out"}, "to": {"id": 611, "port": "in"}}
+            ]
+          },
+          {
+            "id": 620,
+            "title": "Evaluation",
+            "x": 91,
+            "y": 956,
+            "collapsed": false,
+            "ports": {"input": ["src", "ref", "ini"], "output": ["trans", "bleu"]},
+            "processes": [
+              {"id": 622, "x": 45, "y": 95, "type": "tokenizer", "params": {"lang": "$srclang"}},
+              {"id": 624, "x": 59, "y": 255, "type": "moses", "params": {"workdir": "$workdir"}},
+              {"id": 625, "x": 65, "y": 397, "type": "detokenizer", "params": {"lang": "$trglang"}},
+              {"id": 626, "x": 277, "y": 532, "type": "bleu", "params": {"workdir": "$workdir"}}
+            ],
+            "links": [
+              {"from": {"id": 620, "port": "src"}, "to": {"id": 622, "port": "in"}},
+              {"from": {"id": 620, "port": "ref"}, "to": {"id": 623, "port": "in"}},
+              {"from": {"id": 620, "port": "ini"}, "to": {"id": 624, "port": "ini"}},
+              {"from": {"id": 622, "port": "out"}, "to": {"id": 624, "port": "in"}},
+              {"from": {"id": 624, "port": "out"}, "to": {"id": 625, "port": "in"}},
+              {"from": {"id": 625, "port": "out"}, "to": {"id": 626, "port": "trans"}},
+              {"from": {"id": 620, "port": "ref"}, "to": {"id": 626, "port": "ref"}},
+              {"from": {"id": 625, "port": "out"}, "to": {"id": 620, "port": "trans"}},
+              {"from": {"id": 626, "port": "out"}, "to": {"id": 620, "port": "bleu"}}
+            ]
+          },
+          {
+            "id": 629,
+            "title": "Phrase Extraction",
+            "x": 231,
+            "y": 622,
+            "collapsed": true,
+            "ports": {"input": ["algn", "src", "trg"], "output": ["model"]},
+            "processes": [
+              {
+                "id": 630,
+                "x": 69,
+                "y": 80,
+                "type": "extractphrases",
+                "params": {"maxLength": "7", "type": "$reordering-type", "orientation": "$reordering-orientation", "workdir": "$workdir", "tempdir": "$tempdir"}
+              },
+              {"id": 631, "x": 66, "y": 258, "type": "scorephrases", "params": {"workdir": "$workdir", "tempdir": "$tempdir"}},
+              {"id": 632, "x": 376, "y": 109, "type": "lexical", "params": {"workdir": "$workdir", "tempdir": "$tempdir"}},
+              {"id": 633, "x": 75, "y": 435, "type": "phrasesbin", "params": {"workdir": "$workdir", "threads": "$threads"}},
+              {"id": 636, "x": 226, "y": 562, "type": "phrase-extraction-model", "params": {"model": "$reordering-model", "workdir": "$workdir"}}
+            ],
+            "links": [
+              {"from": {"id": 629, "port": "src"}, "to": {"id": 630, "port": "src"}},
+              {"from": {"id": 629, "port": "trg"}, "to": {"id": 630, "port": "trg"}},
+              {"from": {"id": 629, "port": "algn"}, "to": {"id": 630, "port": "algn"}},
+              {"from": {"id": 629, "port": "src"}, "to": {"id": 632, "port": "src"}},
+              {"from": {"id": 629, "port": "trg"}, "to": {"id": 632, "port": "trg"}},
+              {"from": {"id": 629, "port": "algn"}, "to": {"id": 632, "port": "algn"}},
+              {"from": {"id": 630, "port": "out"}, "to": {"id": 631, "port": "phr"}},
+              {"from": {"id": 630, "port": "inv"}, "to": {"id": 631, "port": "phrinv"}},
+              {"from": {"id": 632, "port": "srctrg"}, "to": {"id": 631, "port": "srctrg"}},
+              {"from": {"id": 632, "port": "trgsrc"}, "to": {"id": 631, "port": "trgsrc"}},
+              {"from": {"id": 631, "port": "phr"}, "to": {"id": 633, "port": "phr"}},
+              {"from": {"id": 630, "port": "o"}, "to": {"id": 634, "port": "phr"}},
+              {"from": {"id": 633, "port": "minphr"}, "to": {"id": 636, "port": "phr"}},
+              {"from": {"id": 636, "port": "ini"}, "to": {"id": 629, "port": "model"}}
+            ]
+          }
+        ]
+      }
+    },
+    "exp-413-clone1-clone-clone": {
+      "id": "exp-413-clone1-clone-clone",
+      "props": {"name": "Phrase sampling", "created": "2016-05-24 09:02:14", "updated": "2016-05-24 09:06:40"},
+      "tags": {"Source Language": "EN", "Target Language": "LV", "BLEU": "46.38"},
+      "vars": {
+        "srclang": "en",
+        "trglang": "lv",
+        "tempdir": "/tmp",
+        "workdir": "/home/$USER/exp2",
+        "lm-order": "5",
+        "memory": "32M",
+        "reordering-type": "wbe",
+        "reordering-orientation": "msd",
+        "reordering-model": "wbe-msd-bidirectional-fe"
+      },
+      "graph": {
+        "id": 0,
+        "title": "Main",
+        "x": 0,
+        "y": 0,
+        "collapsed": false,
+        "processes": [
+          {"id": 1, "x": 87, "y": 48, "type": "opus", "params": {"srclang": "$srclang", "trglang": "$trglang", "tempdir": "$tempdir", "corpus": "EUconst"}},
+          {"id": 2, "x": 145, "y": 288, "type": "tokenizer", "params": {"lang": "$srclang"}},
+          {"id": 3, "x": 434, "y": 322, "type": "tokenizer", "params": {"lang": "$trglang"}},
+          {"id": 619, "x": 324, "y": 801, "type": "moses-ini", "params": {"workdir": "$workdir", "lmorder": "$lm-order"}},
+          {"id": 627, "x": 24, "y": 179, "type": "split", "params": {"perc": "95", "tempdir": "$tempdir"}},
+          {"id": 628, "x": 319, "y": 143, "type": "split", "params": {"tempdir": "$tempdir", "perc": "95"}}
+        ],
+        "links": [
+          {"from": {"id": 2, "port": "out"}, "to": {"id": 4, "port": "src"}},
+          {"from": {"id": 3, "port": "out"}, "to": {"id": 4, "port": "trg"}},
+          {"from": {"id": 3, "port": "out"}, "to": {"id": 608, "port": "trg"}},
+          {"from": {"id": 608, "port": "lm"}, "to": {"id": 619, "port": "lm"}},
+          {"from": {"id": 619, "port": "ini"}, "to": {"id": 620, "port": "ini"}},
+          {"from": {"id": 1, "port": "src"}, "to": {"id": 627, "port": "in"}},
+          {"from": {"id": 1, "port": "trg"}, "to": {"id": 628, "port": "in"}},
+          {"from": {"id": 627, "port": "a"}, "to": {"id": 2, "port": "in"}},
+          {"from": {"id": 628, "port": "a"}, "to": {"id": 3, "port": "in"}},
+          {"from": {"id": 627, "port": "b"}, "to": {"id": 620, "port": "src"}},
+          {"from": {"id": 628, "port": "b"}, "to": {"id": 620, "port": "ref"}},
+          {"from": {"id": 4, "port": "algn"}, "to": {"id": 629, "port": "algn"}},
+          {"from": {"id": 2, "port": "out"}, "to": {"id": 629, "port": "src"}},
+          {"from": {"id": 3, "port": "out"}, "to": {"id": 629, "port": "trg"}},
+          {"from": {"id": 629, "port": "model"}, "to": {"id": 619, "port": "sample"}}
+        ],
+        "groups": [
+          {
+            "id": 4,
+            "title": "Word alignment",
+            "x": 143,
+            "y": 465,
+            "collapsed": true,
+            "ports": {"input": ["src", "trg"], "output": ["algn"]},
+            "processes": [
+              {"id": 605, "x": 20, "y": 50, "type": "fastalign", "params": {"tempdir": "$tempdir", "workdir": "$workdir"}},
+              {"id": 606, "x": 200, "y": 50, "type": "fastalign", "params": {"reverse": "true", "tempdir": "$tempdir", "workdir": "$workdir"}},
+              {"id": 607, "x": 120, "y": 200, "type": "symalign", "params": {"method": "grow-diag-final-and", "workdir": "$workdir"}}
+            ],
+            "links": [
+              {"from": {"id": 4, "port": "src"}, "to": {"id": 605, "port": "src"}},
+              {"from": {"id": 4, "port": "trg"}, "to": {"id": 606, "port": "trg"}},
+              {"from": {"id": 4, "port": "src"}, "to": {"id": 606, "port": "src"}},
+              {"from": {"id": 4, "port": "trg"}, "to": {"id": 605, "port": "trg"}},
+              {"from": {"id": 605, "port": "out"}, "to": {"id": 607, "port": "srctrg"}},
+              {"from": {"id": 606, "port": "out"}, "to": {"id": 607, "port": "trgsrc"}},
+              {"from": {"id": 607, "port": "out"}, "to": {"id": 4, "port": "algn"}}
+            ]
+          },
+          {
+            "id": 608,
+            "title": "Language model",
+            "x": 465,
+            "y": 592,
+            "collapsed": true,
+            "ports": {"input": ["trg"], "output": ["lm"]},
+            "processes": [
+              {"id": 611, "x": 49, "y": 232, "type": "binarpa", "params": {"type": "trie", "memory": "$memory", "workdir": "$workdir"}},
+              {"id": 612, "x": 10, "y": 55, "type": "kenlm", "params": {"order": "$lm-order", "memory": "$memory", "tempdir": "$tempdir"}}
+            ],
+            "links": [
+              {"from": {"id": 611, "port": "out"}, "to": {"id": 608, "port": "lm"}},
+              {"from": {"id": 608, "port": "trg"}, "to": {"id": 612, "port": "in"}},
+              {"from": {"id": 612, "port": "out"}, "to": {"id": 611, "port": "in"}}
+            ]
+          },
+          {
+            "id": 620,
+            "title": "Evaluation",
+            "x": 91,
+            "y": 956,
+            "collapsed": false,
+            "ports": {"input": ["src", "ref", "ini"], "output": ["trans", "bleu"]},
+            "processes": [
+              {"id": 622, "x": 45, "y": 95, "type": "tokenizer", "params": {"lang": "$srclang"}},
+              {"id": 624, "x": 59, "y": 255, "type": "moses", "params": {"workdir": "$workdir"}},
+              {"id": 625, "x": 65, "y": 397, "type": "detokenizer", "params": {"lang": "$trglang"}},
+              {"id": 626, "x": 277, "y": 532, "type": "bleu", "params": {"workdir": "$workdir"}}
+            ],
+            "links": [
+              {"from": {"id": 620, "port": "src"}, "to": {"id": 622, "port": "in"}},
+              {"from": {"id": 620, "port": "ref"}, "to": {"id": 623, "port": "in"}},
+              {"from": {"id": 620, "port": "ini"}, "to": {"id": 624, "port": "ini"}},
+              {"from": {"id": 622, "port": "out"}, "to": {"id": 624, "port": "in"}},
+              {"from": {"id": 624, "port": "out"}, "to": {"id": 625, "port": "in"}},
+              {"from": {"id": 625, "port": "out"}, "to": {"id": 626, "port": "trans"}},
+              {"from": {"id": 620, "port": "ref"}, "to": {"id": 626, "port": "ref"}},
+              {"from": {"id": 625, "port": "out"}, "to": {"id": 620, "port": "trans"}},
+              {"from": {"id": 626, "port": "out"}, "to": {"id": 620, "port": "bleu"}}
+            ]
+          },
+          {
+            "id": 629,
+            "title": "Sampling Phrases",
+            "x": 274,
+            "y": 637,
+            "collapsed": true,
+            "ports": {"input": ["algn", "src", "trg"], "output": ["model"]},
+            "processes": [
+              {"id": 631, "x": 20, "y": 50, "type": "bintext", "params": {"workdir": "$workdir"}},
+              {"id": 632, "x": 214, "y": 50, "type": "bintext", "params": {"workdir": "$workdir"}},
+              {"id": 633, "x": 397, "y": 50, "type": "binalign", "params": {"workdir": "$workdir"}},
+              {"id": 634, "x": 387, "y": 224, "type": "binlex", "params": {"workdir": "$workdir", "tempdir": "$tempdir"}},
+              {"id": 635, "x": 135, "y": 375, "type": "phrases-sampling-model", "params": {"workdir": "$workdir"}}
+            ],
+            "links": [
+              {"from": {"id": 629, "port": "src"}, "to": {"id": 631, "port": "in"}},
+              {"from": {"id": 629, "port": "trg"}, "to": {"id": 632, "port": "in"}},
+              {"from": {"id": 629, "port": "algn"}, "to": {"id": 633, "port": "in"}},
+              {"from": {"id": 631, "port": "out"}, "to": {"id": 634, "port": "src"}},
+              {"from": {"id": 632, "port": "out"}, "to": {"id": 634, "port": "trg"}},
+              {"from": {"id": 633, "port": "out"}, "to": {"id": 635, "port": "algn"}},
+              {"from": {"id": 631, "port": "out"}, "to": {"id": 635, "port": "src"}},
+              {"from": {"id": 632, "port": "out"}, "to": {"id": 635, "port": "trg"}},
+              {"from": {"id": 634, "port": "out"}, "to": {"id": 635, "port": "lex"}},
+              {"from": {"id": 633, "port": "out"}, "to": {"id": 634, "port": "algn"}},
+              {"from": {"id": 635, "port": "out"}, "to": {"id": 629, "port": "model"}}
             ]
           }
         ]
@@ -154,19 +464,19 @@
   },
   "cluster": {
     "configs": {
-      "testconf9": {
-        "id": "testconf9",
+      "vagrant": {
+        "id": "vagrant",
         "service": "vagrant",
-        "name": "Vagrant Ubuntu 14.04 LTS x64",
+        "name": "Vagrant Ubuntu 14.04",
         "box": "ubuntu/trusty64",
         "memory": "256",
         "cores": "1",
-        "sshScript": "docker || curl -sSL https://get.docker.com/ | sudo sh && sudo usermod -aG docker $USER"
+        "sshScript": "docker -v || (curl -sSL https://get.docker.com/ | sudo sh ; sudo usermod -aG docker $USER ; docker -v)\nsudo fallocate -l 1G /swapfile\nsudo chown root:root /swapfile\nsudo chmod 0600 /swapfile\nsudo mkswap /swapfile\nsudo swapon /swapfile\n"
       },
-      "testconf1": {
-        "id": "testconf1",
+      "awsmicrospot": {
+        "id": "awsmicrospot",
         "service": "awsec2",
-        "name": "AWS EC2 Spot Micro 1GB/1vCPU",
+        "name": "AWS Micro (Spot)",
         "accessKeyId": "",
         "secretAccessKey": "",
         "region": "eu-west-1b",
@@ -175,45 +485,31 @@
         "spotPrice": "0.05",
         "sshPort": 22,
         "sshUsername": "ubuntu",
-        "sshScript": "docker || curl -sSL https://get.docker.com/ | sudo sh && sudo usermod -aG docker $USER"
+        "sshScript": "docker -v || (curl -sSL https://get.docker.com/ | sudo sh ; sudo usermod -aG docker $USER ; docker -v)\nsudo fallocate -l 1G /swapfile\nsudo chown root:root /swapfile\nsudo chmod 0600 /swapfile\nsudo mkswap /swapfile\nsudo swapon /swapfile\n"
       },
-      "testconf2": {
-        "id": "testconf2",
-        "service": "awsec2",
-        "name": "AWS EC2 Micro 1GB/1vCPU",
-        "accessKeyId": "",
-        "secretAccessKey": "",
-        "region": "eu-west-1b",
-        "instanceType": "t1.micro",
-        "imageId": "ami-5da23a2a",
-        "spotPrice": null,
-        "sshPort": 22,
-        "sshUsername": "ubuntu",
-        "sshScript": "docker || curl -sSL https://get.docker.com/ | sudo sh && sudo usermod -aG docker $USER"
-      },
-      "testconf3": {
-        "id": "testconf3",
-        "service": "awsec2",
-        "name": "AWS EC2 Micro 1GB/1vCPU US",
-        "accessKeyId": "",
-        "secretAccessKey": "",
-        "region": "us-east-1c",
-        "instanceType": "t1.micro",
-        "imageId": "ami-b2e3c6d8",
-        "spotPrice": null,
-        "sshPort": 22,
-        "sshUsername": "ubuntu",
-        "sshScript": "docker || curl -sSL https://get.docker.com/ | sudo sh && sudo usermod -aG docker $USER"
-      },
-      "testconfx": {
-        "id": "testconfx",
+      "localssh": {
+        "id": "localssh",
         "service": "localssh",
         "name": "Linode",
         "sshUsername": "",
         "sshPort": 22,
         "sshHost": "",
         "sshPrivateKey": "",
-        "sshScript": "docker || curl -sSL https://get.docker.com/ | sudo sh && sudo usermod -aG docker $USER"
+        "sshScript": "docker -v || (curl -sSL https://get.docker.com/ | sudo sh ; sudo usermod -aG docker $USER ; docker -v)\nsudo fallocate -l 1G /swapfile\nsudo chown root:root /swapfile\nsudo chmod 0600 /swapfile\nsudo mkswap /swapfile\nsudo swapon /swapfile\n"
+      },
+      "awsmicro": {
+        "id": "awsmicro",
+        "service": "awsec2",
+        "name": "AWS Micro",
+        "accessKeyId": "",
+        "secretAccessKey": "",
+        "region": "eu-west-1b",
+        "instanceType": "t1.micro",
+        "imageId": "ami-5da23a2a",
+        "spotPrice": "",
+        "sshPort": 22,
+        "sshUsername": "ubuntu",
+        "sshScript": "docker -v || (curl -sSL https://get.docker.com/ | sudo sh ; sudo usermod -aG docker $USER ; docker -v)\nsudo fallocate -l 1G /swapfile\nsudo chown root:root /swapfile\nsudo chmod 0600 /swapfile\nsudo mkswap /swapfile\nsudo swapon /swapfile\n"
       }
     },
     "queues": {
