@@ -85,7 +85,6 @@ export default React.createClass({
     delete data.status
     let graphjson = Output.JSON(stack[0])
     eval("data.graph = " + graphjson) // hahaha
-    //console.log(data)
 
     this.state.document.stack = stack
 

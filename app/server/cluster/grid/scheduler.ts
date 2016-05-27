@@ -3,6 +3,8 @@ import { Host } from  './host'
 import { HostInQueue } from './queue'
 import { CancelationToken } from '../sshexec'
 
+let logger = require('winston').loggers.get('scheduler')
+
 export class Scheduler {
   private timer: NodeJS.Timer
   private hosts: { [id: string]: HostInQueue }
@@ -58,7 +60,7 @@ export class Scheduler {
     
     let slots = this.slots
     
-    //console.log(`Running scheduler, I have ${numjobs} total jobs, ${pendingjobs.length} pending jobs, ${runnablejobs.length} runnable, ${numhosts} hosts with ${slots.total} total and ${slots.free} free slots`)
+    logger.silly(`Running scheduler, I have ${numjobs} total jobs, ${pendingjobs.length} pending jobs, ${runnablejobs.length} runnable, ${numhosts} hosts with ${slots.total} total and ${slots.free} free slots`)
     
     runnablejobs.slice(0, slots.free).forEach(job => this.runJob(job))
   } 
@@ -68,16 +70,16 @@ export class Scheduler {
       host = this.nextAvailableHost()
     }
     
-    console.log(`Scheduling ${job.name}`)
+    logger.debug(`Scheduling ${job.name}`)
     
-    console.log(`Got ${host.id} available for ${job.name}`)
+    logger.debug(`Got ${host.id} available for ${job.name}`)
     if (!this.active[host.id]) this.active[host.id] = []
     this.active[host.id].push(job)
     
     let cancelationToken: CancelationToken
     let timer = setInterval(function() {
       if (job.state == 'stopped') {
-        console.log(`Job ${job.id} was canceled...`, cancelationToken)
+        logger.debug(`Job ${job.id} was canceled...`, cancelationToken)
         if (cancelationToken) cancelationToken.canceled = true
       }
     }, 500)
@@ -93,7 +95,7 @@ export class Scheduler {
       
       job.finishRunning(err, exitCode, stdout, stderr)
       this.active[host.id].splice(this.active[host.id].indexOf(job), 1)
-      console.log(`Job ${job.name} finished, err: ${err}, code: ${exitCode}, stdout: ${stdout}, stderr: ${stderr}`)
+      logger.debug(`Job ${job.name} finished, err: ${err}, code: ${exitCode}, stdout: ${stdout}, stderr: ${stderr}`)
     })
   }
 }

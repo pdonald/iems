@@ -1,6 +1,7 @@
 let fs = require('fs')
 let express = require('express')
 let stringify = require('json-stringify-pretty-compact')
+let logger = require('winston').loggers.get('server')
 
 let AwsEc2 = require('./cluster/services/awsec2').AwsEc2
 let Vagrant = require('./cluster/services/vagrant').Vagrant
@@ -11,10 +12,12 @@ import { Host } from './cluster/grid/host'
 import { JobSpec } from '../universal/grid/JobSpec'
 
 function loaddb() {
+  logger.debug('Loading database')
   db = JSON.parse(fs.readFileSync(dbfile))
 }
 
 function savedb() {
+  logger.debug('Saving database')
   fs.writeFileSync(dbfile, stringify(db, { maxLength: 160 }))
 }
 
@@ -67,7 +70,7 @@ app.post('/api/cluster/queues/:id/submit', (req, res) => {
     try {
       queue.submitJobs(jobs)
     } catch (e) {
-      console.log(e)
+      logger.error(e)
       res.status(500).send(e.message)
       return
     }
@@ -152,7 +155,6 @@ app.get('/api/cluster/file', (req, res) => {
       host.readFile(filename, size + 5, (err, contents) => {
         if (err) res.status(500).send(raw ? err : { err: err })
         else {
-          console.log(contents.length, size)
           if (contents.length > size) {
             contents = contents + '\n[ ... TRUNCATED ... ]'
           }

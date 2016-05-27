@@ -1,8 +1,30 @@
-let events = require('events')
-let SshClient = require('ssh2').Client
-let sshexec = require('./sshexec').sshexec
+import { EventEmitter } from 'events'
+import * as ssh2 from 'ssh2'
+import { sshexec } from './sshexec'
 
-class Connection extends events.EventEmitter {
+let logger = require('winston').loggers.get('ssh')
+
+export interface Stats {
+  lastUpdated: string
+  uptime: { boot: any, launch: any }
+  cpu: { cores: number, model: string, loadavg: any }
+  memory: { ram: Memory, swap: Memory, disk: Memory }
+}
+
+interface Memory {
+  total: number
+  used: number
+  free: number
+}
+
+export class Connection extends EventEmitter {
+  private state: string
+  private error: string
+  private stats: Stats
+  private config: any
+  private ssh: ssh2.Client
+  private refreshStatsTimer: NodeJS.Timer
+  
   constructor(config) {
     super()
 
@@ -33,7 +55,7 @@ class Connection extends events.EventEmitter {
       }
     }
     
-    this.on('error', (err) => console.error('SSH Error: ' + err))
+    this.on('error', (err) => logger.error('Error: ' + err))
   }
 
   connect() {
@@ -41,7 +63,7 @@ class Connection extends events.EventEmitter {
     this.state = 'connecting'
     this.error = null
 
-    let ssh = new SshClient()
+    let ssh: ssh2.Client = new ssh2()
 
     ssh.once('ready', () => {
       this.ssh = ssh
@@ -61,6 +83,7 @@ class Connection extends events.EventEmitter {
         } else {
           this.state = 'error'
           this.error = err
+          logger.error(err)
         }
       } else {
         this.disconnect()
@@ -155,7 +178,7 @@ class Connection extends events.EventEmitter {
   provision() {
     this.state = 'provisioning'
     sshexec(this.ssh, this.config.provision, (err, code, stdout, stderr) => {
-      console.log(err, code, stdout, stderr)
+      logger.debug(`Provisioning for ${this.config.id}, ${err ? 'ERR: ' + err + ', ' : ''}exit: ${code}, stdout: ${stdout.trim().replace('\n', '\\n')}, stderr: ${stderr.trim().replace('\n', '\\n')})`)
       if (err || code != 0) this.state = 'error'
       if (err) return this.emit('error', 'Error while provisioning', err)
       if (code != 0) return this.emit('error', 'Provisioning was not successful', code, stdout, stderr)
@@ -164,16 +187,13 @@ class Connection extends events.EventEmitter {
   }
 
   ping() {
-    let intv = setInterval(() => {
-      if (!this.ssh) return clearInterval(intv)
+    let timer = setInterval(() => {
+      if (!this.ssh) return clearInterval(timer)
       sshexec(this.ssh, 'uptime', (err, code, stdout) => {
-        if (err) console.error('uptime error:', err)
-        if (code != 0) console.error('uptime exit code:', code)
-        if (stdout) console.log(stdout.trim())
+        if (err) logger.error('uptime error:', err)
+        if (code != 0) logger.error('uptime exit code:', code)
+        if (stdout) logger.debug(stdout.trim())
       })
     }, 1000)
   }
 }
-
-exports.sshexec = sshexec
-exports.Connection = Connection

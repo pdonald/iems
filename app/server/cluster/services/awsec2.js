@@ -2,6 +2,7 @@ let fs = require('fs')
 let crypto = require('crypto')
 let request = require('request')
 let AWS = require('aws-sdk')
+let logger = require('winston').loggers.get('awsec2')
 
 let SshConnection = require('../ssh').Connection
 
@@ -16,7 +17,11 @@ class AwsEc2 {
     this.instances = {}
     this.version = require('aws-sdk/package.json').description + ' ' + require('aws-sdk/package.json').version
 
-    setInterval(() => this.refresh(), 1000)
+    let interval = 1000
+    setInterval(() => this.refresh(), interval)
+    
+    logger.debug('AWS SDK Version: %s', this.version)
+    logger.debug('Calling AWS APIs to check status every %d ms', interval)
   }
 
   configHash(config) {
@@ -48,7 +53,7 @@ class AwsEc2 {
               let params = { KeyName: aws.keyName }
               aws.ec2.deleteKeyPair(params, (err, data) => {
                 aws.ec2.createKeyPair(params, (err, data) => {
-                  if (err) return console.error(err)
+                  if (err) return logger.error(err)
                   fs.writeFileSync(aws.keyFilename, data.KeyMaterial)
                 })
               })
@@ -58,7 +63,7 @@ class AwsEc2 {
 
             aws.ec2.createSecurityGroup({ GroupName: aws.securityGroup, Description: 'iEMS' }, (err, data) => {
               request('https://api.ipify.org/', (err, resp, body) => {
-                if (err) return console.error(err)
+                if (err) return logger.error(err)
                 let params = {
                   GroupName: aws.securityGroup,
                   FromPort: 22, // todo: move into launch
@@ -68,7 +73,7 @@ class AwsEc2 {
                 }
                 aws.ec2.authorizeSecurityGroupIngress(params, (err, data) => {
                   if (err && err.code == 'InvalidPermission.Duplicate') return
-                  if (err) console.error(err)
+                  if (err) logger.error(err)
                 })
               })
             })
@@ -122,7 +127,7 @@ class AwsEc2 {
 
       aws.ec2.describeInstances(params, (err, data) => {
         if (err) {
-          console.error(err.message)
+          logger.error(err.message)
           aws.failures++
           return
         }
@@ -144,7 +149,7 @@ class AwsEc2 {
               let config = this.configs[configId]
 
               if (!config) {
-                console.error('Unknown config:', config)
+                logger.error('Unknown config:', config)
               }
 
               this.instances[id] = new Instance(aws, id, config)
@@ -157,7 +162,7 @@ class AwsEc2 {
 
       aws.ec2.describeSpotInstanceRequests(params, (err, data) => {
         if (err) {
-          console.error(err.message)
+          logger.error(err.message)
           aws.failures++
           return
         }
@@ -176,7 +181,7 @@ class AwsEc2 {
             let config = this.configs[configId]
 
             if (!config) {
-              console.error('Unknown config:', config)
+              logger.error('Unknown config:', config)
             }
 
             this.instances[id] = new Instance(aws, id, config)
@@ -267,7 +272,7 @@ class Instance {
       if (err) {
         this.state = 'error'
         this.error = err
-        console.error(err)
+        logger.error(err)
         return
       }
 
@@ -297,7 +302,7 @@ class Instance {
       if (err) {
         this.state = 'error'
         this.error = err
-        console.error(err)
+        logger.error(err)
         return
       }
 
@@ -406,7 +411,7 @@ class Instance {
       if (err) {
         this.state = 'error'
         this.error = err
-        console.error(err)
+      logger.error(err)
         return
       }
     })

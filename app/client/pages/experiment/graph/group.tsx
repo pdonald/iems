@@ -79,16 +79,7 @@ export default class Group extends React.Component<Props, {}> {
       let from = group.getLinkInput(l)
       let to = group.getChildById(l.to.id)
 
-      //console.log(from,to)
-      //if (!(to instanceof GroupModel)) {
-        //console.log(from.process.type, from.port, from.process.template.output[from.port], to.type, l.to.port, to.template.input[l.to.port]);
-
-        //console.log(ProcessModel.isLinkValid(from.process.template.output[from.port], to.template.input[l.to.port]))
-      //}
-
       if (to instanceof GroupModel) {
-        //console.log(from.process.type, from.port, to.type, l.to.port);
-        //console.log(to.resolveLinkOutput(l.to))
         from = null
         to = null
       }

@@ -4,6 +4,7 @@ const path = require('path')
 const spawn = require('child_process').spawn
 const exec = require('child_process').exec
 const rmdir = require('rimraf')
+const logger = require('winston').loggers.get('vagrant')
 
 let SshConnection = require('../ssh').Connection
 
@@ -26,7 +27,7 @@ class Vagrant {
 
   scan() {
     exec('vagrant --version', { cwd: this.dir }, (err, stdout, stderr) => {
-      if (err) return console.error(err)
+      if (err) return logger.error(err)
       if (stdout.trim()) this.vagrantVersion = stdout.trim()
     })
 
@@ -133,8 +134,8 @@ class Instance {
 
     let vagrantup = spawn('vagrant', ['up'], { cwd: this.dir })
 
-    vagrantup.stdout.on('data', (data) => console.log(`stdout: ${data.toString().trim()}`))
-    vagrantup.stderr.on('data', (data) => console.log(`stderr: ${data.toString().trim()}`))
+    vagrantup.stdout.on('data', (data) => logger.debug(`stdout: ${data.toString().trim()}`))
+    vagrantup.stderr.on('data', (data) => logger.debug(`stderr: ${data.toString().trim()}`))
 
     vagrantup.on('close', (code) => {
       if (code == 0) {
@@ -180,9 +181,9 @@ class Instance {
     this.disconnect()
 
     let destroy = spawn('vagrant', ['destroy', '-f'], { cwd: this.dir })
-    destroy.stdout.on('data', (data) => console.log(`stdout: ${data.toString().trim()}`))
-    destroy.stderr.on('data', (data) => console.log(`stderr: ${data.toString().trim()}`))
-    destroy.on('close', (code) => console.log(`child process exited with code ${code}`))
+    destroy.stdout.on('data', (data) => logger.debug(`stdout: ${data.toString().trim()}`))
+    destroy.stderr.on('data', (data) => logger.debug(`stderr: ${data.toString().trim()}`))
+    destroy.on('close', (code) => logger.debug(`child process exited with code ${code}`))
     destroy.on('close', (code) => this.state = 'terminated')
     destroy.on('close', (code) => code == 0 && rmdir(this.dir, err => {}))
   }

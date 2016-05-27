@@ -47,6 +47,7 @@
     "typings": "^0.8.1",
     "webpack": "^1.13.0",
     "webpack-dev-server": "^1.14.1",
-    "whatwg-fetch": "^1.0.0"
+    "whatwg-fetch": "^1.0.0",
+    "winston": "^2.2.0"
   }
 }
