@@ -149,15 +149,16 @@ class AwsEc2 {
               let config = this.configs[configId]
 
               if (!config) {
-                logger.error('Unknown config: ' + config + '. Please check AWS Console.')
-                delete this.configs[configId]
+                logger.error('Unknown config: ' + config + '. Please check the AWS Console at https://console.aws.amazon.com')
                 continue
               }
 
               this.instances[id] = new Instance(aws, id, config)
             }
 
-            this.instances[id].update(instance, new Date())
+            if (this.instances[id]) {
+              this.instances[id].update(instance, new Date())
+            }
           }
         }
       })
