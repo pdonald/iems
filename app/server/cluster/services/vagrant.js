@@ -27,7 +27,7 @@ class Vagrant {
 
   scan() {
     exec('vagrant --version', { cwd: this.dir }, (err, stdout, stderr) => {
-      if (err) return logger.error(err)
+      if (err) return logger.warn(`Vagrant appears to not be installed on this system: ${err.message}`)
       if (stdout.trim()) this.vagrantVersion = stdout.trim()
     })
 

@@ -149,7 +149,9 @@ class AwsEc2 {
               let config = this.configs[configId]
 
               if (!config) {
-                logger.error('Unknown config:', config)
+                logger.error('Unknown config: ' + config + '. Please check AWS Console.')
+                delete this.configs[configId]
+                continue
               }
 
               this.instances[id] = new Instance(aws, id, config)

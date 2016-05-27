@@ -1,6 +1,6 @@
 import { Job } from './job'
 import { Host } from './host'
-import { Scheduler } from './Scheduler'
+import { Scheduler } from './scheduler'
 import { JobSpec } from '../../../universal/grid/JobSpec'
 import { QueueSummary } from '../../../universal/grid/QueueSummary'
 import { JobSummary } from '../../../universal/grid/JobSummary'
