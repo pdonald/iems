@@ -176,9 +176,10 @@ export class Connection extends EventEmitter {
   }
 
   provision() {
+    logger.debug(`Provisioning ${this.config.name}`)
     this.state = 'provisioning'
     sshexec(this.ssh, this.config.provision, (err, code, stdout, stderr) => {
-      logger.debug(`Provisioning for ${this.config.id}, ${err ? 'ERR: ' + err + ', ' : ''}exit: ${code}, stdout: ${stdout.trim().replace('\n', '\\n')}, stderr: ${stderr.trim().replace('\n', '\\n')})`)
+      logger.debug(`Provisioning ${this.config.name}, ${err ? 'ERR: ' + err + ', ' : ''}exit: ${code}, stdout: ${stdout.trim().replace('\n', '\\n')}, stderr: ${stderr.trim().replace('\n', '\\n')})`)
       if (err || code != 0) this.state = 'error'
       if (err) return this.emit('error', 'Error while provisioning', err)
       if (code != 0) return this.emit('error', 'Provisioning was not successful', code, stdout, stderr)

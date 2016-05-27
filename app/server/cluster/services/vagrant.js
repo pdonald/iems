@@ -202,7 +202,8 @@ class Instance {
       instance: this.instance,
       config: this.config,
       stats: this.ssh ? this.ssh.stats : null,
-      logs: this.logs
+      logs: this.logs,
+      ssh: { state: this.ssh ? this.ssh.state : null }
     }
   }
 }

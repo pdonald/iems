@@ -411,7 +411,7 @@ class Instance {
       if (err) {
         this.state = 'error'
         this.error = err
-      logger.error(err)
+        logger.error(err)
         return
       }
     })
