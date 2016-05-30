@@ -2,12 +2,9 @@
 
 An Interactive Experiment Management System for machine translation.
 
-[Demo](http://pdonald.github.io/iems/) (Google Chrome recommended, should also work in Firefox, IE11 and Edge)
+[![iEMS Demo Video](http://img.youtube.com/vi/BRu9kYJ9-iE/0.jpg)](http://www.youtube.com/watch?v=BRu9kYJ9-iE "iEMS Demo Video")
 
 **Warning: this project is under heavy development**
-
-A project at the [Machine Translation Marathon 2015](http://ufal.mff.cuni.cz/mtm15).
-[Project presentation](http://www.slideshare.net/matissrikters/interactive-experiment-management-system).
 
 ## Build
 
@@ -15,7 +12,7 @@ You will need [node.js](https://nodejs.org/en/) 6.x.
 
 On Windows, [download](https://nodejs.org/dist/v6.1.0/node-v6.1.0-x64.msi) and install the latest 6.x (stable) version with the Windows Installer (.msi).
 
-On Ubuntu 14.04 LTS, here is an easy way to install node.js via apt-get
+On Ubuntu 14.04, here is an easy way to install node.js via apt-get
 
 ```bash
 curl -sL https://deb.nodesource.com/setup_6.x | sudo -E bash -
@@ -66,7 +63,7 @@ You can launch new virtual servers for running your experiments.
 
 #### Linux
 
-Ubuntu 14.04 LTS
+Ubuntu 14.04
 
 ```
 sudo apt-get install -y virtualbox virtualbox-dkms vagrant
