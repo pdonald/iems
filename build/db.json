@@ -469,9 +469,9 @@
         "service": "vagrant",
         "name": "Vagrant Ubuntu 14.04",
         "box": "ubuntu/trusty64",
-        "memory": "256",
+        "memory": "512",
         "cores": "1",
-        "sshScript": "docker -v || (curl -sSL https://get.docker.com/ | sudo sh ; sudo usermod -aG docker $USER ; docker -v)\nsudo fallocate -l 1G /swapfile\nsudo chown root:root /swapfile\nsudo chmod 0600 /swapfile\nsudo mkswap /swapfile\nsudo swapon /swapfile\n"
+        "sshScript": "docker -v || (curl -sSL https://get.docker.com/ | sudo sh ; sudo usermod -aG docker $USER ; docker -v)\n(sudo fallocate -l 1G /swapfile && sudo chown root:root /swapfile && sudo chmod 0600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile) || true"
       },
       "awsmicrospot": {
         "id": "awsmicrospot",
@@ -485,7 +485,7 @@
         "spotPrice": "0.05",
         "sshPort": 22,
         "sshUsername": "ubuntu",
-        "sshScript": "docker -v || (curl -sSL https://get.docker.com/ | sudo sh ; sudo usermod -aG docker $USER ; docker -v)\nsudo fallocate -l 1G /swapfile\nsudo chown root:root /swapfile\nsudo chmod 0600 /swapfile\nsudo mkswap /swapfile\nsudo swapon /swapfile\n"
+        "sshScript": "docker -v || (curl -sSL https://get.docker.com/ | sudo sh ; sudo usermod -aG docker $USER ; docker -v)\n(sudo fallocate -l 1G /swapfile && sudo chown root:root /swapfile && sudo chmod 0600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile) || true"
       },
       "localssh": {
         "id": "localssh",
@@ -495,7 +495,7 @@
         "sshPort": 22,
         "sshHost": "",
         "sshPrivateKey": "",
-        "sshScript": "docker -v || (curl -sSL https://get.docker.com/ | sudo sh ; sudo usermod -aG docker $USER ; docker -v)\nsudo fallocate -l 1G /swapfile\nsudo chown root:root /swapfile\nsudo chmod 0600 /swapfile\nsudo mkswap /swapfile\nsudo swapon /swapfile\n"
+        "sshScript": "docker -v || (curl -sSL https://get.docker.com/ | sudo sh ; sudo usermod -aG docker $USER ; docker -v)\n(sudo fallocate -l 1G /swapfile && sudo chown root:root /swapfile && sudo chmod 0600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile) || true"
       },
       "awsmicro": {
         "id": "awsmicro",
@@ -509,7 +509,7 @@
         "spotPrice": "",
         "sshPort": 22,
         "sshUsername": "ubuntu",
-        "sshScript": "docker -v || (curl -sSL https://get.docker.com/ | sudo sh ; sudo usermod -aG docker $USER ; docker -v)\nsudo fallocate -l 1G /swapfile\nsudo chown root:root /swapfile\nsudo chmod 0600 /swapfile\nsudo mkswap /swapfile\nsudo swapon /swapfile\n"
+        "sshScript": "docker -v || (curl -sSL https://get.docker.com/ | sudo sh ; sudo usermod -aG docker $USER ; docker -v)\n(sudo fallocate -l 1G /swapfile && sudo chown root:root /swapfile && sudo chmod 0600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile) || true"
       }
     },
     "queues": {
