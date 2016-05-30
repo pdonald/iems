@@ -121,6 +121,7 @@ export class Connection extends EventEmitter {
 
   refreshStats() {
     let cmds = {
+      'true': (stdout) => {},
       'cat /proc/uptime': (stdout) => {
         this.stats.uptime.boot = parseInt(stdout.trim().split(/\s+/)[0])
       },
