@@ -41,7 +41,7 @@ export default class Experiments extends React.Component<any, any> {
           onUpdate={exps => this.setState({ filters: this.makeFilters(exps) })} />
 
         <section className="filters">
-          <div><button className="primary">Create</button></div>
+          <div><button className="primary" onClick={e => this.createExperiment()}>Create</button></div>
           <p><input type="search" placeholder="Search"/></p>
 
           <p>Group by:{' '}
@@ -98,5 +98,33 @@ export default class Experiments extends React.Component<any, any> {
 
   onGroupByChange(groupby) {
     this.setState({ groupby: groupby })
+  }
+  
+  createExperiment() {
+    let exp = {
+      id: 'exp-' + Math.round(Math.random() * 1000),
+      props: {
+        "name": 'New Experiment',
+        "created": isodate(),
+        "updated": isodate()
+      },
+      tags: {},
+      vars: {
+        'srclang': 'en',
+        'trglang': 'lv',
+        'tempdir': '/tmp',
+        'workdir': ''
+      },
+      "graph": {
+        "id": 0, "title": "Main", "type": "main", "category": "undefined",
+        "x": 0, "y": 0, "collapsed": false,
+        "processes": [], "groups": [], "links": []
+      }
+    }
+
+    post(`${apiurl}/experiments/${exp.id}`, exp)
+      .then(_ => {
+        browserHistory.push(`/experiments/${exp.id}`)
+      })
   }
 }

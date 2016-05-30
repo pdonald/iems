@@ -76,36 +76,6 @@ export default class ExperimentContainer extends React.Component<Props, any> {
       })
   }
 
-  createExperiment() {
-    let exp = {
-      id: 'exp-' + Math.round(Math.random() * 1000),
-      props: {
-        "name": 'New Experiment',
-        "created": isodate(),
-        "updated": isodate()
-      },
-      tags: {},
-      vars: {
-        'srclang': 'en',
-        'trglang': 'lv',
-        'tempdir': '/tmp',
-        'workdir': ''
-      },
-      "graph": {
-        "id": 0, "title": "Main", "type": "main", "category": "undefined",
-        "x": 0, "y": 0, "collapsed": false,
-        "processes": [], "groups": [], "links": []
-      }
-    }
-
-    post(`${apiurl}/experiments/${exp.id}`, exp)
-      .then(_ => {
-        this.state.experiments[exp.id] = exp
-        this.setState(this.state)
-        browserHistory.push(`/experiments/${exp.id}`)
-      })
-  }
-
   cloneExperiment(exp) {
     let clonedexp = clone(exp)
     clonedexp.id = exp.id + '-clone'
